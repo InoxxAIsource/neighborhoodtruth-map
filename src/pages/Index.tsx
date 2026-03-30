@@ -3,16 +3,19 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { MapView } from "@/components/MapView";
 import { AddLabelDialog } from "@/components/AddLabelDialog";
-import { FilterSidebar } from "@/components/FilterSidebar";
+import { FilterSidebar, DEFAULT_FILTERS } from "@/components/FilterSidebar";
 import { Button } from "@/components/ui/button";
 import { Plus, MapPin } from "lucide-react";
 import { useVoterId } from "@/hooks/useVoterId";
 import { toast } from "sonner";
+import type { Filters } from "@/components/MapView";
 
 export default function Index() {
   const [isPlacingPin, setIsPlacingPin] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [clickedPosition, setClickedPosition] = useState<{ lat: number; lng: number } | null>(null);
+  const [showHeatmap, setShowHeatmap] = useState(false);
+  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const voterId = useVoterId();
   const queryClient = useQueryClient();
 
@@ -28,7 +31,6 @@ export default function Index() {
     },
   });
 
-  // Fetch user's existing votes to prevent duplicates
   const { data: userVotes = [] } = useQuery({
     queryKey: ["votes", voterId],
     queryFn: async () => {
@@ -43,12 +45,7 @@ export default function Index() {
 
   const addLabel = useMutation({
     mutationFn: async (label: {
-      lat: number;
-      lng: number;
-      text: string;
-      safety: number;
-      vibe: string[];
-      cost: string;
+      lat: number; lng: number; text: string; safety: number; vibe: string[]; cost: string;
     }) => {
       const { error } = await supabase.from("labels").insert(label);
       if (error) throw error;
@@ -64,7 +61,6 @@ export default function Index() {
 
   const vote = useMutation({
     mutationFn: async ({ labelId, voteType }: { labelId: string; voteType: "upvote" | "downvote" }) => {
-      // Check locally first
       const alreadyVoted = userVotes.some((v) => v.label_id === labelId);
       if (alreadyVoted) throw new Error("Already voted");
 
@@ -79,24 +75,16 @@ export default function Index() {
       const field = voteType === "upvote" ? "upvotes" : "downvotes";
       const label = labels.find((l) => l.id === labelId);
       if (label) {
-        await supabase
-          .from("labels")
-          .update({ [field]: label[field] + 1 })
-          .eq("id", labelId);
+        await supabase.from("labels").update({ [field]: label[field] + 1 }).eq("id", labelId);
       }
     },
-    // Optimistic update
     onMutate: async ({ labelId, voteType }) => {
       await queryClient.cancelQueries({ queryKey: ["labels"] });
       const previous = queryClient.getQueryData(["labels"]);
       const field = voteType === "upvote" ? "upvotes" : "downvotes";
-
       queryClient.setQueryData(["labels"], (old: typeof labels) =>
-        old?.map((l) =>
-          l.id === labelId ? { ...l, [field]: l[field] + 1 } : l
-        )
+        old?.map((l) => l.id === labelId ? { ...l, [field]: l[field] + 1 } : l)
       );
-
       return { previous };
     },
     onError: (e, _vars, context) => {
@@ -125,9 +113,16 @@ export default function Index() {
         isPlacingPin={isPlacingPin}
         onMapClick={handleMapClick}
         onVote={handleVote}
+        showHeatmap={showHeatmap}
+        filters={filters}
       />
 
-      <FilterSidebar />
+      <FilterSidebar
+        filters={filters}
+        onFiltersChange={setFilters}
+        showHeatmap={showHeatmap}
+        onToggleHeatmap={() => setShowHeatmap((p) => !p)}
+      />
 
       {/* App title */}
       <div className="absolute top-4 right-4 z-[1000]">
@@ -146,16 +141,10 @@ export default function Index() {
                 Tap the map to drop your label
               </p>
             </div>
-            <Button variant="outline" onClick={() => setIsPlacingPin(false)}>
-              Cancel
-            </Button>
+            <Button variant="outline" onClick={() => setIsPlacingPin(false)}>Cancel</Button>
           </div>
         ) : (
-          <Button
-            size="lg"
-            className="shadow-lg gap-2"
-            onClick={() => setIsPlacingPin(true)}
-          >
+          <Button size="lg" className="shadow-lg gap-2" onClick={() => setIsPlacingPin(true)}>
             <Plus className="h-5 w-5" />
             Drop Label
           </Button>
@@ -168,9 +157,7 @@ export default function Index() {
           <div className="bg-card/95 backdrop-blur-sm rounded-xl px-8 py-6 shadow-lg border text-center">
             <MapPin className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
             <p className="text-lg font-medium text-foreground">No labels yet</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Be the first to share what your neighborhood is really like!
-            </p>
+            <p className="text-sm text-muted-foreground mt-1">Be the first to share what your neighborhood is really like!</p>
           </div>
         </div>
       )}
