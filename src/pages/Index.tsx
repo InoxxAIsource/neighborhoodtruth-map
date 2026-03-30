@@ -18,6 +18,8 @@ export default function Index() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [clickedPosition, setClickedPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [showHeatmap, setShowHeatmap] = useState(false);
+  const [showLabels, setShowLabels] = useState(true);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const voterId = useVoterId();
   const queryClient = useQueryClient();
