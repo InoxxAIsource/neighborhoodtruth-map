@@ -48,7 +48,7 @@ export default function Index() {
 
   const addLabel = useMutation({
     mutationFn: async (label: {
-      lat: number; lng: number; text: string; safety: number; vibe: string[]; cost: string;
+      lat: number; lng: number; text: string; safety: number; vibe: string[]; cost: string; color: string;
     }) => {
       const { error } = await supabase.from("labels").insert(label);
       if (error) throw error;
