@@ -10,10 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Slider } from "@/components/ui/slider";
-import { MapPin } from "lucide-react";
+import { MapPin, Star } from "lucide-react";
+import { validateLabelText } from "@/lib/profanityFilter";
 
-const VIBE_OPTIONS = ["Chill", "Lively", "Artsy", "Family", "Sketchy", "Trendy", "Quiet", "Loud"];
+const VIBE_OPTIONS = ["Chill", "Loud", "Bougie", "Artsy", "Family", "Nightlife"];
 const COST_OPTIONS = ["$", "$$", "$$$", "$$$$"];
 
 interface AddLabelDialogProps {
@@ -39,9 +39,10 @@ export function AddLabelDialog({
   isSubmitting,
 }: AddLabelDialogProps) {
   const [text, setText] = useState("");
-  const [safety, setSafety] = useState([3]);
+  const [safety, setSafety] = useState(3);
   const [vibes, setVibes] = useState<string[]>([]);
   const [cost, setCost] = useState("$$");
+  const [error, setError] = useState<string | null>(null);
 
   const toggleVibe = (v: string) => {
     setVibes((prev) =>
@@ -50,19 +51,26 @@ export function AddLabelDialog({
   };
 
   const handleSubmit = () => {
-    if (!position || !text.trim()) return;
+    if (!position) return;
+    const validation = validateLabelText(text);
+    if (!validation.valid) {
+      setError(validation.reason ?? "Invalid text");
+      return;
+    }
+    setError(null);
     onSubmit({
       lat: position.lat,
       lng: position.lng,
       text: text.trim(),
-      safety: safety[0],
+      safety,
       vibe: vibes,
       cost,
     });
     setText("");
-    setSafety([3]);
+    setSafety(3);
     setVibes([]);
     setCost("$$");
+    setError(null);
   };
 
   return (
@@ -89,21 +97,41 @@ export function AddLabelDialog({
               placeholder="e.g. Great coffee shops, sketchy at night..."
               maxLength={80}
               value={text}
-              onChange={(e) => setText(e.target.value)}
+              onChange={(e) => {
+                setText(e.target.value);
+                if (error) setError(null);
+              }}
             />
-            <p className="text-xs text-muted-foreground text-right">{text.length}/80</p>
+            <div className="flex justify-between">
+              {error ? (
+                <p className="text-xs text-destructive">{error}</p>
+              ) : (
+                <span />
+              )}
+              <p className="text-xs text-muted-foreground">{text.length}/80</p>
+            </div>
           </div>
 
           <div className="space-y-2">
-            <Label>Safety ({safety[0]}/5)</Label>
-            <Slider
-              min={1}
-              max={5}
-              step={1}
-              value={safety}
-              onValueChange={setSafety}
-              className="w-full"
-            />
+            <Label>Safety ({safety}/5)</Label>
+            <div className="flex gap-1">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => setSafety(n)}
+                  className="transition-transform hover:scale-110"
+                >
+                  <Star
+                    className={`h-6 w-6 ${
+                      n <= safety
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-muted-foreground/40"
+                    }`}
+                  />
+                </button>
+              ))}
+            </div>
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>Sketchy</span>
               <span>Very Safe</span>
@@ -117,7 +145,7 @@ export function AddLabelDialog({
                 <Badge
                   key={v}
                   variant={vibes.includes(v) ? "default" : "outline"}
-                  className="cursor-pointer select-none"
+                  className="cursor-pointer select-none transition-all"
                   onClick={() => toggleVibe(v)}
                 >
                   {v}
@@ -149,7 +177,7 @@ export function AddLabelDialog({
             onClick={handleSubmit}
             disabled={!text.trim() || !position || isSubmitting}
           >
-            {isSubmitting ? "Adding..." : "Add Label"}
+            {isSubmitting ? "Adding..." : "Drop Label 📌"}
           </Button>
         </DialogFooter>
       </DialogContent>
