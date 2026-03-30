@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { MapView } from "@/components/MapView";
+import type { AreaSummary } from "@/components/MapView";
 import { AddLabelDialog } from "@/components/AddLabelDialog";
 import { FilterSidebar, DEFAULT_FILTERS } from "@/components/FilterSidebar";
 import { HeroOverlay, MicroHints, useOnboarding } from "@/components/Onboarding";
@@ -119,6 +120,10 @@ export default function Index() {
         onVote={handleVote}
         showHeatmap={showHeatmap}
         filters={filters}
+        onAreaClick={(area) => {
+          // Zoom into the area for "Explore details"
+          toast.info(`Exploring ${area.name} — ${area.labelCount} labels nearby`);
+        }}
       />
 
       <FilterSidebar
