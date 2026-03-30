@@ -1,0 +1,1 @@
+ALTER TABLE public.labels ADD COLUMN color text DEFAULT '#6b7280';
