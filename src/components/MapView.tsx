@@ -144,7 +144,9 @@ function buildPopupContent(label: LabelData, onVote: MapViewProps["onVote"]) {
   return wrapper;
 }
 
-function applyFilters(labels: LabelData[], filters: Filters): LabelData[] {
+const DEFAULT_FILTERS: Filters = { safetyMin: 1, safetyMax: 5, costs: [], vibes: [], minScore: -99 };
+
+function applyFilters(labels: LabelData[], filters: Filters = DEFAULT_FILTERS): LabelData[] {
   return labels.filter((l) => {
     const score = getScore(l);
     if (l.safety < filters.safetyMin || l.safety > filters.safetyMax) return false;
