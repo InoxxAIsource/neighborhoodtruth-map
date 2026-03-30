@@ -1,43 +1,40 @@
 
 
-## Plan: Hoodmaps-Style Colored Zone Overlay
+## Plan: Add Places Filter & No Tags Toggle (Hoodmaps-style)
 
 ### What it does
-Replace the current `leaflet.heat` gradient heatmap with colored polygon zone overlays like Hoodmaps. Each predefined NYC neighborhood gets a semi-transparent colored rectangle/circle based on its dominant category, determined by aggregating labels in that area.
+Add two Hoodmaps-inspired features to the top toolbar area:
+1. **"Places" dropdown** — categorized checkbox list of place types (Good: Cafes, Parks, Coworking... / Bad: Fast food, Gambling, Pawn shops) that filter labels by matching text/vibe keywords
+2. **"No tags" toggle** — instantly hides ALL labels from the map, showing only the base map + zone overlays
 
-### Categories and Colors
-Using the Hoodmaps model adapted to our data:
-- **Suits** (high cost, high safety) — Light Blue `#64b5f6`
-- **Rich** ($$$$, high safety) — Green `#4caf50`
-- **Cool** (Artsy/Nightlife vibes) — Yellow `#ffeb3b`
-- **Tourists** (mixed vibes, moderate cost) — Red/Coral `#ef5350`
-- **Uni** (Chill, low cost) — Dark Blue `#1565c0`
-- **Normies** (neutral, moderate everything) — Gray `#9e9e9e`
-- **Edgy** (low safety, Loud/Nightlife) — Dark Gray `#424242`
+### How it works
 
-Each neighborhood zone is classified by aggregating its labels' vibe, cost, and safety data.
+**1. Add a `category` field to labels (database migration)**
+- Add `category text` column to the `labels` table
+- This stores a place type like "Cafes to work", "Parks", "Fast food", etc.
+- Optional field — existing labels without a category still show normally
 
-### Technical approach
+**2. Update AddLabelDialog with place category picker**
+- Add a "Place Type" selector in the label creation dialog
+- Two groups: "Good" (Cafes to work, Coworking, Yoga studios, Parks, Playgrounds, etc.) and "Bad" (Hotels, Fast food, Gambling, Pawn shops, Laundromats, Phone repair, Money transfer)
+- Each option has an emoji icon like the reference
+- Optional — users can skip if their label doesn't fit a category
 
-**1. Zone classification function**
-- For each predefined area in the existing `getAreaName` list, gather nearby labels
-- Score each category based on label attributes (cost level, safety, vibes)
-- Assign the dominant category + its color
+**3. Add top toolbar with Places dropdown + No Tags toggle**
+- Horizontal bar at the top of the map (below title) with three toggle buttons: **"District mode"**, **"Places"**, **"No tags"**
+- **Places** button opens a dropdown/popover with checkboxed categories grouped into Good/Bad
+- Checking categories filters the map to only show labels matching those categories
+- **No tags** button hides all text labels from the map entirely
 
-**2. Render colored zones as Leaflet circle overlays**
-- Use `L.circle()` with semi-transparent fill (opacity ~0.25) for each neighborhood
-- Radius matches the existing `r` value from the areas array
-- Add the zone layer when heatmap toggle is ON; remove when OFF
-
-**3. Add legend bar at the bottom**
-- Horizontal bar matching the reference image showing category colors + labels + emoji
-- Positioned at the bottom of the map, fixed, z-indexed above the map
-
-**4. Replace heatmap rendering**
-- The current `leaflet.heat` layer is replaced by the zone overlay system when toggled
-- Labels remain visible on top of zones
+**4. Update MapView filtering logic**
+- Add `showLabels` boolean and `selectedCategories` string array to filter state
+- When "No tags" is active, skip rendering all label markers
+- When specific place categories are selected, only show labels matching those categories
 
 ### Files Modified
-- `src/components/MapView.tsx` — zone classification logic, circle overlay rendering (replaces heat layer), legend bar
-- No database changes needed
+- `supabase/migrations/` — add `category` column
+- `src/components/AddLabelDialog.tsx` — add place type selector
+- `src/components/FilterSidebar.tsx` or new `src/components/TopToolbar.tsx` — Places dropdown + No Tags toggle
+- `src/components/MapView.tsx` — respect `showLabels` flag and category filter
+- `src/pages/Index.tsx` — wire up new state
 
