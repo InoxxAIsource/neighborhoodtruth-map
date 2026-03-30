@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-import { MapPin, Tag, TagsIcon, EyeOff } from "lucide-react";
+import { MapPin, TagsIcon, EyeOff, LocateFixed } from "lucide-react";
 
 export const PLACE_CATEGORIES = {
   good: [

@@ -424,6 +424,37 @@ export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap 
     if (el) el.style.cursor = isPlacingPin ? "crosshair" : "";
   }, [isPlacingPin]);
 
+  // Locate user
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !locateUser) return;
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        map.flyTo([latitude, longitude], 15, { duration: 1.5 });
+
+        if (userMarkerRef.current) {
+          map.removeLayer(userMarkerRef.current);
+        }
+        userMarkerRef.current = L.circleMarker([latitude, longitude], {
+          radius: 10,
+          fillColor: "#3b82f6",
+          fillOpacity: 0.9,
+          color: "#fff",
+          weight: 3,
+        }).addTo(map);
+        userMarkerRef.current.bindPopup("<strong>You are here</strong>");
+
+        onLocated?.();
+      },
+      () => {
+        onLocated?.();
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, [locateUser, onLocated]);
+
   // Render labels
   useEffect(() => {
     const layer = markerLayerRef.current;
