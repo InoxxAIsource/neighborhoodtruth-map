@@ -1,9 +1,6 @@
 import { useEffect, useRef, useMemo } from "react";
 import L, { Map as LeafletMap } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import "leaflet.markercluster";
-import "leaflet.markercluster/dist/MarkerCluster.css";
-import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 
 interface Label {
   id: string;
@@ -31,109 +28,95 @@ function getScore(label: Label) {
   return label.upvotes - label.downvotes;
 }
 
-function getSentiment(score: number) {
-  if (score >= 3) return "positive";
-  if (score <= -3) return "negative";
-  return "neutral";
+function getLabelColor(score: number) {
+  if (score >= 5) return "#15803d";   // strong green
+  if (score >= 2) return "#22c55e";   // green
+  if (score <= -5) return "#dc2626";  // strong red
+  if (score <= -2) return "#ef4444";  // red
+  return "#6b7280";                   // gray
 }
 
-function getBubbleStyle(sentiment: string) {
-  switch (sentiment) {
-    case "positive": return { bg: "#dcfce7", border: "#86efac", text: "#166534" };
-    case "negative": return { bg: "#fee2e2", border: "#fca5a5", text: "#991b1b" };
-    default: return { bg: "#f3f4f6", border: "#d1d5db", text: "#374151" };
-  }
+function getLabelSize(score: number) {
+  const abs = Math.abs(score);
+  if (abs >= 10) return 16;
+  if (abs >= 5) return 14;
+  if (abs >= 2) return 13;
+  return 12;
 }
 
-function getScaleFromScore(score: number) {
-  // Clamp score -20 to +30, map to 0.7–1.4 scale
-  const clamped = Math.max(-20, Math.min(30, score));
-  const t = (clamped + 20) / 50; // 0..1
-  return 0.7 + t * 0.7;
+function getLabelOpacity(score: number) {
+  const abs = Math.abs(score);
+  if (abs >= 5) return 1;
+  if (abs >= 2) return 0.85;
+  return 0.65;
 }
 
-function getOpacityFromScore(score: number) {
-  if (score <= -5) return 0.5;
-  if (score <= 0) return 0.7;
-  return 1;
-}
-
-function createBubbleIcon(label: Label) {
+function createTextIcon(label: Label) {
   const score = getScore(label);
-  const sentiment = getSentiment(score);
-  const colors = getBubbleStyle(sentiment);
-  const scale = getScaleFromScore(score);
-  const opacity = getOpacityFromScore(score);
-  const shortText = label.text.length > 30 ? label.text.slice(0, 28) + "…" : label.text;
+  const color = getLabelColor(score);
+  const size = getLabelSize(score);
+  const opacity = getLabelOpacity(score);
+  const weight = Math.abs(score) >= 5 ? 800 : Math.abs(score) >= 2 ? 700 : 600;
 
-  const html = `
-    <div style="
-      background: ${colors.bg};
-      border: 2px solid ${colors.border};
-      color: ${colors.text};
-      border-radius: 12px;
-      padding: 5px 9px;
-      font-size: ${Math.round(11 * scale)}px;
-      font-weight: ${score > 5 ? 700 : 500};
-      font-family: system-ui, sans-serif;
-      white-space: nowrap;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-      position: relative;
-      max-width: 220px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      opacity: ${opacity};
-      transform: scale(${scale});
-      transform-origin: bottom center;
-      transition: transform 0.2s, opacity 0.2s;
-    ">${escapeHtml(shortText)}
-      <div style="
-        position: absolute;
-        bottom: -6px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 0; height: 0;
-        border-left: 6px solid transparent;
-        border-right: 6px solid transparent;
-        border-top: 6px solid ${colors.border};
-      "></div>
-    </div>
-  `;
+  const html = `<div style="
+    color: ${color};
+    font-size: ${size}px;
+    font-weight: ${weight};
+    font-family: system-ui, -apple-system, sans-serif;
+    text-shadow: 
+      -1px -1px 0 rgba(255,255,255,0.9),
+       1px -1px 0 rgba(255,255,255,0.9),
+      -1px  1px 0 rgba(255,255,255,0.9),
+       1px  1px 0 rgba(255,255,255,0.9),
+       0    2px 4px rgba(0,0,0,0.1);
+    white-space: nowrap;
+    opacity: ${opacity};
+    cursor: pointer;
+    user-select: none;
+    pointer-events: auto;
+    transition: opacity 0.15s;
+    letter-spacing: -0.01em;
+  ">${escapeHtml(label.text)}</div>`;
 
   return L.divIcon({
     html,
-    className: "label-bubble-icon",
+    className: "hoodmap-label",
     iconSize: [0, 0],
-    iconAnchor: [0, 30],
-    popupAnchor: [0, -35],
+    iconAnchor: [0, 0],
   });
 }
 
 function buildPopupContent(label: Label, onVote: MapViewProps["onVote"]) {
   const wrapper = document.createElement("div");
   wrapper.style.fontFamily = "system-ui, sans-serif";
-  wrapper.style.minWidth = "220px";
+  wrapper.style.minWidth = "200px";
 
   const score = getScore(label);
-  const sentiment = getSentiment(score);
   const vibes = (label.vibe ?? [])
-    .map((v) => `<span style="display:inline-block;border:1px solid #d1d5db;border-radius:4px;padding:1px 6px;font-size:10px;margin:0 2px 2px 0;">${escapeHtml(v)}</span>`)
+    .map((v) => `<span style="display:inline-block;background:#f3f4f6;border-radius:4px;padding:2px 7px;font-size:11px;margin:0 3px 3px 0;color:#374151;">${escapeHtml(v)}</span>`)
     .join("");
 
   const stars = Array.from({ length: 5 }, (_, i) =>
-    `<span style="color:${i < label.safety ? '#facc15' : '#d1d5db'};">★</span>`
+    `<span style="color:${i < label.safety ? '#facc15' : '#e5e7eb'};font-size:14px;">★</span>`
   ).join("");
 
-  const upBg = sentiment === "positive" ? "background:#dcfce7;border-color:#86efac;" : "";
-  const downBg = sentiment === "negative" ? "background:#fee2e2;border-color:#fca5a5;" : "";
+  const scoreBadgeColor = score > 0 ? "#dcfce7" : score < 0 ? "#fee2e2" : "#f3f4f6";
+  const scoreBadgeText = score > 0 ? "#166534" : score < 0 ? "#991b1b" : "#374151";
 
   wrapper.innerHTML = `
-    <p style="font-size:14px;font-weight:600;margin:0 0 6px;">${escapeHtml(label.text)}</p>
-    <div style="font-size:12px;margin-bottom:4px;">Safety: ${stars} · ${escapeHtml(label.cost)}</div>
-    ${vibes ? `<div style="margin-bottom:6px;">${vibes}</div>` : ""}
-    <div style="display:flex;gap:8px;border-top:1px solid #e5e7eb;padding-top:6px;">
-      <button data-vote="upvote" style="cursor:pointer;border:1px solid #d1d5db;border-radius:6px;padding:4px 10px;font-size:12px;${upBg}">👍 ${label.upvotes}</button>
-      <button data-vote="downvote" style="cursor:pointer;border:1px solid #d1d5db;border-radius:6px;padding:4px 10px;font-size:12px;${downBg}">👎 ${label.downvotes}</button>
+    <div style="margin-bottom:8px;">
+      <p style="font-size:14px;font-weight:700;margin:0 0 4px;line-height:1.3;">${escapeHtml(label.text)}</p>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+        <span>${stars}</span>
+        <span style="font-size:12px;color:#6b7280;">·</span>
+        <span style="font-size:13px;font-weight:600;color:#374151;">${escapeHtml(label.cost)}</span>
+      </div>
+      ${vibes ? `<div style="margin-top:4px;">${vibes}</div>` : ""}
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;border-top:1px solid #e5e7eb;padding-top:8px;">
+      <button data-vote="upvote" style="cursor:pointer;background:#f9fafb;border:1px solid #d1d5db;border-radius:8px;padding:5px 12px;font-size:13px;display:flex;align-items:center;gap:4px;transition:background 0.15s;">👍 <strong>${label.upvotes}</strong></button>
+      <button data-vote="downvote" style="cursor:pointer;background:#f9fafb;border:1px solid #d1d5db;border-radius:8px;padding:5px 12px;font-size:13px;display:flex;align-items:center;gap:4px;transition:background 0.15s;">👎 <strong>${label.downvotes}</strong></button>
+      <span style="margin-left:auto;background:${scoreBadgeColor};color:${scoreBadgeText};border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;">${score > 0 ? '+' : ''}${score}</span>
     </div>
   `;
 
@@ -146,12 +129,12 @@ function buildPopupContent(label: Label, onVote: MapViewProps["onVote"]) {
 export function MapView({ labels, isPlacingPin, onMapClick, onVote }: MapViewProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
-  const clusterRef = useRef<L.MarkerClusterGroup | null>(null);
+  const markerLayerRef = useRef<L.LayerGroup | null>(null);
 
-  // Sort by score, take top 100
+  // Show top 100 by absolute score
   const visibleLabels = useMemo(() => {
     return [...labels]
-      .sort((a, b) => getScore(b) - getScore(a))
+      .sort((a, b) => Math.abs(getScore(b)) - Math.abs(getScore(a)))
       .slice(0, 100);
   }, [labels]);
 
@@ -161,53 +144,20 @@ export function MapView({ labels, isPlacingPin, onMapClick, onVote }: MapViewPro
     const map = L.map(mapContainerRef.current, {
       zoomAnimation: true,
       markerZoomAnimation: true,
-    }).setView([40.7128, -74.006], 12);
+    }).setView([40.7328, -73.970], 12);
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+      maxZoom: 19,
     }).addTo(map);
 
-    const cluster = L.markerClusterGroup({
-      maxClusterRadius: 50,
-      spiderfyOnMaxZoom: true,
-      showCoverageOnHover: false,
-      zoomToBoundsOnClick: true,
-      animate: true,
-      animateAddingMarkers: true,
-      iconCreateFunction: (c) => {
-        const count = c.getChildCount();
-        let size = "small";
-        if (count > 20) size = "large";
-        else if (count > 10) size = "medium";
-        return L.divIcon({
-          html: `<div style="
-            background: hsl(174 62% 47%);
-            color: white;
-            border-radius: 50%;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 13px;
-            font-family: system-ui, sans-serif;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-          ">${count}</div>`,
-          className: "marker-cluster-custom",
-          iconSize: L.point(size === "large" ? 48 : size === "medium" ? 40 : 34, size === "large" ? 48 : size === "medium" ? 40 : 34),
-        });
-      },
-    });
-
-    cluster.addTo(map);
-    clusterRef.current = cluster;
+    markerLayerRef.current = L.layerGroup().addTo(map);
     mapRef.current = map;
 
     return () => {
       map.remove();
       mapRef.current = null;
-      clusterRef.current = null;
+      markerLayerRef.current = null;
     };
   }, []);
 
@@ -224,29 +174,45 @@ export function MapView({ labels, isPlacingPin, onMapClick, onVote }: MapViewPro
 
   useEffect(() => {
     const el = mapContainerRef.current;
-    if (el) el.style.cursor = isPlacingPin ? "crosshair" : "grab";
+    if (el) el.style.cursor = isPlacingPin ? "crosshair" : "";
   }, [isPlacingPin]);
 
   useEffect(() => {
-    const cluster = clusterRef.current;
-    if (!cluster) return;
+    const layer = markerLayerRef.current;
+    if (!layer) return;
 
-    cluster.clearLayers();
+    layer.clearLayers();
 
     visibleLabels.forEach((label) => {
       const marker = L.marker([label.lat, label.lng], {
-        icon: createBubbleIcon(label),
+        icon: createTextIcon(label),
+        interactive: true,
+      }).addTo(layer);
+      marker.bindPopup(buildPopupContent(label, onVote), {
+        maxWidth: 280,
+        className: "hoodmap-popup",
       });
-      marker.bindPopup(buildPopupContent(label, onVote));
-      cluster.addLayer(marker);
     });
   }, [visibleLabels, onVote]);
 
   return (
     <>
       <style>{`
-        .label-bubble-icon { background: none !important; border: none !important; }
-        .marker-cluster-custom { background: none !important; border: none !important; }
+        .hoodmap-label {
+          background: none !important;
+          border: none !important;
+        }
+        .hoodmap-popup .leaflet-popup-content-wrapper {
+          border-radius: 12px;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+          padding: 4px;
+        }
+        .hoodmap-popup .leaflet-popup-tip {
+          box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .hoodmap-popup button:hover {
+          background: #e5e7eb !important;
+        }
       `}</style>
       <div ref={mapContainerRef} className="h-full w-full z-0" />
     </>
