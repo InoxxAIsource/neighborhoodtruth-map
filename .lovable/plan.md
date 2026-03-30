@@ -1,32 +1,43 @@
 
 
-## Plan: Add Color Picker to Labels + Bold Outlined Font Style
+## Plan: Hoodmaps-Style Colored Zone Overlay
 
-### What Changes
+### What it does
+Replace the current `leaflet.heat` gradient heatmap with colored polygon zone overlays like Hoodmaps. Each predefined NYC neighborhood gets a semi-transparent colored rectangle/circle based on its dominant category, determined by aggregating labels in that area.
 
-**1. Database: Add `color` column to `labels` table**
-- Migration: `ALTER TABLE public.labels ADD COLUMN color text DEFAULT '#6b7280';`
-- Default gray so existing seed labels get a neutral color
+### Categories and Colors
+Using the Hoodmaps model adapted to our data:
+- **Suits** (high cost, high safety) — Light Blue `#64b5f6`
+- **Rich** ($$$$, high safety) — Green `#4caf50`
+- **Cool** (Artsy/Nightlife vibes) — Yellow `#ffeb3b`
+- **Tourists** (mixed vibes, moderate cost) — Red/Coral `#ef5350`
+- **Uni** (Chill, low cost) — Dark Blue `#1565c0`
+- **Normies** (neutral, moderate everything) — Gray `#9e9e9e`
+- **Edgy** (low safety, Loud/Nightlife) — Dark Gray `#424242`
 
-**2. AddLabelDialog: Add color picker**
-- Add a row of 8-10 preset color swatches (red, green, blue, orange, purple, pink, teal, yellow, gray, black)
-- User clicks to select; selected swatch gets a ring/border highlight
-- Color is submitted alongside other label data
+Each neighborhood zone is classified by aggregating its labels' vibe, cost, and safety data.
 
-**3. MapView: Use user-chosen color + bold outlined font**
-- In `createTextIcon`, use `label.color` (falling back to the current score-based color logic if no color set)
-- Change font style to match the reference image: **heavy bold weight (800-900), larger base size, thick white outline stroke** using CSS `text-shadow` with multiple offsets (like a 3D outlined/embossed look similar to the Ghibli Museum sign)
-- Font: `'Arial Black', 'Impact', system-ui, sans-serif` for that chunky feel
+### Technical approach
 
-**4. Seed script update**
-- When seeding labels, assign random colors from the preset palette so the map looks colorful immediately
+**1. Zone classification function**
+- For each predefined area in the existing `getAreaName` list, gather nearby labels
+- Score each category based on label attributes (cost level, safety, vibes)
+- Assign the dominant category + its color
 
-**5. Index.tsx / mutation**
-- Pass `color` field through the add label mutation to Supabase
+**2. Render colored zones as Leaflet circle overlays**
+- Use `L.circle()` with semi-transparent fill (opacity ~0.25) for each neighborhood
+- Radius matches the existing `r` value from the areas array
+- Add the zone layer when heatmap toggle is ON; remove when OFF
+
+**3. Add legend bar at the bottom**
+- Horizontal bar matching the reference image showing category colors + labels + emoji
+- Positioned at the bottom of the map, fixed, z-indexed above the map
+
+**4. Replace heatmap rendering**
+- The current `leaflet.heat` layer is replaced by the zone overlay system when toggled
+- Labels remain visible on top of zones
 
 ### Files Modified
-- `supabase/migrations/` — new migration for `color` column
-- `src/components/AddLabelDialog.tsx` — color picker UI
-- `src/components/MapView.tsx` — use label color + bold outlined font
-- `src/pages/Index.tsx` — pass color in mutation
+- `src/components/MapView.tsx` — zone classification logic, circle overlay rendering (replaces heat layer), legend bar
+- No database changes needed
 
