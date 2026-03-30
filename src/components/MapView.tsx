@@ -35,6 +35,8 @@ interface MapViewProps {
   onAreaClick?: (area: AreaSummary) => void;
   showLabels?: boolean;
   selectedCategories?: string[];
+  locateUser?: boolean;
+  onLocated?: () => void;
 }
 
 export interface AreaSummary {
