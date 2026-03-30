@@ -83,12 +83,14 @@ export function AddLabelDialog({
       vibe: vibes,
       cost,
       color,
+      category,
     });
     setText("");
     setSafety(3);
     setVibes([]);
     setCost("$$");
     setColor("#dc2626");
+    setCategory(null);
     setError(null);
   };
 
