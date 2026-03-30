@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { MapView } from "@/components/MapView";
 import { AddLabelDialog } from "@/components/AddLabelDialog";
 import { FilterSidebar, DEFAULT_FILTERS } from "@/components/FilterSidebar";
+import { HeroOverlay, MicroHints, useOnboarding } from "@/components/Onboarding";
 import { Button } from "@/components/ui/button";
 import { Plus, MapPin } from "lucide-react";
 import { useVoterId } from "@/hooks/useVoterId";
@@ -18,6 +19,7 @@ export default function Index() {
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const voterId = useVoterId();
   const queryClient = useQueryClient();
+  const { showHero, hasInteracted, dismissHero, markInteracted } = useOnboarding();
 
   const { data: labels = [] } = useQuery({
     queryKey: ["labels"],
@@ -54,6 +56,7 @@ export default function Index() {
       queryClient.invalidateQueries({ queryKey: ["labels"] });
       setDialogOpen(false);
       setIsPlacingPin(false);
+      markInteracted();
       toast.success("Label dropped! 📌");
     },
     onError: () => toast.error("Failed to add label"),
@@ -85,6 +88,7 @@ export default function Index() {
       queryClient.setQueryData(["labels"], (old: typeof labels) =>
         old?.map((l) => l.id === labelId ? { ...l, [field]: l[field] + 1 } : l)
       );
+      markInteracted();
       return { previous };
     },
     onError: (e, _vars, context) => {
@@ -124,6 +128,10 @@ export default function Index() {
         onToggleHeatmap={() => setShowHeatmap((p) => !p)}
       />
 
+      {/* Onboarding */}
+      {showHero && <HeroOverlay onDismiss={dismissHero} />}
+      {!showHero && <MicroHints hasInteracted={hasInteracted} />}
+
       {/* App title */}
       <div className="absolute top-4 right-4 z-[1000]">
         <div className="bg-card/95 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border">
@@ -152,12 +160,12 @@ export default function Index() {
       </div>
 
       {/* Empty state */}
-      {labels.length === 0 && (
+      {!showHero && labels.length === 0 && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1000] pointer-events-none">
           <div className="bg-card/95 backdrop-blur-sm rounded-xl px-8 py-6 shadow-lg border text-center">
             <MapPin className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
             <p className="text-lg font-medium text-foreground">No labels yet</p>
-            <p className="text-sm text-muted-foreground mt-1">Be the first to share what your neighborhood is really like!</p>
+            <p className="text-sm text-muted-foreground mt-1">Click anywhere on the map to add your insight</p>
           </div>
         </div>
       )}
