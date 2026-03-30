@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-import { MapPin, Tag, TagsIcon, EyeOff } from "lucide-react";
+import { MapPin, TagsIcon, EyeOff, LocateFixed } from "lucide-react";
 
 export const PLACE_CATEGORIES = {
   good: [
@@ -41,6 +41,8 @@ interface TopToolbarProps {
   onCategoriesChange: (categories: string[]) => void;
   showHeatmap: boolean;
   onToggleHeatmap: () => void;
+  isLocating: boolean;
+  onLocate: () => void;
 }
 
 export function TopToolbar({
@@ -50,6 +52,8 @@ export function TopToolbar({
   onCategoriesChange,
   showHeatmap,
   onToggleHeatmap,
+  isLocating,
+  onLocate,
 }: TopToolbarProps) {
   const [placesOpen, setPlacesOpen] = useState(false);
 
@@ -152,6 +156,18 @@ export function TopToolbar({
       >
         <EyeOff className="h-3.5 w-3.5" />
         No tags
+      </Button>
+
+      {/* Live location */}
+      <Button
+        size="sm"
+        variant={isLocating ? "default" : "outline"}
+        className="gap-1.5 rounded-full shadow-md bg-card/95 backdrop-blur-sm border"
+        onClick={onLocate}
+        disabled={isLocating}
+      >
+        <LocateFixed className={`h-3.5 w-3.5 ${isLocating ? "animate-spin" : ""}`} />
+        My Location
       </Button>
     </div>
   );

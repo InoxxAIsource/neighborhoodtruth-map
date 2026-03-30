@@ -35,6 +35,8 @@ interface MapViewProps {
   onAreaClick?: (area: AreaSummary) => void;
   showLabels?: boolean;
   selectedCategories?: string[];
+  locateUser?: boolean;
+  onLocated?: () => void;
 }
 
 export interface AreaSummary {
@@ -344,12 +346,13 @@ function applyFilters(labels: LabelData[], filters: Filters = DEFAULT_FILTERS): 
   });
 }
 
-export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap = false, filters = DEFAULT_FILTERS, onAreaClick, showLabels = true, selectedCategories = [] }: MapViewProps) {
+export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap = false, filters = DEFAULT_FILTERS, onAreaClick, showLabels = true, selectedCategories = [], locateUser = false, onLocated }: MapViewProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const markerLayerRef = useRef<L.LayerGroup | null>(null);
   const heatLayerRef = useRef<L.Layer | null>(null);
   const labelsRef = useRef<LabelData[]>([]);
+  const userMarkerRef = useRef<L.CircleMarker | null>(null);
 
   // Keep labels ref in sync for use in click handler
   labelsRef.current = labels;
@@ -420,6 +423,37 @@ export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap 
     const el = mapContainerRef.current;
     if (el) el.style.cursor = isPlacingPin ? "crosshair" : "";
   }, [isPlacingPin]);
+
+  // Locate user
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !locateUser) return;
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        map.flyTo([latitude, longitude], 15, { duration: 1.5 });
+
+        if (userMarkerRef.current) {
+          map.removeLayer(userMarkerRef.current);
+        }
+        userMarkerRef.current = L.circleMarker([latitude, longitude], {
+          radius: 10,
+          fillColor: "#3b82f6",
+          fillOpacity: 0.9,
+          color: "#fff",
+          weight: 3,
+        }).addTo(map);
+        userMarkerRef.current.bindPopup("<strong>You are here</strong>");
+
+        onLocated?.();
+      },
+      () => {
+        onLocated?.();
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, [locateUser, onLocated]);
 
   // Render labels
   useEffect(() => {

@@ -20,6 +20,7 @@ export default function Index() {
   const [showHeatmap, setShowHeatmap] = useState(false);
   const [showLabels, setShowLabels] = useState(true);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [locateUser, setLocateUser] = useState(false);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const voterId = useVoterId();
   const queryClient = useQueryClient();
@@ -125,6 +126,8 @@ export default function Index() {
         filters={filters}
         showLabels={showLabels}
         selectedCategories={selectedCategories}
+        locateUser={locateUser}
+        onLocated={() => setLocateUser(false)}
         onAreaClick={(area) => {
           toast.info(`Exploring ${area.name} — ${area.labelCount} labels nearby`);
         }}
@@ -137,6 +140,8 @@ export default function Index() {
         onCategoriesChange={setSelectedCategories}
         showHeatmap={showHeatmap}
         onToggleHeatmap={() => setShowHeatmap((p) => !p)}
+        isLocating={locateUser}
+        onLocate={() => setLocateUser(true)}
       />
 
       <FilterSidebar
