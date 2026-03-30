@@ -21,6 +21,7 @@ export interface LabelData {
   cost: string;
   upvotes: number;
   downvotes: number;
+  color?: string | null;
 }
 
 export interface Filters {
