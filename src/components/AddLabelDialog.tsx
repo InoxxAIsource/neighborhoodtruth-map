@@ -186,6 +186,26 @@ export function AddLabelDialog({
               ))}
             </div>
           </div>
+
+          <div className="space-y-2">
+            <Label>Label Color</Label>
+            <div className="flex flex-wrap gap-2">
+              {COLOR_OPTIONS.map((c) => (
+                <button
+                  key={c.value}
+                  type="button"
+                  title={c.label}
+                  onClick={() => setColor(c.value)}
+                  className={`w-7 h-7 rounded-full border-2 transition-all hover:scale-110 ${
+                    color === c.value
+                      ? "ring-2 ring-offset-2 ring-primary border-primary"
+                      : "border-transparent"
+                  }`}
+                  style={{ backgroundColor: c.value }}
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
         <DialogFooter>
