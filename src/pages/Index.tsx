@@ -120,6 +120,10 @@ export default function Index() {
         onVote={handleVote}
         showHeatmap={showHeatmap}
         filters={filters}
+        onAreaClick={(area) => {
+          // Zoom into the area for "Explore details"
+          toast.info(`Exploring ${area.name} — ${area.labelCount} labels nearby`);
+        }}
       />
 
       <FilterSidebar
