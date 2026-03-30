@@ -157,6 +157,18 @@ export function TopToolbar({
         <EyeOff className="h-3.5 w-3.5" />
         No tags
       </Button>
+
+      {/* Live location */}
+      <Button
+        size="sm"
+        variant={isLocating ? "default" : "outline"}
+        className="gap-1.5 rounded-full shadow-md bg-card/95 backdrop-blur-sm border"
+        onClick={onLocate}
+        disabled={isLocating}
+      >
+        <LocateFixed className={`h-3.5 w-3.5 ${isLocating ? "animate-spin" : ""}`} />
+        My Location
+      </Button>
     </div>
   );
 }
