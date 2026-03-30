@@ -14,7 +14,77 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      labels: {
+        Row: {
+          cost: string
+          created_at: string
+          downvotes: number
+          id: string
+          lat: number
+          lng: number
+          safety: number
+          text: string
+          upvotes: number
+          vibe: string[] | null
+        }
+        Insert: {
+          cost: string
+          created_at?: string
+          downvotes?: number
+          id?: string
+          lat: number
+          lng: number
+          safety: number
+          text: string
+          upvotes?: number
+          vibe?: string[] | null
+        }
+        Update: {
+          cost?: string
+          created_at?: string
+          downvotes?: number
+          id?: string
+          lat?: number
+          lng?: number
+          safety?: number
+          text?: string
+          upvotes?: number
+          vibe?: string[] | null
+        }
+        Relationships: []
+      }
+      votes: {
+        Row: {
+          created_at: string
+          id: string
+          label_id: string
+          vote_type: string
+          voter_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label_id: string
+          vote_type: string
+          voter_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label_id?: string
+          vote_type?: string
+          voter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "votes_label_id_fkey"
+            columns: ["label_id"]
+            isOneToOne: false
+            referencedRelation: "labels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
