@@ -1,15 +1,7 @@
 import { useEffect, useRef, useMemo } from "react";
 import L, { Map as LeafletMap } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import "leaflet.heat";
-
-// Extend Leaflet types for heat layer
-declare module "leaflet" {
-  function heatLayer(
-    latlngs: Array<[number, number, number]>,
-    options?: Record<string, unknown>
-  ): L.Layer;
-}
+import { renderZoneLayer, ZONE_CATEGORIES } from "./ZoneOverlay";
 
 export interface LabelData {
   id: string;
