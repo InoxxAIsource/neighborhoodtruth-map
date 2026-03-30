@@ -126,6 +126,8 @@ export default function Index() {
         filters={filters}
         showLabels={showLabels}
         selectedCategories={selectedCategories}
+        locateUser={locateUser}
+        onLocated={() => setLocateUser(false)}
         onAreaClick={(area) => {
           toast.info(`Exploring ${area.name} — ${area.labelCount} labels nearby`);
         }}
@@ -138,6 +140,8 @@ export default function Index() {
         onCategoriesChange={setSelectedCategories}
         showHeatmap={showHeatmap}
         onToggleHeatmap={() => setShowHeatmap((p) => !p)}
+        isLocating={locateUser}
+        onLocate={() => setLocateUser(true)}
       />
 
       <FilterSidebar
