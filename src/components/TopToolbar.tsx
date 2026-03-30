@@ -41,6 +41,8 @@ interface TopToolbarProps {
   onCategoriesChange: (categories: string[]) => void;
   showHeatmap: boolean;
   onToggleHeatmap: () => void;
+  isLocating: boolean;
+  onLocate: () => void;
 }
 
 export function TopToolbar({
@@ -50,6 +52,8 @@ export function TopToolbar({
   onCategoriesChange,
   showHeatmap,
   onToggleHeatmap,
+  isLocating,
+  onLocate,
 }: TopToolbarProps) {
   const [placesOpen, setPlacesOpen] = useState(false);
 
