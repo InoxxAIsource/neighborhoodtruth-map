@@ -144,7 +144,9 @@ function buildPopupContent(label: LabelData, onVote: MapViewProps["onVote"]) {
   return wrapper;
 }
 
-function applyFilters(labels: LabelData[], filters: Filters): LabelData[] {
+const DEFAULT_FILTERS: Filters = { safetyMin: 1, safetyMax: 5, costs: [], vibes: [], minScore: -99 };
+
+function applyFilters(labels: LabelData[], filters: Filters = DEFAULT_FILTERS): LabelData[] {
   return labels.filter((l) => {
     const score = getScore(l);
     if (l.safety < filters.safetyMin || l.safety > filters.safetyMax) return false;
@@ -155,7 +157,7 @@ function applyFilters(labels: LabelData[], filters: Filters): LabelData[] {
   });
 }
 
-export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap, filters }: MapViewProps) {
+export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap = false, filters = DEFAULT_FILTERS }: MapViewProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const markerLayerRef = useRef<L.LayerGroup | null>(null);
