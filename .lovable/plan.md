@@ -1,29 +1,32 @@
 
 
-## NeighborhoodTruth — Interactive Neighborhood Map SaaS
+## Plan: Add Color Picker to Labels + Bold Outlined Font Style
 
-### Overview
-A fullscreen interactive map app where users can drop labels on NYC neighborhoods with safety ratings, vibe tags, cost levels, and community voting.
+### What Changes
 
-### Database (Supabase)
-1. **`labels` table** — id (uuid), lat (float8), lng (float8), text (varchar 80), safety (int2, 1-5), vibe (text[]), cost (text, one of $/$$/$$$/$$$$), upvotes (int default 0), downvotes (int default 0), created_at (timestamptz)
-2. **`votes` table** — id (uuid), label_id (uuid FK → labels), voter_id (text), vote_type (text, upvote/downvote), created_at (timestamptz). Unique constraint on (label_id, voter_id).
-3. RLS policies: public read on labels, authenticated insert. Public read on votes, authenticated insert.
+**1. Database: Add `color` column to `labels` table**
+- Migration: `ALTER TABLE public.labels ADD COLUMN color text DEFAULT '#6b7280';`
+- Default gray so existing seed labels get a neutral color
 
-### UI & Features
-1. **Fullscreen Leaflet map** centered on NYC (40.7128, -74.0060, zoom 12) using OpenStreetMap tiles
-2. **Floating "+ Add Label" button** (bottom-right) — opens a modal/dialog to place a label:
-   - Click map to set location, then fill: text, safety (1-5 star slider), vibe tags (multi-select chips: Chill, Lively, Artsy, Family, Sketchy, Trendy, Quiet, Loud), cost ($-$$$$)
-   - Submits to Supabase `labels` table
-3. **Map markers** — custom markers for each label; clicking shows a popup card with label details + upvote/downvote buttons
-4. **Upvote/Downvote** — generates anonymous voter_id (localStorage), updates votes table and label counters
-5. **Left sidebar** — collapsible placeholder panel for future filters, with a toggle button
-6. **Empty state** — friendly message when no labels exist yet
-7. **Clean modern light theme** — minimal UI, shadcn components for dialogs/buttons, soft shadows
+**2. AddLabelDialog: Add color picker**
+- Add a row of 8-10 preset color swatches (red, green, blue, orange, purple, pink, teal, yellow, gray, black)
+- User clicks to select; selected swatch gets a ring/border highlight
+- Color is submitted alongside other label data
 
-### Tech
-- React + TypeScript + Tailwind + shadcn/ui
-- react-leaflet for map
-- Supabase client for data (Lovable Cloud)
-- TanStack Query for data fetching
+**3. MapView: Use user-chosen color + bold outlined font**
+- In `createTextIcon`, use `label.color` (falling back to the current score-based color logic if no color set)
+- Change font style to match the reference image: **heavy bold weight (800-900), larger base size, thick white outline stroke** using CSS `text-shadow` with multiple offsets (like a 3D outlined/embossed look similar to the Ghibli Museum sign)
+- Font: `'Arial Black', 'Impact', system-ui, sans-serif` for that chunky feel
+
+**4. Seed script update**
+- When seeding labels, assign random colors from the preset palette so the map looks colorful immediately
+
+**5. Index.tsx / mutation**
+- Pass `color` field through the add label mutation to Supabase
+
+### Files Modified
+- `supabase/migrations/` — new migration for `color` column
+- `src/components/AddLabelDialog.tsx` — color picker UI
+- `src/components/MapView.tsx` — use label color + bold outlined font
+- `src/pages/Index.tsx` — pass color in mutation
 
