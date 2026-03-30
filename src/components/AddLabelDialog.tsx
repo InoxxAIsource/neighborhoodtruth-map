@@ -55,6 +55,7 @@ export function AddLabelDialog({
   const [safety, setSafety] = useState(3);
   const [vibes, setVibes] = useState<string[]>([]);
   const [cost, setCost] = useState("$$");
+  const [color, setColor] = useState("#dc2626");
   const [error, setError] = useState<string | null>(null);
 
   const toggleVibe = (v: string) => {
