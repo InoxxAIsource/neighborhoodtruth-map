@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { v4 } from 'crypto';
 
 function getOrCreateVoterId(): string {
   const key = 'neighborhood-truth-voter-id';
