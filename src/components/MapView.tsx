@@ -355,11 +355,15 @@ export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap 
   labelsRef.current = labels;
 
   const filteredLabels = useMemo(() => {
-    const filtered = applyFilters(labels, filters);
+    if (!showLabels) return [];
+    let filtered = applyFilters(labels, filters);
+    if (selectedCategories.length > 0) {
+      filtered = filtered.filter((l) => l.category && selectedCategories.includes(l.category));
+    }
     return [...filtered]
       .sort((a, b) => Math.abs(getScore(b)) - Math.abs(getScore(a)))
       .slice(0, 150);
-  }, [labels, filters]);
+  }, [labels, filters, showLabels, selectedCategories]);
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
