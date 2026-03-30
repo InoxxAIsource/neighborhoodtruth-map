@@ -1,0 +1,1 @@
+ALTER TABLE public.labels ADD COLUMN category text DEFAULT NULL;
