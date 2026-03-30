@@ -79,11 +79,13 @@ export function AddLabelDialog({
       safety,
       vibe: vibes,
       cost,
+      color,
     });
     setText("");
     setSafety(3);
     setVibes([]);
     setCost("$$");
+    setColor("#dc2626");
     setError(null);
   };
 
