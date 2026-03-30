@@ -5,6 +5,7 @@ import { MapView } from "@/components/MapView";
 import type { AreaSummary } from "@/components/MapView";
 import { AddLabelDialog } from "@/components/AddLabelDialog";
 import { FilterSidebar, DEFAULT_FILTERS } from "@/components/FilterSidebar";
+import { TopToolbar } from "@/components/TopToolbar";
 import { HeroOverlay, MicroHints, useOnboarding } from "@/components/Onboarding";
 import { Button } from "@/components/ui/button";
 import { Plus, MapPin } from "lucide-react";
