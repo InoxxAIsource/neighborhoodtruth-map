@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Star } from "lucide-react";
 import { validateLabelText } from "@/lib/profanityFilter";
+import { PLACE_CATEGORIES } from "@/components/TopToolbar";
 
 const VIBE_OPTIONS = ["Chill", "Loud", "Bougie", "Artsy", "Family", "Nightlife"];
 const COST_OPTIONS = ["$", "$$", "$$$", "$$$$"];
@@ -40,6 +41,7 @@ interface AddLabelDialogProps {
     vibe: string[];
     cost: string;
     color: string;
+    category: string | null;
   }) => void;
   isSubmitting: boolean;
 }
@@ -56,6 +58,7 @@ export function AddLabelDialog({
   const [vibes, setVibes] = useState<string[]>([]);
   const [cost, setCost] = useState("$$");
   const [color, setColor] = useState("#dc2626");
+  const [category, setCategory] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const toggleVibe = (v: string) => {
@@ -80,12 +83,14 @@ export function AddLabelDialog({
       vibe: vibes,
       cost,
       color,
+      category,
     });
     setText("");
     setSafety(3);
     setVibes([]);
     setCost("$$");
     setColor("#dc2626");
+    setCategory(null);
     setError(null);
   };
 
@@ -184,6 +189,34 @@ export function AddLabelDialog({
                   {c}
                 </Button>
               ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Place Type (optional)</Label>
+            <div className="space-y-1.5 max-h-32 overflow-y-auto">
+              <div className="flex flex-wrap gap-1.5">
+                {PLACE_CATEGORIES.good.map((cat) => (
+                  <Badge
+                    key={cat.label}
+                    variant={category === cat.label ? "default" : "outline"}
+                    className="cursor-pointer select-none text-xs"
+                    onClick={() => setCategory(category === cat.label ? null : cat.label)}
+                  >
+                    {cat.emoji} {cat.label}
+                  </Badge>
+                ))}
+                {PLACE_CATEGORIES.bad.map((cat) => (
+                  <Badge
+                    key={cat.label}
+                    variant={category === cat.label ? "destructive" : "outline"}
+                    className="cursor-pointer select-none text-xs"
+                    onClick={() => setCategory(category === cat.label ? null : cat.label)}
+                  >
+                    {cat.emoji} {cat.label}
+                  </Badge>
+                ))}
+              </div>
             </div>
           </div>
 

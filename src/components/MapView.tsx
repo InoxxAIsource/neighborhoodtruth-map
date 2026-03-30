@@ -14,6 +14,7 @@ export interface LabelData {
   upvotes: number;
   downvotes: number;
   color?: string | null;
+  category?: string | null;
 }
 
 export interface Filters {
@@ -32,6 +33,8 @@ interface MapViewProps {
   showHeatmap: boolean;
   filters: Filters;
   onAreaClick?: (area: AreaSummary) => void;
+  showLabels?: boolean;
+  selectedCategories?: string[];
 }
 
 export interface AreaSummary {
@@ -341,7 +344,7 @@ function applyFilters(labels: LabelData[], filters: Filters = DEFAULT_FILTERS): 
   });
 }
 
-export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap = false, filters = DEFAULT_FILTERS, onAreaClick }: MapViewProps) {
+export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap = false, filters = DEFAULT_FILTERS, onAreaClick, showLabels = true, selectedCategories = [] }: MapViewProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const markerLayerRef = useRef<L.LayerGroup | null>(null);
@@ -352,11 +355,15 @@ export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap 
   labelsRef.current = labels;
 
   const filteredLabels = useMemo(() => {
-    const filtered = applyFilters(labels, filters);
+    if (!showLabels) return [];
+    let filtered = applyFilters(labels, filters);
+    if (selectedCategories.length > 0) {
+      filtered = filtered.filter((l) => l.category && selectedCategories.includes(l.category));
+    }
     return [...filtered]
       .sort((a, b) => Math.abs(getScore(b)) - Math.abs(getScore(a)))
       .slice(0, 150);
-  }, [labels, filters]);
+  }, [labels, filters, showLabels, selectedCategories]);
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;

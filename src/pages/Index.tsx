@@ -5,6 +5,7 @@ import { MapView } from "@/components/MapView";
 import type { AreaSummary } from "@/components/MapView";
 import { AddLabelDialog } from "@/components/AddLabelDialog";
 import { FilterSidebar, DEFAULT_FILTERS } from "@/components/FilterSidebar";
+import { TopToolbar } from "@/components/TopToolbar";
 import { HeroOverlay, MicroHints, useOnboarding } from "@/components/Onboarding";
 import { Button } from "@/components/ui/button";
 import { Plus, MapPin } from "lucide-react";
@@ -17,6 +18,8 @@ export default function Index() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [clickedPosition, setClickedPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [showHeatmap, setShowHeatmap] = useState(false);
+  const [showLabels, setShowLabels] = useState(true);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const voterId = useVoterId();
   const queryClient = useQueryClient();
@@ -48,7 +51,7 @@ export default function Index() {
 
   const addLabel = useMutation({
     mutationFn: async (label: {
-      lat: number; lng: number; text: string; safety: number; vibe: string[]; cost: string; color: string;
+      lat: number; lng: number; text: string; safety: number; vibe: string[]; cost: string; color: string; category: string | null;
     }) => {
       const { error } = await supabase.from("labels").insert(label);
       if (error) throw error;
@@ -120,10 +123,20 @@ export default function Index() {
         onVote={handleVote}
         showHeatmap={showHeatmap}
         filters={filters}
+        showLabels={showLabels}
+        selectedCategories={selectedCategories}
         onAreaClick={(area) => {
-          // Zoom into the area for "Explore details"
           toast.info(`Exploring ${area.name} — ${area.labelCount} labels nearby`);
         }}
+      />
+
+      <TopToolbar
+        showLabels={showLabels}
+        onToggleLabels={() => setShowLabels((p) => !p)}
+        selectedCategories={selectedCategories}
+        onCategoriesChange={setSelectedCategories}
+        showHeatmap={showHeatmap}
+        onToggleHeatmap={() => setShowHeatmap((p) => !p)}
       />
 
       <FilterSidebar
