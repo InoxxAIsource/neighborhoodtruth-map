@@ -193,6 +193,34 @@ export function AddLabelDialog({
           </div>
 
           <div className="space-y-2">
+            <Label>Place Type (optional)</Label>
+            <div className="space-y-1.5 max-h-32 overflow-y-auto">
+              <div className="flex flex-wrap gap-1.5">
+                {PLACE_CATEGORIES.good.map((cat) => (
+                  <Badge
+                    key={cat.label}
+                    variant={category === cat.label ? "default" : "outline"}
+                    className="cursor-pointer select-none text-xs"
+                    onClick={() => setCategory(category === cat.label ? null : cat.label)}
+                  >
+                    {cat.emoji} {cat.label}
+                  </Badge>
+                ))}
+                {PLACE_CATEGORIES.bad.map((cat) => (
+                  <Badge
+                    key={cat.label}
+                    variant={category === cat.label ? "destructive" : "outline"}
+                    className="cursor-pointer select-none text-xs"
+                    onClick={() => setCategory(category === cat.label ? null : cat.label)}
+                  >
+                    {cat.emoji} {cat.label}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
             <Label>Label Color</Label>
             <div className="flex flex-wrap gap-2">
               {COLOR_OPTIONS.map((c) => (

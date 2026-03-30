@@ -33,6 +33,8 @@ interface MapViewProps {
   showHeatmap: boolean;
   filters: Filters;
   onAreaClick?: (area: AreaSummary) => void;
+  showLabels?: boolean;
+  selectedCategories?: string[];
 }
 
 export interface AreaSummary {
