@@ -435,7 +435,7 @@ export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap 
     }
   }, [filteredLabels, onVote, showHeatmap]);
 
-  // Render heatmap
+  // Render zone overlay
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -447,30 +447,9 @@ export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap 
 
     if (!showHeatmap) return;
 
-    const heatPoints: Array<[number, number, number]> = filteredLabels.map((l) => {
-      const score = getScore(l);
-      const intensity = Math.max(0.1, Math.min(1, (score + 20) / 40));
-      return [l.lat, l.lng, intensity];
-    });
-
-    const heat = L.heatLayer(heatPoints, {
-      radius: 35,
-      blur: 25,
-      maxZoom: 15,
-      max: 1,
-      gradient: {
-        0.0: "#dc2626",
-        0.3: "#ef4444",
-        0.45: "#fbbf24",
-        0.55: "#facc15",
-        0.7: "#22c55e",
-        1.0: "#15803d",
-      },
-    });
-
-    heat.addTo(map);
-    heatLayerRef.current = heat;
-  }, [filteredLabels, showHeatmap]);
+    const zoneLayer = renderZoneLayer(map, labels);
+    heatLayerRef.current = zoneLayer;
+  }, [labels, showHeatmap]);
 
   return (
     <>
