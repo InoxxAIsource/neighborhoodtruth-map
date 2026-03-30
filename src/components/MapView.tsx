@@ -21,6 +21,7 @@ export interface LabelData {
   cost: string;
   upvotes: number;
   downvotes: number;
+  color?: string | null;
 }
 
 export interface Filters {
@@ -85,28 +86,31 @@ function getLabelOpacity(score: number) {
 
 function createTextIcon(label: LabelData) {
   const score = getScore(label);
-  const color = getLabelColor(score);
+  const color = label.color || getLabelColor(score);
   const size = getLabelSize(score);
   const opacity = getLabelOpacity(score);
-  const weight = Math.abs(score) >= 5 ? 800 : Math.abs(score) >= 2 ? 700 : 600;
 
   const html = `<div style="
     color: ${color};
-    font-size: ${size}px;
-    font-weight: ${weight};
-    font-family: system-ui, -apple-system, sans-serif;
+    font-size: ${Math.max(size, 14)}px;
+    font-weight: 900;
+    font-family: 'Arial Black', 'Impact', system-ui, sans-serif;
     text-shadow: 
-      -1px -1px 0 rgba(255,255,255,0.9),
-       1px -1px 0 rgba(255,255,255,0.9),
-      -1px  1px 0 rgba(255,255,255,0.9),
-       1px  1px 0 rgba(255,255,255,0.9),
-       0    2px 4px rgba(0,0,0,0.1);
+      -2px -2px 0 #fff,
+       2px -2px 0 #fff,
+      -2px  2px 0 #fff,
+       2px  2px 0 #fff,
+       0   -2px 0 #fff,
+       0    2px 0 #fff,
+      -2px  0   0 #fff,
+       2px  0   0 #fff,
+       0    3px 6px rgba(0,0,0,0.15);
     white-space: nowrap;
     opacity: ${opacity};
     cursor: pointer;
     user-select: none;
     pointer-events: auto;
-    letter-spacing: -0.01em;
+    letter-spacing: 0.02em;
   ">${escapeHtml(label.text)}</div>`;
 
   return L.divIcon({

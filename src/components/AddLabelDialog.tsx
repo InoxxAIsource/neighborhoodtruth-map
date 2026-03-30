@@ -15,6 +15,18 @@ import { validateLabelText } from "@/lib/profanityFilter";
 
 const VIBE_OPTIONS = ["Chill", "Loud", "Bougie", "Artsy", "Family", "Nightlife"];
 const COST_OPTIONS = ["$", "$$", "$$$", "$$$$"];
+const COLOR_OPTIONS = [
+  { label: "Red", value: "#dc2626" },
+  { label: "Orange", value: "#ea580c" },
+  { label: "Yellow", value: "#ca8a04" },
+  { label: "Green", value: "#16a34a" },
+  { label: "Teal", value: "#0d9488" },
+  { label: "Blue", value: "#2563eb" },
+  { label: "Purple", value: "#7c3aed" },
+  { label: "Pink", value: "#db2777" },
+  { label: "Gray", value: "#6b7280" },
+  { label: "Black", value: "#111827" },
+];
 
 interface AddLabelDialogProps {
   open: boolean;
@@ -27,6 +39,7 @@ interface AddLabelDialogProps {
     safety: number;
     vibe: string[];
     cost: string;
+    color: string;
   }) => void;
   isSubmitting: boolean;
 }
@@ -42,6 +55,7 @@ export function AddLabelDialog({
   const [safety, setSafety] = useState(3);
   const [vibes, setVibes] = useState<string[]>([]);
   const [cost, setCost] = useState("$$");
+  const [color, setColor] = useState("#dc2626");
   const [error, setError] = useState<string | null>(null);
 
   const toggleVibe = (v: string) => {
@@ -65,11 +79,13 @@ export function AddLabelDialog({
       safety,
       vibe: vibes,
       cost,
+      color,
     });
     setText("");
     setSafety(3);
     setVibes([]);
     setCost("$$");
+    setColor("#dc2626");
     setError(null);
   };
 
@@ -167,6 +183,26 @@ export function AddLabelDialog({
                 >
                   {c}
                 </Button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Label Color</Label>
+            <div className="flex flex-wrap gap-2">
+              {COLOR_OPTIONS.map((c) => (
+                <button
+                  key={c.value}
+                  type="button"
+                  title={c.label}
+                  onClick={() => setColor(c.value)}
+                  className={`w-7 h-7 rounded-full border-2 transition-all hover:scale-110 ${
+                    color === c.value
+                      ? "ring-2 ring-offset-2 ring-primary border-primary"
+                      : "border-transparent"
+                  }`}
+                  style={{ backgroundColor: c.value }}
+                />
               ))}
             </div>
           </div>

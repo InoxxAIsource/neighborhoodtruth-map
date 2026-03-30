@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       labels: {
         Row: {
+          color: string | null
           cost: string
           created_at: string
           downvotes: number
@@ -28,6 +29,7 @@ export type Database = {
           vibe: string[] | null
         }
         Insert: {
+          color?: string | null
           cost: string
           created_at?: string
           downvotes?: number
@@ -40,6 +42,7 @@ export type Database = {
           vibe?: string[] | null
         }
         Update: {
+          color?: string | null
           cost?: string
           created_at?: string
           downvotes?: number
