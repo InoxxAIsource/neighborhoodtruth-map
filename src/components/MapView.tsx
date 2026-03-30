@@ -451,10 +451,13 @@ export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap 
     heatLayerRef.current = zoneLayer;
   }, [labels, showHeatmap]);
 
+  const legendItems = Object.values(ZONE_CATEGORIES);
+
   return (
     <>
       <style>{`
         .hoodmap-label { background: none !important; border: none !important; }
+        .zone-label-icon { background: none !important; border: none !important; }
         .hoodmap-popup .leaflet-popup-content-wrapper,
         .area-summary-popup .leaflet-popup-content-wrapper {
           border-radius: 14px;
@@ -476,7 +479,26 @@ export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap 
           margin: 10px 12px;
         }
       `}</style>
-      <div ref={mapContainerRef} className="h-full w-full z-0" />
+      <div className="relative h-full w-full">
+        <div ref={mapContainerRef} className="h-full w-full z-0" />
+        {showHeatmap && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] flex items-center gap-0 rounded-full overflow-hidden shadow-lg border border-white/30"
+               style={{ backdropFilter: "blur(8px)" }}>
+            {legendItems.map((item) => (
+              <div
+                key={item.name}
+                className="flex items-center gap-1.5 px-3 py-2 text-white font-bold text-xs"
+                style={{ backgroundColor: item.color, minWidth: 80, justifyContent: "center" }}
+              >
+                <span>{item.emoji}</span>
+                <span className="uppercase tracking-wide" style={{ textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>
+                  {item.name}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </>
   );
 }
