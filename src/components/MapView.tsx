@@ -14,6 +14,7 @@ export interface LabelData {
   upvotes: number;
   downvotes: number;
   color?: string | null;
+  category?: string | null;
 }
 
 export interface Filters {
