@@ -41,6 +41,7 @@ interface AddLabelDialogProps {
     vibe: string[];
     cost: string;
     color: string;
+    category: string | null;
   }) => void;
   isSubmitting: boolean;
 }
