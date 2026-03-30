@@ -39,6 +39,7 @@ interface AddLabelDialogProps {
     safety: number;
     vibe: string[];
     cost: string;
+    color: string;
   }) => void;
   isSubmitting: boolean;
 }
