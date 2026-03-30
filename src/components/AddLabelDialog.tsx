@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Star } from "lucide-react";
 import { validateLabelText } from "@/lib/profanityFilter";
+import { PLACE_CATEGORIES } from "@/components/TopToolbar";
 
 const VIBE_OPTIONS = ["Chill", "Loud", "Bougie", "Artsy", "Family", "Nightlife"];
 const COST_OPTIONS = ["$", "$$", "$$$", "$$$$"];
