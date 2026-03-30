@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { MapView } from "@/components/MapView";
@@ -28,6 +28,19 @@ export default function Index() {
     },
   });
 
+  // Fetch user's existing votes to prevent duplicates
+  const { data: userVotes = [] } = useQuery({
+    queryKey: ["votes", voterId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("votes")
+        .select("label_id, vote_type")
+        .eq("voter_id", voterId);
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const addLabel = useMutation({
     mutationFn: async (label: {
       lat: number;
@@ -44,14 +57,17 @@ export default function Index() {
       queryClient.invalidateQueries({ queryKey: ["labels"] });
       setDialogOpen(false);
       setIsPlacingPin(false);
-      toast.success("Label added!");
+      toast.success("Label dropped! 📌");
     },
     onError: () => toast.error("Failed to add label"),
   });
 
   const vote = useMutation({
     mutationFn: async ({ labelId, voteType }: { labelId: string; voteType: "upvote" | "downvote" }) => {
-      // Insert vote (unique constraint prevents duplicates)
+      // Check locally first
+      const alreadyVoted = userVotes.some((v) => v.label_id === labelId);
+      if (alreadyVoted) throw new Error("Already voted");
+
       const { error: voteError } = await supabase
         .from("votes")
         .insert({ label_id: labelId, voter_id: voterId, vote_type: voteType });
@@ -59,7 +75,7 @@ export default function Index() {
         if (voteError.code === "23505") throw new Error("Already voted");
         throw voteError;
       }
-      // Update count
+
       const field = voteType === "upvote" ? "upvotes" : "downvotes";
       const label = labels.find((l) => l.id === labelId);
       if (label) {
@@ -69,18 +85,38 @@ export default function Index() {
           .eq("id", labelId);
       }
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["labels"] }),
-    onError: (e) => toast.error(e.message === "Already voted" ? "You already voted on this!" : "Vote failed"),
+    // Optimistic update
+    onMutate: async ({ labelId, voteType }) => {
+      await queryClient.cancelQueries({ queryKey: ["labels"] });
+      const previous = queryClient.getQueryData(["labels"]);
+      const field = voteType === "upvote" ? "upvotes" : "downvotes";
+
+      queryClient.setQueryData(["labels"], (old: typeof labels) =>
+        old?.map((l) =>
+          l.id === labelId ? { ...l, [field]: l[field] + 1 } : l
+        )
+      );
+
+      return { previous };
+    },
+    onError: (e, _vars, context) => {
+      if (context?.previous) queryClient.setQueryData(["labels"], context.previous);
+      toast.error(e.message === "Already voted" ? "You already voted on this!" : "Vote failed");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["labels"] });
+      queryClient.invalidateQueries({ queryKey: ["votes", voterId] });
+    },
   });
 
-  const handleMapClick = (lat: number, lng: number) => {
+  const handleMapClick = useCallback((lat: number, lng: number) => {
     setClickedPosition({ lat, lng });
     setDialogOpen(true);
-  };
+  }, []);
 
-  const handleVote = (labelId: string, voteType: "upvote" | "downvote") => {
+  const handleVote = useCallback((labelId: string, voteType: "upvote" | "downvote") => {
     vote.mutate({ labelId, voteType });
-  };
+  }, [vote]);
 
   return (
     <div className="h-screen w-screen relative overflow-hidden">
@@ -104,10 +140,10 @@ export default function Index() {
       <div className="absolute bottom-6 right-6 z-[1000]">
         {isPlacingPin ? (
           <div className="flex flex-col items-end gap-2">
-            <div className="bg-card/95 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border">
+            <div className="bg-card/95 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border animate-pulse">
               <p className="text-sm text-muted-foreground flex items-center gap-2">
                 <MapPin className="h-4 w-4 animate-bounce" />
-                Click the map to place your label
+                Tap the map to drop your label
               </p>
             </div>
             <Button variant="outline" onClick={() => setIsPlacingPin(false)}>
@@ -121,7 +157,7 @@ export default function Index() {
             onClick={() => setIsPlacingPin(true)}
           >
             <Plus className="h-5 w-5" />
-            Add Label
+            Drop Label
           </Button>
         )}
       </div>
