@@ -123,10 +123,20 @@ export default function Index() {
         onVote={handleVote}
         showHeatmap={showHeatmap}
         filters={filters}
+        showLabels={showLabels}
+        selectedCategories={selectedCategories}
         onAreaClick={(area) => {
-          // Zoom into the area for "Explore details"
           toast.info(`Exploring ${area.name} — ${area.labelCount} labels nearby`);
         }}
+      />
+
+      <TopToolbar
+        showLabels={showLabels}
+        onToggleLabels={() => setShowLabels((p) => !p)}
+        selectedCategories={selectedCategories}
+        onCategoriesChange={setSelectedCategories}
+        showHeatmap={showHeatmap}
+        onToggleHeatmap={() => setShowHeatmap((p) => !p)}
       />
 
       <FilterSidebar
