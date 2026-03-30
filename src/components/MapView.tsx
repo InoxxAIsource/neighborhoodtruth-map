@@ -1,15 +1,7 @@
 import { useEffect, useRef, useMemo } from "react";
 import L, { Map as LeafletMap } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import "leaflet.heat";
-
-// Extend Leaflet types for heat layer
-declare module "leaflet" {
-  function heatLayer(
-    latlngs: Array<[number, number, number]>,
-    options?: Record<string, unknown>
-  ): L.Layer;
-}
+import { renderZoneLayer, ZONE_CATEGORIES } from "./ZoneOverlay";
 
 export interface LabelData {
   id: string;
@@ -443,7 +435,7 @@ export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap 
     }
   }, [filteredLabels, onVote, showHeatmap]);
 
-  // Render heatmap
+  // Render zone overlay
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -455,35 +447,17 @@ export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap 
 
     if (!showHeatmap) return;
 
-    const heatPoints: Array<[number, number, number]> = filteredLabels.map((l) => {
-      const score = getScore(l);
-      const intensity = Math.max(0.1, Math.min(1, (score + 20) / 40));
-      return [l.lat, l.lng, intensity];
-    });
+    const zoneLayer = renderZoneLayer(map, labels);
+    heatLayerRef.current = zoneLayer;
+  }, [labels, showHeatmap]);
 
-    const heat = L.heatLayer(heatPoints, {
-      radius: 35,
-      blur: 25,
-      maxZoom: 15,
-      max: 1,
-      gradient: {
-        0.0: "#dc2626",
-        0.3: "#ef4444",
-        0.45: "#fbbf24",
-        0.55: "#facc15",
-        0.7: "#22c55e",
-        1.0: "#15803d",
-      },
-    });
-
-    heat.addTo(map);
-    heatLayerRef.current = heat;
-  }, [filteredLabels, showHeatmap]);
+  const legendItems = Object.values(ZONE_CATEGORIES);
 
   return (
     <>
       <style>{`
         .hoodmap-label { background: none !important; border: none !important; }
+        .zone-label-icon { background: none !important; border: none !important; }
         .hoodmap-popup .leaflet-popup-content-wrapper,
         .area-summary-popup .leaflet-popup-content-wrapper {
           border-radius: 14px;
@@ -505,7 +479,26 @@ export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap 
           margin: 10px 12px;
         }
       `}</style>
-      <div ref={mapContainerRef} className="h-full w-full z-0" />
+      <div className="relative h-full w-full">
+        <div ref={mapContainerRef} className="h-full w-full z-0" />
+        {showHeatmap && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] flex items-center gap-0 rounded-full overflow-hidden shadow-lg border border-white/30"
+               style={{ backdropFilter: "blur(8px)" }}>
+            {legendItems.map((item) => (
+              <div
+                key={item.name}
+                className="flex items-center gap-1.5 px-3 py-2 text-white font-bold text-xs"
+                style={{ backgroundColor: item.color, minWidth: 80, justifyContent: "center" }}
+              >
+                <span>{item.emoji}</span>
+                <span className="uppercase tracking-wide" style={{ textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>
+                  {item.name}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </>
   );
 }
