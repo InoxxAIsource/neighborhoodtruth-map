@@ -142,29 +142,48 @@ export function TopToolbar({
 
   return (
     <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] flex items-center gap-2">
-      {/* Search city/country */}
-      <div className="flex items-center bg-card/95 backdrop-blur-sm border rounded-full shadow-md overflow-hidden">
-        <Input
-          ref={searchRef}
-          placeholder="Search city or country..."
-          className="h-8 w-40 sm:w-48 border-0 bg-transparent text-sm focus-visible:ring-0 focus-visible:ring-offset-0 pl-3"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-        />
-        <Button
-          size="sm"
-          variant="ghost"
-          className="h-8 w-8 p-0 shrink-0"
-          onClick={handleSearch}
-          disabled={isSearching || !searchQuery.trim()}
-        >
-          {isSearching ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <Search className="h-3.5 w-3.5" />
-          )}
-        </Button>
+      {/* Search with autocomplete */}
+      <div ref={wrapperRef} className="relative">
+        <div className="flex items-center bg-card/95 backdrop-blur-sm border rounded-full shadow-md overflow-hidden">
+          <Input
+            ref={searchRef}
+            placeholder="Search neighborhood, city..."
+            className="h-8 w-44 sm:w-56 border-0 bg-transparent text-sm focus-visible:ring-0 focus-visible:ring-offset-0 pl-3"
+            value={searchQuery}
+            onChange={(e) => handleInputChange(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+          />
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8 w-8 p-0 shrink-0"
+            onClick={handleSearch}
+            disabled={isSearching || !searchQuery.trim()}
+          >
+            {isSearching ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Search className="h-3.5 w-3.5" />
+            )}
+          </Button>
+        </div>
+
+        {/* Autocomplete dropdown */}
+        {showSuggestions && suggestions.length > 0 && (
+          <div className="absolute top-full left-0 right-0 mt-1 bg-card border rounded-lg shadow-xl overflow-hidden z-50">
+            {suggestions.map((s, i) => (
+              <button
+                key={`${s.lat}-${s.lon}-${i}`}
+                className="w-full text-left px-3 py-2 text-sm hover:bg-accent/60 transition-colors flex items-start gap-2 border-b border-border/30 last:border-0"
+                onClick={() => selectSuggestion(s)}
+              >
+                <MapPin className="h-3.5 w-3.5 mt-0.5 shrink-0 text-muted-foreground" />
+                <span className="text-foreground leading-snug">{formatName(s.display_name)}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* District mode toggle */}
