@@ -24,6 +24,10 @@ export default function Index() {
   const [locateUser, setLocateUser] = useState(false);
   const [flyToLocation, setFlyToLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
+  const [chatDrawerOpen, setChatDrawerOpen] = useState(false);
+  const [chatLabel, setChatLabel] = useState<LabelData | null>(null);
+  const [chatNearby, setChatNearby] = useState<LabelData[]>([]);
+  const [chatAreaName, setChatAreaName] = useState("This Area");
   const voterId = useVoterId();
   const queryClient = useQueryClient();
   const { showHero, hasInteracted, dismissHero, markInteracted } = useOnboarding();
