@@ -92,6 +92,7 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase }: Ne
 
   useEffect(() => {
     if (label) {
+      abortRef.current?.abort();
       setChatOpen(false);
       setMessages([]);
       setInput("");
@@ -101,6 +102,10 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase }: Ne
       setRateLimitDataState(getRateLimit());
     }
   }, [label]);
+
+  useEffect(() => {
+    return () => { abortRef.current?.abort(); };
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
