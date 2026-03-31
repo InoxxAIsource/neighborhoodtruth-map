@@ -111,7 +111,7 @@ export default function Index() {
   });
 
   const vote = useMutation({
-    mutationFn: async ({ labelId, voteType }: { labelId: string; voteType: "upvote" | "downvote" }) => {
+    mutationFn: async ({ labelId, voteType }: { labelId: string; voteType: "upvote" | "downvote" | "accurate" }) => {
       const alreadyVoted = userVotes.some((v) => v.labelId === labelId);
       if (alreadyVoted) throw new Error("Already voted");
 
@@ -135,7 +135,7 @@ export default function Index() {
     setDialogOpen(true);
   }, []);
 
-  const handleVote = useCallback((labelId: string, voteType: "upvote" | "downvote") => {
+  const handleVote = useCallback((labelId: string, voteType: "upvote" | "downvote" | "accurate") => {
     vote.mutate({ labelId, voteType });
   }, [vote]);
 

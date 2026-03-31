@@ -30,7 +30,7 @@ interface MapViewProps {
   labels: LabelData[];
   isPlacingPin: boolean;
   onMapClick: (lat: number, lng: number) => void;
-  onVote: (labelId: string, voteType: "upvote" | "downvote") => void;
+  onVote: (labelId: string, voteType: "upvote" | "downvote" | "accurate") => void;
   onLabelClick?: (label: LabelData) => void;
   showHeatmap: boolean;
   filters: Filters;
@@ -153,7 +153,7 @@ function renderTopTagBadges(topTags: string[]): string {
 
 function buildPopupContent(
   label: LabelData,
-  onVote: MapViewProps["onVote"],
+  onVote: (labelId: string, voteType: "upvote" | "downvote" | "accurate") => void,
   apiBase: string,
   voterId: string,
   myVotes?: { labelId: string; voteType: string }[],
@@ -267,19 +267,12 @@ function buildPopupContent(
     onVote(label.id, "downvote");
   });
 
-  accurateBtn.addEventListener("click", async () => {
+  accurateBtn.addEventListener("click", () => {
     if (alreadyVoted) return;
     accurateBtn.style.background = "#e0f2fe";
     accurateBtn.style.borderColor = "#7dd3fc";
     lockVoteButtons();
-    try {
-      await fetch(`${apiBase}/labels/${label.id}/vote`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ voterId, voteType: "accurate" }),
-      });
-    } catch {
-    }
+    onVote(label.id, "accurate");
   });
 
   wrapper.querySelector('button[data-action="ask-ai"]')?.addEventListener("click", () => {
