@@ -21,6 +21,7 @@ export default function Index() {
   const [showLabels, setShowLabels] = useState(true);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [locateUser, setLocateUser] = useState(false);
+  const [flyToLocation, setFlyToLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const voterId = useVoterId();
   const queryClient = useQueryClient();
