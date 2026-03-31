@@ -107,6 +107,7 @@ export default function Index() {
     onSuccess: () => {
       markInteracted();
       queryClient.invalidateQueries({ queryKey: ["votes", voterId] });
+      queryClient.invalidateQueries({ queryKey: ["labels"] });
     },
     onError: (e: Error) => {
       toast.error(e.message === "Already voted" ? "You already voted on this!" : "Vote failed");

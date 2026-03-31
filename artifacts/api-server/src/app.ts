@@ -58,6 +58,10 @@ app.get("/robots.txt", (_req: Request, res: Response) => {
   );
 });
 
+app.get("/api/healthz", (_req: Request, res: Response) => {
+  res.json({ ok: true });
+});
+
 app.use("/api", router);
 
 export default app;
