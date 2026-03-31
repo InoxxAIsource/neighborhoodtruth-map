@@ -233,7 +233,7 @@ export function TopToolbar({
                   key={city.name}
                   className="w-full text-left text-sm px-2 py-1.5 rounded-md hover:bg-accent transition-colors flex items-center gap-2"
                   onClick={() => {
-                    onSearchLocation({ lat: city.lat, lng: city.lng });
+                    onSearchLocation({ lat: city.lat, lng: city.lng, zoom: 11 });
                     setCitiesOpen(false);
                   }}
                 >
