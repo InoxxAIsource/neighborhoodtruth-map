@@ -119,3 +119,42 @@
   font-size: 9px;
   opacity: 0.6;
 }
+
+/* User location dot */
+.user-location-dot {
+  position: relative;
+  width: 24px;
+  height: 24px;
+}
+
+.user-location-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  transform: translate(-50%, -50%);
+  background: #2563eb;
+  border: 2.5px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.5);
+  z-index: 2;
+}
+
+.user-location-pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  transform: translate(-50%, -50%);
+  background: rgba(37, 99, 235, 0.25);
+  border-radius: 50%;
+  animation: location-pulse 1.8s ease-out infinite;
+  z-index: 1;
+}
+
+@keyframes location-pulse {
+  0% { transform: translate(-50%, -50%) scale(0.4); opacity: 0.9; }
+  100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
+}

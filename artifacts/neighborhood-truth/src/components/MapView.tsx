@@ -221,6 +221,7 @@ export function MapView({
   const markersRef = useRef<L.LayerGroup | null>(null);
   const heatLayerRef = useRef<L.Layer | null>(null);
   const zoneLayerRef = useRef<L.LayerGroup | null>(null);
+  const userLocationMarkerRef = useRef<L.Marker | null>(null);
 
   // Initialize map
   useEffect(() => {
@@ -268,8 +269,34 @@ export function MapView({
     const map = mapRef.current;
     if (!map || !locateUser) return;
 
-    map.locate({ setView: true, maxZoom: 14 });
-    const onLocate = () => { onLocated?.(); };
+    map.locate({ setView: true, maxZoom: 15 });
+
+    const onLocate = (e: L.LocationEvent) => {
+      if (userLocationMarkerRef.current) {
+        userLocationMarkerRef.current.remove();
+        userLocationMarkerRef.current = null;
+      }
+
+      const pulsingIcon = L.divIcon({
+        html: `<div class="user-location-dot">
+          <div class="user-location-pulse"></div>
+          <div class="user-location-core"></div>
+        </div>`,
+        className: "",
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+      });
+
+      const marker = L.marker([e.latlng.lat, e.latlng.lng], {
+        icon: pulsingIcon,
+        zIndexOffset: 2000,
+        interactive: false,
+      }).addTo(map);
+
+      userLocationMarkerRef.current = marker;
+      onLocated?.();
+    };
+
     map.on("locationfound", onLocate);
 
     return () => { map.off("locationfound", onLocate); };
