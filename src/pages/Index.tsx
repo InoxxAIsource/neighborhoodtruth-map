@@ -145,6 +145,7 @@ export default function Index() {
         onToggleHeatmap={() => setShowHeatmap((p) => !p)}
         isLocating={locateUser}
         onLocate={() => setLocateUser(true)}
+        onSearchLocation={(coords) => setFlyToLocation(coords)}
       />
 
       <FilterSidebar
