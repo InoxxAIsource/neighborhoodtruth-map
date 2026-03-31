@@ -35,9 +35,20 @@ export const commentsTable = pgTable("comments", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+export const labelTagsTable = pgTable("label_tags", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  labelId: uuid("label_id").notNull().references(() => labelsTable.id, { onDelete: "cascade" }),
+  tagKey: text("tag_key").notNull(),
+  voterId: text("voter_id").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  unique("label_tags_label_tag_voter_unique").on(t.labelId, t.tagKey, t.voterId),
+]);
+
 export const insertLabelSchema = createInsertSchema(labelsTable).omit({ id: true, createdAt: true });
 export const insertVoteSchema = createInsertSchema(votesTable).omit({ id: true, createdAt: true });
 export const insertCommentSchema = createInsertSchema(commentsTable).omit({ id: true, createdAt: true });
+export const insertLabelTagSchema = createInsertSchema(labelTagsTable).omit({ id: true, createdAt: true });
 
 export type InsertLabel = z.infer<typeof insertLabelSchema>;
 export type Label = typeof labelsTable.$inferSelect;
@@ -45,3 +56,5 @@ export type InsertVote = z.infer<typeof insertVoteSchema>;
 export type Vote = typeof votesTable.$inferSelect;
 export type InsertComment = z.infer<typeof insertCommentSchema>;
 export type Comment = typeof commentsTable.$inferSelect;
+export type InsertLabelTag = z.infer<typeof insertLabelTagSchema>;
+export type LabelTag = typeof labelTagsTable.$inferSelect;

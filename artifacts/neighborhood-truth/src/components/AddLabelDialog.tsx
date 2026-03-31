@@ -34,6 +34,17 @@ const COLOR_OPTIONS = [
   { label: "Black", value: "#111827" },
 ];
 
+const TAG_OPTIONS = [
+  { key: "safe-at-night", label: "Safe at night", emoji: "🌙" },
+  { key: "noisy-on-weekends", label: "Noisy on weekends", emoji: "🔊" },
+  { key: "family-friendly", label: "Family-friendly", emoji: "👨‍👩‍👧" },
+  { key: "expensive", label: "Expensive", emoji: "💎" },
+  { key: "good-nightlife", label: "Good nightlife", emoji: "🎉" },
+  { key: "quiet", label: "Quiet", emoji: "🌿" },
+  { key: "good-for-students", label: "Good for students", emoji: "🎓" },
+  { key: "well-connected", label: "Well connected", emoji: "🚇" },
+];
+
 interface AddLabelDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -47,6 +58,7 @@ interface AddLabelDialogProps {
     cost: string;
     color: string;
     category: string | null;
+    tags: string[];
   }) => void;
   isSubmitting: boolean;
 }
@@ -58,12 +70,21 @@ export function AddLabelDialog({ open, onOpenChange, position, onSubmit, isSubmi
   const [cost, setCost] = useState("$$");
   const [color, setColor] = useState("#0d9488");
   const [category, setCategory] = useState<string | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const toggleVibe = (v: string) => {
     setSelectedVibes((prev) =>
       prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]
     );
+  };
+
+  const toggleTag = (key: string) => {
+    setSelectedTags((prev) => {
+      if (prev.includes(key)) return prev.filter((k) => k !== key);
+      if (prev.length >= 4) return prev;
+      return [...prev, key];
+    });
   };
 
   const handleSubmit = () => {
@@ -84,6 +105,7 @@ export function AddLabelDialog({ open, onOpenChange, position, onSubmit, isSubmi
       cost,
       color,
       category,
+      tags: selectedTags,
     });
     setText("");
     setSafety(3);
@@ -91,11 +113,12 @@ export function AddLabelDialog({ open, onOpenChange, position, onSubmit, isSubmi
     setCost("$$");
     setColor("#0d9488");
     setCategory(null);
+    setSelectedTags([]);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5 text-primary" />
@@ -187,6 +210,40 @@ export function AddLabelDialog({ open, onOpenChange, position, onSubmit, isSubmi
                 </Badge>
               ))}
             </div>
+          </div>
+
+          <div>
+            <Label>
+              Tags{" "}
+              <span className="text-muted-foreground font-normal">(optional, up to 4)</span>
+            </Label>
+            <div className="flex flex-wrap gap-2 mt-1">
+              {TAG_OPTIONS.map((t) => {
+                const selected = selectedTags.includes(t.key);
+                const disabled = !selected && selectedTags.length >= 4;
+                return (
+                  <button
+                    key={t.key}
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => toggleTag(t.key)}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-colors select-none ${
+                      selected
+                        ? "bg-teal-50 border-teal-500 text-teal-700"
+                        : disabled
+                          ? "bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed"
+                          : "bg-white border-gray-200 text-gray-600 hover:border-teal-300 cursor-pointer"
+                    }`}
+                  >
+                    <span>{t.emoji}</span>
+                    {t.label}
+                  </button>
+                );
+              })}
+            </div>
+            {selectedTags.length > 0 && (
+              <p className="text-xs text-muted-foreground mt-1">{selectedTags.length}/4 selected</p>
+            )}
           </div>
 
           <div>

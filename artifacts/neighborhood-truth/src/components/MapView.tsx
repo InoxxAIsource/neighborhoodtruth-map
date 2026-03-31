@@ -15,6 +15,7 @@ export interface LabelData {
   downvotes: number;
   color?: string | null;
   category?: string | null;
+  topTags?: string[];
 }
 
 export interface Filters {
@@ -56,6 +57,21 @@ export interface AreaSummary {
   sentimentPercent: number;
   topLabels: LabelData[];
 }
+
+const PREDEFINED_TAGS: { key: string; label: string; emoji: string }[] = [
+  { key: "safe-at-night", label: "Safe at night", emoji: "🌙" },
+  { key: "noisy-on-weekends", label: "Noisy weekends", emoji: "🔊" },
+  { key: "family-friendly", label: "Family-friendly", emoji: "👨‍👩‍👧" },
+  { key: "expensive", label: "Expensive", emoji: "💎" },
+  { key: "good-nightlife", label: "Good nightlife", emoji: "🎉" },
+  { key: "quiet", label: "Quiet", emoji: "🌿" },
+  { key: "good-for-students", label: "Good for students", emoji: "🎓" },
+  { key: "well-connected", label: "Well connected", emoji: "🚇" },
+];
+
+const TAG_LABEL_MAP: Record<string, string> = Object.fromEntries(
+  PREDEFINED_TAGS.map((t) => [t.key, `${t.emoji} ${t.label}`])
+);
 
 const escapeHtml = (value: string) =>
   value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
@@ -124,53 +140,15 @@ function createTextIcon(label: LabelData) {
   });
 }
 
-interface CommentItem {
-  id: string;
-  authorId: string;
-  body: string;
-  createdAt: string;
-}
-
-function timeAgo(iso: string): string {
-  const seconds = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-  if (seconds < 60) return "just now";
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  return `${days}d ago`;
-}
-
-function initials(authorId: string): string {
-  return authorId.slice(0, 2).toUpperCase();
-}
-
-function renderComments(list: CommentItem[]): string {
-  if (list.length === 0) {
-    return `<p style="font-size:12px;color:#9ca3af;margin:0;text-align:center;padding:8px 0;">No comments yet. Be the first!</p>`;
-  }
-  return list.map((c) => `
-    <div style="display:flex;gap:8px;margin-bottom:8px;align-items:flex-start;">
-      <div style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:#e0e7ff;color:#4338ca;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;">${escapeHtml(initials(c.authorId))}</div>
-      <div style="flex:1;min-width:0;">
-        <p style="font-size:12px;color:#1f2937;margin:0 0 2px;word-break:break-word;">${escapeHtml(c.body)}</p>
-        <span style="font-size:10px;color:#9ca3af;">${escapeHtml(timeAgo(c.createdAt))}</span>
-      </div>
-    </div>
-  `).join("");
-}
-
-async function loadAndRenderComments(commentsEl: HTMLElement, labelId: string, apiBase: string) {
-  commentsEl.innerHTML = `<p style="font-size:12px;color:#9ca3af;margin:0;text-align:center;">Loading…</p>`;
-  try {
-    const res = await fetch(`${apiBase}/labels/${labelId}/comments`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data: CommentItem[] = await res.json();
-    commentsEl.innerHTML = renderComments(data);
-  } catch {
-    commentsEl.innerHTML = `<p style="font-size:12px;color:#ef4444;margin:0;">Failed to load comments.</p>`;
-  }
+function renderTopTagBadges(topTags: string[]): string {
+  if (!topTags.length) return "";
+  return `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">
+    ${topTags.map((key) => {
+      const info = PREDEFINED_TAGS.find((t) => t.key === key);
+      if (!info) return "";
+      return `<span style="display:inline-flex;align-items:center;gap:3px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:20px;padding:2px 8px;font-size:11px;color:#166534;font-weight:600;">${escapeHtml(info.emoji)} ${escapeHtml(info.label)}</span>`;
+    }).join("")}
+  </div>`;
 }
 
 function buildPopupContent(
@@ -183,7 +161,7 @@ function buildPopupContent(
   const wrapper = document.createElement("div");
   wrapper.style.fontFamily = "system-ui, sans-serif";
   wrapper.style.minWidth = "220px";
-  wrapper.style.maxWidth = "280px";
+  wrapper.style.maxWidth = "300px";
 
   const score = getScore(label);
   const vibes = (label.vibe ?? [])
@@ -201,11 +179,14 @@ function buildPopupContent(
   const alreadyVoted = !!existingVote;
   const upvotedStyle = existingVote?.voteType === "upvote" ? "background:#dcfce7;border-color:#86efac;" : "background:#f9fafb;border:1px solid #d1d5db;";
   const downvotedStyle = existingVote?.voteType === "downvote" ? "background:#fee2e2;border-color:#fca5a5;" : "background:#f9fafb;border:1px solid #d1d5db;";
+  const accurateStyle = existingVote?.voteType === "accurate" ? "background:#e0f2fe;border-color:#7dd3fc;" : "background:#f9fafb;border:1px solid #d1d5db;";
   const voteCursor = alreadyVoted ? "default" : "pointer";
   const voteTitle = alreadyVoted ? "You already voted on this label" : "";
 
   let currentUpvotes = label.upvotes;
   let currentDownvotes = label.downvotes;
+
+  const topTagsHtml = renderTopTagBadges(label.topTags ?? []);
 
   wrapper.innerHTML = `
     <div style="margin-bottom:8px;">
@@ -216,35 +197,37 @@ function buildPopupContent(
         <span style="font-size:13px;font-weight:600;color:#374151;">${escapeHtml(label.cost)}</span>
       </div>
       ${vibes ? `<div style="margin-top:4px;">${vibes}</div>` : ""}
+      ${topTagsHtml ? `<div style="margin-top:6px;" data-top-tags>${topTagsHtml}</div>` : `<div style="margin-top:6px;" data-top-tags></div>`}
     </div>
-    <div style="display:flex;align-items:center;gap:8px;border-top:1px solid #e5e7eb;padding-top:8px;">
-      <button data-vote="upvote" title="${voteTitle}" style="cursor:${voteCursor};${upvotedStyle};border-radius:8px;padding:5px 12px;font-size:13px;display:flex;align-items:center;gap:4px;">👍 <strong data-count="upvotes">${label.upvotes}</strong></button>
-      <button data-vote="downvote" title="${voteTitle}" style="cursor:${voteCursor};${downvotedStyle};border-radius:8px;padding:5px 12px;font-size:13px;display:flex;align-items:center;gap:4px;">👎 <strong data-count="downvotes">${label.downvotes}</strong></button>
+    <div style="display:flex;align-items:center;gap:6px;border-top:1px solid #e5e7eb;padding-top:8px;flex-wrap:wrap;">
+      <button data-vote="upvote" title="${voteTitle}" style="cursor:${voteCursor};${upvotedStyle};border-radius:8px;padding:4px 10px;font-size:12px;display:flex;align-items:center;gap:3px;">👍 <strong data-count="upvotes">${label.upvotes}</strong></button>
+      <button data-vote="downvote" title="${voteTitle}" style="cursor:${voteCursor};${downvotedStyle};border-radius:8px;padding:4px 10px;font-size:12px;display:flex;align-items:center;gap:3px;">👎 <strong data-count="downvotes">${label.downvotes}</strong></button>
+      <button data-vote="accurate" title="${voteTitle}" style="cursor:${voteCursor};${accurateStyle};border-radius:8px;padding:4px 10px;font-size:12px;display:flex;align-items:center;gap:3px;">🔁 Still accurate</button>
       <span data-score-badge style="margin-left:auto;background:${scoreBadgeColor};color:${scoreBadgeText};border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;">${score > 0 ? '+' : ''}${score}</span>
     </div>
     <div style="margin-top:8px;">
       <button data-action="ask-ai" style="cursor:pointer;width:100%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;">✨ Ask AI about this area</button>
     </div>
     <div style="margin-top:10px;border-top:1px solid #e5e7eb;padding-top:10px;">
-      <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 6px;text-transform:uppercase;letter-spacing:0.05em;">Comments</p>
-      <div data-comments-list style="margin-bottom:8px;"></div>
-      <div style="display:flex;gap:6px;align-items:flex-end;">
-        <textarea data-comment-input rows="2" maxlength="200" placeholder="Add a comment…" style="flex:1;font-size:12px;border:1px solid #d1d5db;border-radius:6px;padding:5px 8px;resize:none;font-family:inherit;outline:none;color:#1f2937;"></textarea>
-        <button data-action="post-comment" style="cursor:pointer;background:#6366f1;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;white-space:nowrap;height:52px;">Post</button>
-      </div>
-      <p data-comment-error style="font-size:11px;color:#ef4444;margin:4px 0 0;display:none;"></p>
+      <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 6px;text-transform:uppercase;letter-spacing:0.05em;">Tag this area <span style="font-weight:400;color:#9ca3af;">(pick up to 4)</span></p>
+      <div data-tag-picker style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px;"></div>
+      <p data-tag-msg style="font-size:11px;color:#6b7280;margin:4px 0 0;display:none;"></p>
     </div>
   `;
 
   const upBtn = wrapper.querySelector('button[data-vote="upvote"]') as HTMLButtonElement;
   const downBtn = wrapper.querySelector('button[data-vote="downvote"]') as HTMLButtonElement;
+  const accurateBtn = wrapper.querySelector('button[data-vote="accurate"]') as HTMLButtonElement;
   const scoreBadge = wrapper.querySelector('[data-score-badge]') as HTMLElement;
+  const tagPicker = wrapper.querySelector('[data-tag-picker]') as HTMLElement;
+  const tagMsg = wrapper.querySelector('[data-tag-msg]') as HTMLElement;
+  const topTagsEl = wrapper.querySelector('[data-top-tags]') as HTMLElement;
 
   function lockVoteButtons() {
-    upBtn.style.cursor = "default";
-    downBtn.style.cursor = "default";
-    upBtn.style.opacity = "0.8";
-    downBtn.style.opacity = "0.8";
+    [upBtn, downBtn, accurateBtn].forEach((btn) => {
+      btn.style.cursor = "default";
+      btn.style.opacity = "0.8";
+    });
   }
 
   function updateScoreBadge(up: number, down: number) {
@@ -283,40 +266,86 @@ function buildPopupContent(
     lockVoteButtons();
     onVote(label.id, "downvote");
   });
+
+  accurateBtn.addEventListener("click", async () => {
+    if (alreadyVoted) return;
+    accurateBtn.style.background = "#e0f2fe";
+    accurateBtn.style.borderColor = "#7dd3fc";
+    lockVoteButtons();
+    try {
+      await fetch(`${apiBase}/labels/${label.id}/vote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ voterId, voteType: "accurate" }),
+      });
+    } catch {
+    }
+  });
+
   wrapper.querySelector('button[data-action="ask-ai"]')?.addEventListener("click", () => {
     window.dispatchEvent(new CustomEvent("hoodmap:askai", { detail: label }));
   });
 
-  const commentsEl = wrapper.querySelector("[data-comments-list]") as HTMLElement;
-  const textareaEl = wrapper.querySelector("[data-comment-input]") as HTMLTextAreaElement;
-  const errorEl = wrapper.querySelector("[data-comment-error]") as HTMLElement;
-  const postBtn = wrapper.querySelector('button[data-action="post-comment"]') as HTMLButtonElement;
+  const userSelectedTags = new Set<string>();
 
-  postBtn.addEventListener("click", async () => {
-    const body = textareaEl.value.trim();
-    if (!body) return;
-    errorEl.style.display = "none";
-    postBtn.disabled = true;
-    postBtn.textContent = "…";
+  async function loadAndRenderTagPicker() {
+    let liveCounts: Record<string, number> = {};
     try {
-      const res = await fetch(`${apiBase}/labels/${label.id}/comments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ authorId: voterId, body }),
-      });
-      if (!res.ok) throw new Error("Failed");
-      textareaEl.value = "";
-      await loadAndRenderComments(commentsEl, label.id, apiBase);
+      const res = await fetch(`${apiBase}/labels/${label.id}/tags`);
+      if (res.ok) {
+        const data: { tagKey: string; count: number }[] = await res.json();
+        for (const row of data) liveCounts[row.tagKey] = row.count;
+      }
     } catch {
-      errorEl.textContent = "Failed to post. Try again.";
-      errorEl.style.display = "block";
-    } finally {
-      postBtn.disabled = false;
-      postBtn.textContent = "Post";
     }
-  });
 
-  const onOpen = () => loadAndRenderComments(commentsEl, label.id, apiBase);
+    const topLiveKeys = Object.entries(liveCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([k]) => k);
+
+    if (topLiveKeys.length > 0) {
+      topTagsEl.innerHTML = renderTopTagBadges(topLiveKeys);
+    }
+
+    tagPicker.innerHTML = "";
+    for (const tag of PREDEFINED_TAGS) {
+      const count = liveCounts[tag.key] ?? 0;
+      const selected = userSelectedTags.has(tag.key);
+      const chip = document.createElement("button");
+      chip.dataset.tagKey = tag.key;
+      chip.style.cssText = `cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;border:1px solid ${selected ? "#0d9488" : "#d1d5db"};background:${selected ? "#f0fdfa" : "#f9fafb"};color:${selected ? "#0f766e" : "#374151"};transition:all 0.15s;`;
+      chip.innerHTML = `${escapeHtml(tag.emoji)} ${escapeHtml(tag.label)}${count > 0 ? ` <span style="background:${selected ? "#ccfbf1" : "#e5e7eb"};border-radius:10px;padding:0 5px;font-size:10px;margin-left:2px;">${count}</span>` : ""}`;
+      chip.addEventListener("click", async () => {
+        if (userSelectedTags.size >= 4 && !userSelectedTags.has(tag.key)) {
+          tagMsg.textContent = "Max 4 tags per label.";
+          tagMsg.style.display = "block";
+          return;
+        }
+        tagMsg.style.display = "none";
+        if (userSelectedTags.has(tag.key)) {
+          userSelectedTags.delete(tag.key);
+        } else {
+          userSelectedTags.add(tag.key);
+          try {
+            const res = await fetch(`${apiBase}/labels/${label.id}/tags`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ tagKey: tag.key, voterId }),
+            });
+            if (res.ok) {
+              liveCounts[tag.key] = (liveCounts[tag.key] ?? 0) + 1;
+            }
+          } catch {
+          }
+        }
+        loadAndRenderTagPicker();
+      });
+      tagPicker.appendChild(chip);
+    }
+  }
+
+  const onOpen = () => loadAndRenderTagPicker();
   return { el: wrapper, onOpen };
 }
 

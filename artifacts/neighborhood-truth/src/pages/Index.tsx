@@ -42,6 +42,7 @@ interface LabelDTO {
   color: string | null;
   category: string | null;
   createdAt: string;
+  topTags?: string[];
 }
 
 interface VoteDTO {
@@ -76,13 +77,28 @@ export default function Index() {
   });
 
   const addLabel = useMutation({
-    mutationFn: async (label: {
-      lat: number; lng: number; text: string; safety: number; vibe: string[]; cost: string; color: string; category: string | null;
+    mutationFn: async (payload: {
+      lat: number; lng: number; text: string; safety: number; vibe: string[]; cost: string; color: string; category: string | null; tags: string[];
     }) => {
-      return apiFetch<LabelDTO>("/labels", {
+      const { tags, ...labelData } = payload;
+      const label = await apiFetch<LabelDTO>("/labels", {
         method: "POST",
-        body: JSON.stringify(label),
+        body: JSON.stringify(labelData),
       });
+
+      if (tags.length > 0) {
+        await Promise.allSettled(
+          tags.map((tagKey) =>
+            fetch(`${API}/labels/${label.id}/tags`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ tagKey, voterId }),
+            })
+          )
+        );
+      }
+
+      return label;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["labels"] });

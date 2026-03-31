@@ -1,10 +1,12 @@
 import { Router, type IRouter } from "express";
-import { db, labelsTable } from "@workspace/db";
+import { db, labelsTable, labelTagsTable } from "@workspace/db";
+import { sql, inArray } from "drizzle-orm";
 import { generateSitemapXml } from "../lib/sitemap";
 
 const router: IRouter = Router();
 
 type LabelRow = typeof labelsTable.$inferSelect;
+type TagCounts = Record<string, number>;
 
 interface CityDef {
   slug: string;
@@ -38,6 +40,15 @@ const CITIES: CityDef[] = [
   { slug: "karachi", name: "Karachi", country: "PK", latMin: 24.7, latMax: 25.2, lngMin: 66.8, lngMax: 67.4, intents: {} },
   { slug: "lahore", name: "Lahore", country: "PK", latMin: 31.3, latMax: 31.7, lngMin: 74.1, lngMax: 74.5, intents: {} },
 ];
+
+const INTENT_TAG_MAP: Record<string, string> = {
+  safe: "safe-at-night",
+  quiet: "quiet",
+  family: "family-friendly",
+  students: "good-for-students",
+  expensive: "expensive",
+  nightlife: "good-nightlife",
+};
 
 function slugify(text: string): string {
   return text
@@ -101,30 +112,62 @@ function aggregateArea(labels: LabelRow[]) {
   };
 }
 
-function matchesIntent(label: LabelRow, intent: string): boolean {
+function matchesIntent(label: LabelRow, intent: string, tagCounts: TagCounts = {}): boolean {
   const vibe = label.vibe ?? [];
+  const tagKey = INTENT_TAG_MAP[intent];
+  const tagCount = tagKey ? (tagCounts[tagKey] ?? 0) : 0;
+
   switch (intent) {
     case "safe":
-      return label.safety >= 4;
+      return label.safety >= 4 || tagCount >= 2;
     case "affordable":
       return label.cost === "$" || label.cost === "$$";
     case "nightlife":
-      return vibe.some((v) => ["Nightlife", "Bars", "Loud"].includes(v)) || label.category === "Bars";
+      return vibe.some((v) => ["Nightlife", "Bars", "Loud"].includes(v)) ||
+        label.category === "Bars" ||
+        tagCount >= 2;
     case "family":
-      return vibe.includes("Family") || label.category === "Parks";
+      return vibe.includes("Family") || label.category === "Parks" || tagCount >= 2;
     case "students":
       return (label.cost === "$" || label.cost === "$$") &&
-        (vibe.some((v) => ["Artsy", "Chill", "Bars", "Nightlife"].includes(v)) || label.safety >= 3);
+        (vibe.some((v) => ["Artsy", "Chill", "Bars", "Nightlife"].includes(v)) || label.safety >= 3 || tagCount >= 1);
     case "young-professionals":
       return label.safety >= 3 &&
         (vibe.some((v) => ["Artsy", "Chill", "Bougie", "Bars"].includes(v)) || label.cost === "$$$");
     case "quiet":
-      return !vibe.includes("Loud") && !vibe.includes("Nightlife") && label.safety >= 3;
+      return (!vibe.includes("Loud") && !vibe.includes("Nightlife") && label.safety >= 3) || tagCount >= 2;
     case "expensive":
-      return label.cost === "$$$" || label.cost === "$$$$";
+      return label.cost === "$$$" || label.cost === "$$$$" || tagCount >= 2;
     default:
       return true;
   }
+}
+
+function intentScore(label: LabelRow, intent: string, tagCounts: TagCounts = {}): number {
+  const tagKey = INTENT_TAG_MAP[intent];
+  const tagCount = tagKey ? (tagCounts[tagKey] ?? 0) : 0;
+  const sentiment = label.upvotes - label.downvotes;
+  return sentiment + tagCount * 2;
+}
+
+async function buildTagCountMap(labelIds: string[]): Promise<Record<string, TagCounts>> {
+  if (!labelIds.length) return {};
+  const rows = await db
+    .select({
+      labelId: labelTagsTable.labelId,
+      tagKey: labelTagsTable.tagKey,
+      count: sql<number>`cast(count(*) as int)`,
+    })
+    .from(labelTagsTable)
+    .where(inArray(labelTagsTable.labelId, labelIds))
+    .groupBy(labelTagsTable.labelId, labelTagsTable.tagKey);
+
+  const map: Record<string, TagCounts> = {};
+  for (const row of rows) {
+    if (!map[row.labelId]) map[row.labelId] = {};
+    map[row.labelId][row.tagKey] = row.count;
+  }
+  return map;
 }
 
 const INTENT_SLUGS: Record<string, string> = {
@@ -287,9 +330,12 @@ router.get("/intent/:city/:intent", async (req, res) => {
     return c?.slug === cityDef.slug;
   });
 
+  const cityLabelIds = cityLabels.map((l) => l.id);
+  const tagCountMap = await buildTagCountMap(cityLabelIds);
+
   const filtered = cityLabels
-    .filter((l) => matchesIntent(l, intentKey))
-    .sort((a, b) => (b.upvotes - b.downvotes) - (a.upvotes - a.downvotes));
+    .filter((l) => matchesIntent(l, intentKey, tagCountMap[l.id] ?? {}))
+    .sort((a, b) => intentScore(b, intentKey, tagCountMap[b.id] ?? {}) - intentScore(a, intentKey, tagCountMap[a.id] ?? {}));
 
   const stats = aggregateArea(filtered);
 
@@ -314,6 +360,10 @@ router.get("/intent/:city/:intent", async (req, res) => {
       upvotes: l.upvotes,
       downvotes: l.downvotes,
       category: l.category,
+      topTags: Object.entries(tagCountMap[l.id] ?? {})
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([k]) => k),
       url: `/${cityDef.slug}/${slugify(l.text)}`,
     })),
     allIntents: Object.keys(INTENT_SLUGS).map((key) => ({
