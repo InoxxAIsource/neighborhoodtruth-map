@@ -334,8 +334,8 @@ export function MapView({
     if (!containerRef.current || mapRef.current) return;
 
     const map = L.map(containerRef.current, {
-      center: [40.755, -73.984],
-      zoom: 11,
+      center: [20, 0],
+      zoom: 2,
       zoomControl: true,
     });
 
@@ -403,9 +403,17 @@ export function MapView({
       onLocated?.();
     };
 
-    map.on("locationfound", onLocate);
+    const onLocationError = () => {
+      onLocated?.();
+    };
 
-    return () => { map.off("locationfound", onLocate); };
+    map.on("locationfound", onLocate);
+    map.on("locationerror", onLocationError);
+
+    return () => {
+      map.off("locationfound", onLocate);
+      map.off("locationerror", onLocationError);
+    };
   }, [locateUser, onLocated]);
 
   // Fly to location

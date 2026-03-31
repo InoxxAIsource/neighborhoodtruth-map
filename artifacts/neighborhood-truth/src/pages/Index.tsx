@@ -56,7 +56,7 @@ export default function Index() {
   const [showHeatmap, setShowHeatmap] = useState(false);
   const [showLabels, setShowLabels] = useState(true);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [locateUser, setLocateUser] = useState(false);
+  const [locateUser, setLocateUser] = useState(true);
   const [flyToLocation, setFlyToLocation] = useState<{ lat: number; lng: number; zoom?: number } | null>(null);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [selectedLabel, setSelectedLabel] = useState<LabelData | null>(null);
