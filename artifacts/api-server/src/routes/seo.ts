@@ -1,0 +1,410 @@
+import { Router, type IRouter } from "express";
+import { db, labelsTable } from "@workspace/db";
+
+const router: IRouter = Router();
+
+type LabelRow = typeof labelsTable.$inferSelect;
+
+interface CityDef {
+  slug: string;
+  name: string;
+  country: string;
+  latMin: number;
+  latMax: number;
+  lngMin: number;
+  lngMax: number;
+  intents: Record<string, string>;
+}
+
+const CITIES: CityDef[] = [
+  { slug: "new-york", name: "New York", country: "US", latMin: 40.4, latMax: 41.0, lngMin: -74.3, lngMax: -73.7, intents: { "safe-neighborhoods": "safe", "affordable-areas": "affordable", "nightlife-areas": "nightlife", "family-friendly": "family" } },
+  { slug: "san-francisco", name: "San Francisco", country: "US", latMin: 37.6, latMax: 37.9, lngMin: -122.6, lngMax: -122.3, intents: {} },
+  { slug: "los-angeles", name: "Los Angeles", country: "US", latMin: 33.7, latMax: 34.4, lngMin: -118.7, lngMax: -118.0, intents: {} },
+  { slug: "mexico-city", name: "Mexico City", country: "MX", latMin: 19.2, latMax: 19.6, lngMin: -99.4, lngMax: -98.9, intents: {} },
+  { slug: "istanbul", name: "Istanbul", country: "TR", latMin: 40.8, latMax: 41.3, lngMin: 28.6, lngMax: 29.5, intents: {} },
+  { slug: "amsterdam", name: "Amsterdam", country: "NL", latMin: 52.3, latMax: 52.5, lngMin: 4.7, lngMax: 5.1, intents: {} },
+  { slug: "buenos-aires", name: "Buenos Aires", country: "AR", latMin: -34.8, latMax: -34.4, lngMin: -58.7, lngMax: -58.2, intents: {} },
+  { slug: "toronto", name: "Toronto", country: "CA", latMin: 43.5, latMax: 43.9, lngMin: -79.7, lngMax: -79.1, intents: {} },
+  { slug: "seoul", name: "Seoul", country: "KR", latMin: 37.4, latMax: 37.7, lngMin: 126.8, lngMax: 127.3, intents: {} },
+  { slug: "cairo", name: "Cairo", country: "EG", latMin: 29.9, latMax: 30.2, lngMin: 31.1, lngMax: 31.5, intents: {} },
+  { slug: "hong-kong", name: "Hong Kong", country: "HK", latMin: 22.1, latMax: 22.6, lngMin: 113.9, lngMax: 114.5, intents: {} },
+  { slug: "bali", name: "Bali", country: "ID", latMin: -8.9, latMax: -8.3, lngMin: 115.0, lngMax: 115.5, intents: {} },
+  { slug: "cape-town", name: "Cape Town", country: "ZA", latMin: -34.2, latMax: -33.7, lngMin: 18.3, lngMax: 18.7, intents: {} },
+  { slug: "rome", name: "Rome", country: "IT", latMin: 41.7, latMax: 42.1, lngMin: 12.3, lngMax: 12.7, intents: {} },
+  { slug: "tehran", name: "Tehran", country: "IR", latMin: 35.5, latMax: 36.0, lngMin: 51.0, lngMax: 51.7, intents: {} },
+  { slug: "tel-aviv", name: "Tel Aviv", country: "IL", latMin: 31.9, latMax: 32.2, lngMin: 34.7, lngMax: 35.05, intents: {} },
+  { slug: "jerusalem", name: "Jerusalem", country: "IL", latMin: 31.6, latMax: 31.9, lngMin: 35.1, lngMax: 35.4, intents: {} },
+  { slug: "karachi", name: "Karachi", country: "PK", latMin: 24.7, latMax: 25.2, lngMin: 66.8, lngMax: 67.4, intents: {} },
+  { slug: "lahore", name: "Lahore", country: "PK", latMin: 31.3, latMax: 31.7, lngMin: 74.1, lngMax: 74.5, intents: {} },
+];
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/[\s]+/g, "-")
+    .replace(/-+/g, "-");
+}
+
+function getCityForLabel(label: LabelRow): CityDef | null {
+  return CITIES.find(
+    (c) =>
+      label.lat >= c.latMin &&
+      label.lat <= c.latMax &&
+      label.lng >= c.lngMin &&
+      label.lng <= c.lngMax
+  ) ?? null;
+}
+
+function modeOf(arr: string[]): string {
+  if (!arr.length) return "$$";
+  const counts: Record<string, number> = {};
+  for (const v of arr) counts[v] = (counts[v] || 0) + 1;
+  return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+}
+
+function topVibes(labels: LabelRow[], limit = 5): string[] {
+  const counts: Record<string, number> = {};
+  for (const l of labels) {
+    for (const v of l.vibe ?? []) {
+      counts[v] = (counts[v] || 0) + 1;
+    }
+  }
+  return Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([v]) => v);
+}
+
+function aggregateArea(labels: LabelRow[]) {
+  if (!labels.length) return null;
+  const avgSafety = labels.reduce((s, l) => s + l.safety, 0) / labels.length;
+  const modeCost = modeOf(labels.map((l) => l.cost));
+  const vibes = topVibes(labels);
+  const sentiment = labels.reduce((s, l) => s + (l.upvotes - l.downvotes), 0);
+  const totalUpvotes = labels.reduce((s, l) => s + l.upvotes, 0);
+  const totalDownvotes = labels.reduce((s, l) => s + l.downvotes, 0);
+  const bestLabel = [...labels].sort((a, b) => (b.upvotes - b.downvotes) - (a.upvotes - a.downvotes))[0];
+  return {
+    avgSafety: Math.round(avgSafety * 10) / 10,
+    modeCost,
+    vibes,
+    sentiment,
+    totalUpvotes,
+    totalDownvotes,
+    labelCount: labels.length,
+    lat: bestLabel.lat,
+    lng: bestLabel.lng,
+    topLabel: bestLabel.text,
+  };
+}
+
+function matchesIntent(label: LabelRow, intent: string): boolean {
+  switch (intent) {
+    case "safe":
+      return label.safety >= 4;
+    case "affordable":
+      return label.cost === "$" || label.cost === "$$";
+    case "nightlife":
+      return (label.vibe ?? []).some((v) => ["Nightlife", "Bars", "Loud"].includes(v)) ||
+        label.category === "Bars";
+    case "family":
+      return (label.vibe ?? []).includes("Family") ||
+        label.category === "Parks";
+    default:
+      return true;
+  }
+}
+
+const INTENT_SLUGS: Record<string, string> = {
+  "safe-neighborhoods": "safe",
+  "affordable-areas": "affordable",
+  "nightlife-areas": "nightlife",
+  "family-friendly": "family",
+};
+
+const INTENT_LABELS: Record<string, string> = {
+  safe: "Safe Neighborhoods",
+  affordable: "Affordable Areas",
+  nightlife: "Nightlife Areas",
+  family: "Family-Friendly Neighborhoods",
+};
+
+router.get("/cities", async (_req, res) => {
+  const allLabels = await db.select().from(labelsTable);
+
+  const result = CITIES.map((city) => {
+    const cityLabels = allLabels.filter((l) => {
+      const c = getCityForLabel(l);
+      return c?.slug === city.slug;
+    });
+    if (!cityLabels.length) return null;
+    const stats = aggregateArea(cityLabels);
+    return {
+      slug: city.slug,
+      name: city.name,
+      country: city.country,
+      ...stats,
+    };
+  }).filter(Boolean);
+
+  res.json(result);
+});
+
+router.get("/city/:city", async (req, res) => {
+  const cityDef = CITIES.find((c) => c.slug === req.params.city);
+  if (!cityDef) return res.status(404).json({ error: "City not found" });
+
+  const allLabels = await db.select().from(labelsTable);
+  const cityLabels = allLabels.filter((l) => {
+    const c = getCityForLabel(l);
+    return c?.slug === cityDef.slug;
+  });
+
+  const cityStats = aggregateArea(cityLabels);
+
+  const areas = cityLabels.map((label) => {
+    const s = label.upvotes - label.downvotes;
+    return {
+      id: label.id,
+      slug: slugify(label.text),
+      text: label.text,
+      lat: label.lat,
+      lng: label.lng,
+      safety: label.safety,
+      cost: label.cost,
+      vibe: label.vibe ?? [],
+      upvotes: label.upvotes,
+      downvotes: label.downvotes,
+      sentiment: s,
+      category: label.category,
+      color: label.color,
+    };
+  }).sort((a, b) => b.sentiment - a.sentiment);
+
+  res.json({
+    city: {
+      slug: cityDef.slug,
+      name: cityDef.name,
+      country: cityDef.country,
+    },
+    stats: cityStats,
+    areas,
+    intents: Object.keys(INTENT_SLUGS).map((key) => ({
+      slug: key,
+      label: INTENT_LABELS[INTENT_SLUGS[key]],
+      url: `/${cityDef.slug}/${key}`,
+    })),
+  });
+});
+
+router.get("/area/:city/:areaSlug", async (req, res) => {
+  const cityDef = CITIES.find((c) => c.slug === req.params.city);
+  if (!cityDef) return res.status(404).json({ error: "City not found" });
+
+  const allLabels = await db.select().from(labelsTable);
+  const cityLabels = allLabels.filter((l) => {
+    const c = getCityForLabel(l);
+    return c?.slug === cityDef.slug;
+  });
+
+  const matchedLabel = cityLabels.find((l) => slugify(l.text) === req.params.areaSlug);
+  if (!matchedLabel) return res.status(404).json({ error: "Area not found" });
+
+  const RADIUS = 0.03;
+  const nearbyLabels = cityLabels.filter(
+    (l) =>
+      l.id !== matchedLabel.id &&
+      Math.abs(l.lat - matchedLabel.lat) <= RADIUS &&
+      Math.abs(l.lng - matchedLabel.lng) <= RADIUS
+  );
+
+  const areaStats = aggregateArea([matchedLabel, ...nearbyLabels]);
+
+  res.json({
+    city: { slug: cityDef.slug, name: cityDef.name },
+    area: {
+      id: matchedLabel.id,
+      slug: req.params.areaSlug,
+      text: matchedLabel.text,
+      lat: matchedLabel.lat,
+      lng: matchedLabel.lng,
+      safety: matchedLabel.safety,
+      cost: matchedLabel.cost,
+      vibe: matchedLabel.vibe ?? [],
+      upvotes: matchedLabel.upvotes,
+      downvotes: matchedLabel.downvotes,
+      sentiment: matchedLabel.upvotes - matchedLabel.downvotes,
+      category: matchedLabel.category,
+      color: matchedLabel.color,
+    },
+    nearby: nearbyLabels
+      .sort((a, b) => (b.upvotes - b.downvotes) - (a.upvotes - a.downvotes))
+      .slice(0, 10)
+      .map((l) => ({
+        id: l.id,
+        slug: slugify(l.text),
+        text: l.text,
+        safety: l.safety,
+        cost: l.cost,
+        vibe: l.vibe ?? [],
+        sentiment: l.upvotes - l.downvotes,
+        url: `/${cityDef.slug}/${slugify(l.text)}`,
+      })),
+    stats: areaStats,
+  });
+});
+
+router.get("/intent/:city/:intent", async (req, res) => {
+  const cityDef = CITIES.find((c) => c.slug === req.params.city);
+  if (!cityDef) return res.status(404).json({ error: "City not found" });
+
+  const intentKey = INTENT_SLUGS[req.params.intent];
+  if (!intentKey) return res.status(404).json({ error: "Intent not found" });
+
+  const allLabels = await db.select().from(labelsTable);
+  const cityLabels = allLabels.filter((l) => {
+    const c = getCityForLabel(l);
+    return c?.slug === cityDef.slug;
+  });
+
+  const filtered = cityLabels
+    .filter((l) => matchesIntent(l, intentKey))
+    .sort((a, b) => (b.upvotes - b.downvotes) - (a.upvotes - a.downvotes));
+
+  const stats = aggregateArea(filtered);
+
+  res.json({
+    city: { slug: cityDef.slug, name: cityDef.name },
+    intent: {
+      slug: req.params.intent,
+      key: intentKey,
+      label: INTENT_LABELS[intentKey],
+    },
+    stats,
+    areas: filtered.map((l) => ({
+      id: l.id,
+      slug: slugify(l.text),
+      text: l.text,
+      lat: l.lat,
+      lng: l.lng,
+      safety: l.safety,
+      cost: l.cost,
+      vibe: l.vibe ?? [],
+      sentiment: l.upvotes - l.downvotes,
+      upvotes: l.upvotes,
+      downvotes: l.downvotes,
+      category: l.category,
+      url: `/${cityDef.slug}/${slugify(l.text)}`,
+    })),
+    allIntents: Object.keys(INTENT_SLUGS).map((key) => ({
+      slug: key,
+      label: INTENT_LABELS[INTENT_SLUGS[key]],
+      url: `/${cityDef.slug}/${key}`,
+      active: key === req.params.intent,
+    })),
+  });
+});
+
+router.get("/compare", async (req, res) => {
+  const { a, b } = req.query as { a?: string; b?: string };
+  if (!a || !b) return res.status(400).json({ error: "Provide ?a=area-slug&b=area-slug" });
+
+  const allLabels = await db.select().from(labelsTable);
+
+  const findArea = (slug: string) => {
+    const label = allLabels.find((l) => slugify(l.text) === slug);
+    if (!label) return null;
+    const city = getCityForLabel(label);
+    return { label, city };
+  };
+
+  const aData = findArea(a);
+  const bData = findArea(b);
+
+  if (!aData || !bData) {
+    return res.status(404).json({ error: "One or both areas not found" });
+  }
+
+  const formatArea = (data: { label: LabelRow; city: CityDef | null }) => ({
+    id: data.label.id,
+    slug: slugify(data.label.text),
+    text: data.label.text,
+    city: data.city ? { slug: data.city.slug, name: data.city.name } : null,
+    safety: data.label.safety,
+    cost: data.label.cost,
+    vibe: data.label.vibe ?? [],
+    upvotes: data.label.upvotes,
+    downvotes: data.label.downvotes,
+    sentiment: data.label.upvotes - data.label.downvotes,
+    category: data.label.category,
+    lat: data.label.lat,
+    lng: data.label.lng,
+  });
+
+  const aFormatted = formatArea(aData);
+  const bFormatted = formatArea(bData);
+
+  const winner = (field: "safety" | "sentiment" | "upvotes") => {
+    if (aFormatted[field] > bFormatted[field]) return "a";
+    if (bFormatted[field] > aFormatted[field]) return "b";
+    return "tie";
+  };
+
+  const costRank: Record<string, number> = { "$": 1, "$$": 2, "$$$": 3, "$$$$": 4 };
+  const cheaperArea = (costRank[aFormatted.cost] || 2) <= (costRank[bFormatted.cost] || 2) ? "a" : "b";
+
+  res.json({
+    a: aFormatted,
+    b: bFormatted,
+    verdict: {
+      safer: winner("safety"),
+      betterRated: winner("sentiment"),
+      cheaper: cheaperArea,
+      morePopular: winner("upvotes"),
+    },
+  });
+});
+
+router.get("/sitemap", async (_req, res) => {
+  const allLabels = await db.select().from(labelsTable);
+  const baseUrl = "https://hoodsignal.com";
+
+  const urls: string[] = [baseUrl + "/"];
+
+  for (const city of CITIES) {
+    const cityLabels = allLabels.filter((l) => {
+      const c = getCityForLabel(l);
+      return c?.slug === city.slug;
+    });
+    if (!cityLabels.length) continue;
+
+    urls.push(`${baseUrl}/${city.slug}`);
+
+    for (const key of Object.keys(INTENT_SLUGS)) {
+      urls.push(`${baseUrl}/${city.slug}/${key}`);
+    }
+
+    for (const label of cityLabels) {
+      urls.push(`${baseUrl}/${city.slug}/${slugify(label.text)}`);
+    }
+  }
+
+  const allSlugs = allLabels.map((l) => slugify(l.text));
+  for (let i = 0; i < allSlugs.length; i++) {
+    for (let j = i + 1; j < Math.min(i + 5, allSlugs.length); j++) {
+      urls.push(`${baseUrl}/compare/${allSlugs[i]}-vs-${allSlugs[j]}`);
+    }
+  }
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.map((u) => `  <url><loc>${u}</loc></url>`).join("\n")}
+</urlset>`;
+
+  res.setHeader("Content-Type", "application/xml");
+  res.send(xml);
+});
+
+export default router;
