@@ -41,6 +41,7 @@ interface MapViewProps {
   flyToLocation?: { lat: number; lng: number; zoom?: number } | null;
   onFlownTo?: () => void;
   apiBase: string;
+  voterId: string;
 }
 
 export interface AreaSummary {
@@ -163,6 +164,7 @@ async function loadAndRenderComments(commentsEl: HTMLElement, labelId: string, a
   commentsEl.innerHTML = `<p style="font-size:12px;color:#9ca3af;margin:0;text-align:center;">Loading…</p>`;
   try {
     const res = await fetch(`${apiBase}/labels/${labelId}/comments`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data: CommentItem[] = await res.json();
     commentsEl.innerHTML = renderComments(data);
   } catch {
@@ -318,12 +320,8 @@ export function MapView({
   flyToLocation,
   onFlownTo,
   apiBase,
+  voterId,
 }: MapViewProps) {
-  const voterId = (() => {
-    let id = localStorage.getItem("nt_voter_id");
-    if (!id) { id = crypto.randomUUID(); localStorage.setItem("nt_voter_id", id); }
-    return id;
-  })();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);

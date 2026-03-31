@@ -166,6 +166,7 @@ export default function Index() {
           toast.info(`Exploring ${area.name} — ${area.labelCount} labels nearby`);
         }}
         apiBase={API}
+        voterId={voterId}
       />
 
       <TopToolbar
