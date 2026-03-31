@@ -34,7 +34,7 @@ interface FilterSidebarProps {
 }
 
 export function FilterSidebar({ filters, onFiltersChange, showHeatmap, onToggleHeatmap }: FilterSidebarProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => window.innerWidth < 640);
 
   const updateFilter = <K extends keyof Filters>(key: K, value: Filters[K]) => {
     onFiltersChange({ ...filters, [key]: value });
@@ -63,7 +63,7 @@ export function FilterSidebar({ filters, onFiltersChange, showHeatmap, onToggleH
 
   if (collapsed) {
     return (
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 z-[1000]">
+      <div className="absolute left-4 top-20 sm:top-1/2 sm:-translate-y-1/2 z-[1000]">
         <Button
           variant="outline"
           size="icon"
@@ -80,8 +80,8 @@ export function FilterSidebar({ filters, onFiltersChange, showHeatmap, onToggleH
   }
 
   return (
-    <div className="absolute left-4 top-1/2 -translate-y-1/2 z-[1000] w-64">
-      <div className="bg-card/95 backdrop-blur-sm rounded-xl shadow-lg border p-4 space-y-4">
+    <div className="absolute left-4 top-20 sm:top-1/2 sm:-translate-y-1/2 z-[1000] w-64">
+      <div className="bg-card/95 backdrop-blur-sm rounded-xl shadow-lg border p-4 space-y-4 max-h-[calc(100vh-100px)] overflow-y-auto">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-muted-foreground" />
