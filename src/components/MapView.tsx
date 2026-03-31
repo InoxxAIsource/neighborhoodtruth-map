@@ -492,7 +492,7 @@ export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap 
         });
       });
     }
-  }, [filteredLabels, onVote, showHeatmap]);
+  }, [filteredLabels, onVote, showHeatmap, onLabelClick]);
 
   // Render zone overlay
   useEffect(() => {
