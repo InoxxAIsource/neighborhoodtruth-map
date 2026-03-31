@@ -33,6 +33,7 @@ interface MapViewProps {
   showHeatmap: boolean;
   filters: Filters;
   onAreaClick?: (area: AreaSummary) => void;
+  onLabelClick?: (label: LabelData, nearbyLabels: LabelData[], areaName: string) => void;
   showLabels?: boolean;
   selectedCategories?: string[];
   locateUser?: boolean;
