@@ -69,7 +69,11 @@ export function TopToolbar({
   const [placesOpen, setPlacesOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [suggestions, setSuggestions] = useState<SearchResult[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const toggleCategory = (label: string) => {
     onCategoriesChange(
@@ -82,24 +86,58 @@ export function TopToolbar({
   const clearAll = () => onCategoriesChange([]);
   const selectAll = () => onCategoriesChange(ALL_PLACE_LABELS);
 
-  const handleSearch = async () => {
-    const q = searchQuery.trim();
-    if (!q) return;
+  // Close suggestions on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const fetchSuggestions = useCallback(async (q: string) => {
+    if (q.length < 2) { setSuggestions([]); return; }
     setIsSearching(true);
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=6&addressdetails=1`
       );
-      const data = await res.json();
-      if (data.length > 0) {
-        onSearchLocation?.({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
-        setSearchQuery("");
-      }
+      const data: SearchResult[] = await res.json();
+      setSuggestions(data);
+      setShowSuggestions(data.length > 0);
     } catch {
-      // silently fail
+      setSuggestions([]);
     } finally {
       setIsSearching(false);
     }
+  }, []);
+
+  const handleInputChange = (value: string) => {
+    setSearchQuery(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchSuggestions(value), 350);
+  };
+
+  const selectSuggestion = (result: SearchResult) => {
+    onSearchLocation?.({ lat: parseFloat(result.lat), lng: parseFloat(result.lon) });
+    setSearchQuery("");
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
+
+  const handleSearch = () => {
+    if (suggestions.length > 0) {
+      selectSuggestion(suggestions[0]);
+    } else {
+      fetchSuggestions(searchQuery.trim());
+    }
+  };
+
+  const formatName = (name: string) => {
+    const parts = name.split(",").map((p) => p.trim());
+    return parts.length > 2 ? `${parts[0]}, ${parts[1]}` : parts.slice(0, 2).join(", ");
   };
 
   return (
