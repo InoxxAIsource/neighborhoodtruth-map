@@ -341,7 +341,7 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase }: Ne
                     {SUGGESTED_QUESTIONS.map((q) => (
                       <button
                         key={q}
-                        onClick={() => sendMessage(q)}
+                        onClick={() => { setInput(q); setTimeout(() => inputRef.current?.focus(), 50); }}
                         disabled={isStreaming}
                         className="text-xs px-3 py-1.5 rounded-full border border-purple-200 text-purple-700 bg-purple-50 hover:bg-purple-100 transition-colors disabled:opacity-50"
                       >
