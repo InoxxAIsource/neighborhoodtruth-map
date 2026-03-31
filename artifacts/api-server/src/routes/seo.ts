@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, labelsTable } from "@workspace/db";
+import { generateSitemapXml } from "../lib/sitemap";
 
 const router: IRouter = Router();
 
@@ -385,43 +386,14 @@ router.get("/compare", async (req, res) => {
 });
 
 router.get("/sitemap", async (_req, res) => {
-  const allLabels = await db.select().from(labelsTable);
-  const baseUrl = "https://hoodsignal.com";
-
-  const urls: string[] = [baseUrl + "/"];
-
-  for (const city of CITIES) {
-    const cityLabels = allLabels.filter((l) => {
-      const c = getCityForLabel(l);
-      return c?.slug === city.slug;
-    });
-    if (!cityLabels.length) continue;
-
-    urls.push(`${baseUrl}/${city.slug}`);
-
-    for (const key of Object.keys(INTENT_SLUGS)) {
-      urls.push(`${baseUrl}/${city.slug}/${key}`);
-    }
-
-    for (const label of cityLabels) {
-      urls.push(`${baseUrl}/${city.slug}/${slugify(label.text)}`);
-    }
+  try {
+    const xml = await generateSitemapXml();
+    res.setHeader("Content-Type", "application/xml; charset=utf-8");
+    res.setHeader("Cache-Control", "public, max-age=3600");
+    res.send(xml);
+  } catch (err) {
+    res.status(500).send("Sitemap generation failed");
   }
-
-  const allSlugs = allLabels.map((l) => slugify(l.text));
-  for (let i = 0; i < allSlugs.length; i++) {
-    for (let j = i + 1; j < Math.min(i + 5, allSlugs.length); j++) {
-      urls.push(`${baseUrl}/compare/${allSlugs[i]}-vs-${allSlugs[j]}`);
-    }
-  }
-
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map((u) => `  <url><loc>${u}</loc></url>`).join("\n")}
-</urlset>`;
-
-  res.setHeader("Content-Type", "application/xml");
-  res.send(xml);
 });
 
 export default router;

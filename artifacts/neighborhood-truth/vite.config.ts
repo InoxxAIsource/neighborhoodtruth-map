@@ -104,6 +104,10 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(new RegExp(`^${basePath.replace(/\//g, "\\/")}api`), "/api"),
       },
+      "/sitemap.xml": {
+        target: "http://localhost:8080",
+        changeOrigin: true,
+      },
     },
   },
   preview: {
