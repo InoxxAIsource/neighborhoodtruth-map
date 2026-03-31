@@ -37,7 +37,7 @@ interface MapViewProps {
   selectedCategories?: string[];
   locateUser?: boolean;
   onLocated?: () => void;
-  flyToLocation?: { lat: number; lng: number } | null;
+  flyToLocation?: { lat: number; lng: number; zoom?: number } | null;
   onFlownTo?: () => void;
 }
 
@@ -228,7 +228,7 @@ export function MapView({
 
     const map = L.map(containerRef.current, {
       center: [40.755, -73.984],
-      zoom: 12,
+      zoom: 11,
       zoomControl: true,
     });
 
@@ -279,7 +279,7 @@ export function MapView({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !flyToLocation) return;
-    map.flyTo([flyToLocation.lat, flyToLocation.lng], 14, { duration: 1.5 });
+    map.flyTo([flyToLocation.lat, flyToLocation.lng], flyToLocation.zoom ?? 11, { duration: 1.5 });
     onFlownTo?.();
   }, [flyToLocation, onFlownTo]);
 

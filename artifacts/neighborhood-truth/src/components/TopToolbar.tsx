@@ -72,7 +72,7 @@ interface TopToolbarProps {
   onToggleHeatmap: () => void;
   isLocating: boolean;
   onLocate: () => void;
-  onSearchLocation: (coords: { lat: number; lng: number }) => void;
+  onSearchLocation: (coords: { lat: number; lng: number; zoom?: number }) => void;
 }
 
 export function TopToolbar({
