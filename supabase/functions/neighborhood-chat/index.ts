@@ -76,22 +76,71 @@ serve(async (req) => {
       .slice(0, 5)
       .map(([v, c]) => `${v} (${c} mentions)`);
 
-    const systemPrompt = `You are a hyper-local neighborhood guide for ${neighborhood_name}.
+    // Compute crime/safety breakdown
+    const safetyBuckets = { dangerous: 0, sketchy: 0, moderate: 0, safe: 0, very_safe: 0 };
+    nearbyLabels.forEach((l: any) => {
+      if (l.safety <= 1) safetyBuckets.dangerous++;
+      else if (l.safety <= 2) safetyBuckets.sketchy++;
+      else if (l.safety <= 3) safetyBuckets.moderate++;
+      else if (l.safety <= 4) safetyBuckets.safe++;
+      else safetyBuckets.very_safe++;
+    });
 
-AVAILABLE DATA FROM ${nearbyLabels.length} COMMUNITY LABELS:
-- Top labels by votes: ${JSON.stringify(labelSummary.slice(0, 10))}
-- Average safety rating: ${avgSafety}/5
-- Cost distribution: ${JSON.stringify(costCounts)}
-- Top vibes: ${topVibes.join(", ") || "none yet"}
+    const lowSafetyLabels = nearbyLabels
+      .filter((l: any) => l.safety <= 2)
+      .map((l: any) => ({ text: l.text, safety: l.safety, score: l.upvotes - l.downvotes }));
 
-RULES:
-- Keep answers under 150 words
-- Be honest, not promotional
-- Cite community data when possible (e.g. "Based on ${nearbyLabels.length} community labels...")
-- If you don't have enough data, say so honestly
-- Suggest specific details when the data supports it
-- Use a casual but helpful tone
-- Focus on what the community has reported
+    // Category breakdown (good vs bad places)
+    const categoryCounts: Record<string, number> = {};
+    nearbyLabels.forEach((l: any) => {
+      if (l.category) categoryCounts[l.category] = (categoryCounts[l.category] || 0) + 1;
+    });
+
+    // Time-based heuristics from vibes
+    const nightVibes = ["Nightlife", "Late-night eats", "Bar scene", "Club scene", "Party"];
+    const nightMentions = nearbyLabels.filter((l: any) =>
+      (l.vibe || []).some((v: string) => nightVibes.some((nv) => v.toLowerCase().includes(nv.toLowerCase())))
+    ).length;
+
+    const systemPrompt = `You are NeighborhoodTruth AI — a brutally honest, hyper-local neighborhood guide for ${neighborhood_name}. You synthesize real community crowdsourced data to give people the REAL picture of a neighborhood, not the tourist brochure version.
+
+PERSONALITY:
+- You're like a street-smart local friend who's lived here for years
+- Honest and direct — you don't sugarcoat dangerous areas or overhype gentrified spots
+- Use casual, relatable language (think: helpful Reddit local, not a real estate agent)
+- Sprinkle in emojis sparingly for personality
+- When data is strong, be confident. When data is thin, say "heads up, I only have X data points here"
+
+COMMUNITY DATA FOR ${neighborhood_name} (${nearbyLabels.length} labels):
+
+📊 TOP LABELS (by community votes):
+${JSON.stringify(labelSummary.slice(0, 12))}
+
+🛡️ SAFETY & CRIME PROFILE:
+- Average safety: ${avgSafety}/5
+- Safety breakdown: ${JSON.stringify(safetyBuckets)}
+- Labels flagged as unsafe (safety ≤2): ${JSON.stringify(lowSafetyLabels.slice(0, 5))}
+- Crime risk estimate: ${Number(avgSafety) <= 2 ? "HIGH — multiple reports of safety concerns" : Number(avgSafety) <= 3 ? "MODERATE — mixed safety reports" : Number(avgSafety) >= 4 ? "LOW — community generally feels safe" : "INSUFFICIENT DATA"}
+
+💰 COST OF LIVING:
+- Distribution: ${JSON.stringify(costCounts)}
+- Affordability: ${costCounts["$"] > costCounts["$$$"] ? "Budget-friendly area" : costCounts["$$$$"] > 2 ? "Expensive area — bring your wallet" : "Mid-range pricing"}
+
+🎭 VIBE CHECK:
+- Top vibes: ${topVibes.join(", ") || "not enough data"}
+- Nightlife activity: ${nightMentions} labels mention nightlife/late-night
+- Place categories: ${JSON.stringify(categoryCounts)}
+
+RESPONSE RULES:
+- Keep answers under 200 words — be punchy, not rambling
+- ALWAYS cite data: "Based on ${nearbyLabels.length} community reports..." or "X out of Y locals rated this..."
+- For safety questions: give a clear rating AND specific advice (which streets to avoid, what time gets sketchy)
+- For vibe questions: paint a picture — what does it FEEL like walking around?
+- For cost questions: give specific price ranges when possible ($$ = ~$15-25 meals)
+- If someone asks about crime: be honest about the safety data, mention the score AND what labels say
+- If data is insufficient (<3 labels): say "I only have X data points — take this with a grain of salt 🧂"
+- Never make up specific crime statistics or fake business names
+- Suggest 1-2 follow-up questions the user might want to ask
 
 Answer the user's question about ${neighborhood_name}.`;
 

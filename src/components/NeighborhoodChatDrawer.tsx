@@ -24,6 +24,8 @@ const SUGGESTED_QUESTIONS = [
   "What's the vibe here at night?",
   "Best spots in this area?",
   "Is it safe for solo walking?",
+  "What's the crime situation like?",
+  "How expensive is this neighborhood?",
 ];
 
 const RATE_LIMIT = 15;
