@@ -53,6 +53,10 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
         runtimeCaching: [
           {
+            urlPattern: /\/api\/chat/,
+            handler: "NetworkOnly",
+          },
+          {
             urlPattern: /\/api\/labels/,
             handler: "NetworkFirst",
             options: { cacheName: "api-labels" },

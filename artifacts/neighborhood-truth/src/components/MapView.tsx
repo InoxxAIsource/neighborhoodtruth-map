@@ -42,6 +42,7 @@ interface MapViewProps {
   onFlownTo?: () => void;
   apiBase: string;
   voterId: string;
+  myVotes?: { labelId: string; voteType: string }[];
 }
 
 export interface AreaSummary {
@@ -177,6 +178,7 @@ function buildPopupContent(
   onVote: MapViewProps["onVote"],
   apiBase: string,
   voterId: string,
+  myVotes?: { labelId: string; voteType: string }[],
 ): { el: HTMLElement; onOpen: () => void } {
   const wrapper = document.createElement("div");
   wrapper.style.fontFamily = "system-ui, sans-serif";
@@ -195,6 +197,16 @@ function buildPopupContent(
   const scoreBadgeColor = score > 0 ? "#dcfce7" : score < 0 ? "#fee2e2" : "#f3f4f6";
   const scoreBadgeText = score > 0 ? "#166534" : score < 0 ? "#991b1b" : "#374151";
 
+  const existingVote = myVotes?.find((v) => v.labelId === label.id);
+  const alreadyVoted = !!existingVote;
+  const upvotedStyle = existingVote?.voteType === "upvote" ? "background:#dcfce7;border-color:#86efac;" : "background:#f9fafb;border:1px solid #d1d5db;";
+  const downvotedStyle = existingVote?.voteType === "downvote" ? "background:#fee2e2;border-color:#fca5a5;" : "background:#f9fafb;border:1px solid #d1d5db;";
+  const voteCursor = alreadyVoted ? "default" : "pointer";
+  const voteTitle = alreadyVoted ? "You already voted on this label" : "";
+
+  let currentUpvotes = label.upvotes;
+  let currentDownvotes = label.downvotes;
+
   wrapper.innerHTML = `
     <div style="margin-bottom:8px;">
       <p style="font-size:14px;font-weight:700;margin:0 0 4px;line-height:1.3;">${escapeHtml(label.text)}</p>
@@ -206,9 +218,9 @@ function buildPopupContent(
       ${vibes ? `<div style="margin-top:4px;">${vibes}</div>` : ""}
     </div>
     <div style="display:flex;align-items:center;gap:8px;border-top:1px solid #e5e7eb;padding-top:8px;">
-      <button data-vote="upvote" style="cursor:pointer;background:#f9fafb;border:1px solid #d1d5db;border-radius:8px;padding:5px 12px;font-size:13px;display:flex;align-items:center;gap:4px;">👍 <strong>${label.upvotes}</strong></button>
-      <button data-vote="downvote" style="cursor:pointer;background:#f9fafb;border:1px solid #d1d5db;border-radius:8px;padding:5px 12px;font-size:13px;display:flex;align-items:center;gap:4px;">👎 <strong>${label.downvotes}</strong></button>
-      <span style="margin-left:auto;background:${scoreBadgeColor};color:${scoreBadgeText};border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;">${score > 0 ? '+' : ''}${score}</span>
+      <button data-vote="upvote" title="${voteTitle}" style="cursor:${voteCursor};${upvotedStyle};border-radius:8px;padding:5px 12px;font-size:13px;display:flex;align-items:center;gap:4px;">👍 <strong data-count="upvotes">${label.upvotes}</strong></button>
+      <button data-vote="downvote" title="${voteTitle}" style="cursor:${voteCursor};${downvotedStyle};border-radius:8px;padding:5px 12px;font-size:13px;display:flex;align-items:center;gap:4px;">👎 <strong data-count="downvotes">${label.downvotes}</strong></button>
+      <span data-score-badge style="margin-left:auto;background:${scoreBadgeColor};color:${scoreBadgeText};border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;">${score > 0 ? '+' : ''}${score}</span>
     </div>
     <div style="margin-top:8px;">
       <button data-action="ask-ai" style="cursor:pointer;width:100%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;">✨ Ask AI about this area</button>
@@ -224,8 +236,53 @@ function buildPopupContent(
     </div>
   `;
 
-  wrapper.querySelector('button[data-vote="upvote"]')?.addEventListener("click", () => onVote(label.id, "upvote"));
-  wrapper.querySelector('button[data-vote="downvote"]')?.addEventListener("click", () => onVote(label.id, "downvote"));
+  const upBtn = wrapper.querySelector('button[data-vote="upvote"]') as HTMLButtonElement;
+  const downBtn = wrapper.querySelector('button[data-vote="downvote"]') as HTMLButtonElement;
+  const scoreBadge = wrapper.querySelector('[data-score-badge]') as HTMLElement;
+
+  function lockVoteButtons() {
+    upBtn.style.cursor = "default";
+    downBtn.style.cursor = "default";
+    upBtn.style.opacity = "0.8";
+    downBtn.style.opacity = "0.8";
+  }
+
+  function updateScoreBadge(up: number, down: number) {
+    const s = up - down;
+    const bg = s > 0 ? "#dcfce7" : s < 0 ? "#fee2e2" : "#f3f4f6";
+    const fg = s > 0 ? "#166534" : s < 0 ? "#991b1b" : "#374151";
+    scoreBadge.style.background = bg;
+    scoreBadge.style.color = fg;
+    scoreBadge.textContent = `${s > 0 ? '+' : ''}${s}`;
+  }
+
+  if (alreadyVoted) {
+    lockVoteButtons();
+  }
+
+  upBtn.addEventListener("click", () => {
+    if (alreadyVoted) return;
+    currentUpvotes++;
+    const countEl = upBtn.querySelector('[data-count="upvotes"]');
+    if (countEl) countEl.textContent = String(currentUpvotes);
+    upBtn.style.background = "#dcfce7";
+    upBtn.style.borderColor = "#86efac";
+    updateScoreBadge(currentUpvotes, currentDownvotes);
+    lockVoteButtons();
+    onVote(label.id, "upvote");
+  });
+
+  downBtn.addEventListener("click", () => {
+    if (alreadyVoted) return;
+    currentDownvotes++;
+    const countEl = downBtn.querySelector('[data-count="downvotes"]');
+    if (countEl) countEl.textContent = String(currentDownvotes);
+    downBtn.style.background = "#fee2e2";
+    downBtn.style.borderColor = "#fca5a5";
+    updateScoreBadge(currentUpvotes, currentDownvotes);
+    lockVoteButtons();
+    onVote(label.id, "downvote");
+  });
   wrapper.querySelector('button[data-action="ask-ai"]')?.addEventListener("click", () => {
     window.dispatchEvent(new CustomEvent("hoodmap:askai", { detail: label }));
   });
@@ -321,6 +378,7 @@ export function MapView({
   onFlownTo,
   apiBase,
   voterId,
+  myVotes,
 }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
@@ -447,7 +505,7 @@ export function MapView({
     labelsToShow.forEach((label) => {
       const icon = createTextIcon(label);
       const marker = L.marker([label.lat, label.lng], { icon });
-      const { el: popupEl, onOpen } = buildPopupContent(label, onVote, apiBase, voterId);
+      const { el: popupEl, onOpen } = buildPopupContent(label, onVote, apiBase, voterId, myVotes);
       marker.bindPopup(popupEl, { maxWidth: 320, className: "hoodmap-popup" });
       marker.on("popupopen", onOpen);
       if (onLabelClick) {
@@ -455,7 +513,7 @@ export function MapView({
       }
       marker.addTo(markerLayer);
     });
-  }, [filteredLabels, showLabels, selectedCategories, onVote, onLabelClick, apiBase, voterId]);
+  }, [filteredLabels, showLabels, selectedCategories, onVote, onLabelClick, apiBase, voterId, myVotes]);
 
   // Re-render markers on zoom
   useEffect(() => {
@@ -478,7 +536,7 @@ export function MapView({
       labelsToShow.forEach((label) => {
         const icon = createTextIcon(label);
         const marker = L.marker([label.lat, label.lng], { icon });
-        const { el: popupEl, onOpen } = buildPopupContent(label, onVote, apiBase, voterId);
+        const { el: popupEl, onOpen } = buildPopupContent(label, onVote, apiBase, voterId, myVotes);
         marker.bindPopup(popupEl, { maxWidth: 320, className: "hoodmap-popup" });
         marker.on("popupopen", onOpen);
         if (onLabelClick) {

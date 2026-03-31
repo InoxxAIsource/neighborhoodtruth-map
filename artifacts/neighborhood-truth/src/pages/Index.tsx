@@ -104,23 +104,12 @@ export default function Index() {
         body: JSON.stringify({ voterId, voteType }),
       });
     },
-    onMutate: async ({ labelId, voteType }) => {
-      await queryClient.cancelQueries({ queryKey: ["labels"] });
-      const previous = queryClient.getQueryData(["labels"]);
-      const field = voteType === "upvote" ? "upvotes" : "downvotes";
-      queryClient.setQueryData(["labels"], (old: LabelDTO[]) =>
-        old?.map((l) => l.id === labelId ? { ...l, [field]: l[field as keyof typeof l] as number + 1 } : l)
-      );
+    onSuccess: () => {
       markInteracted();
-      return { previous };
-    },
-    onError: (e: Error, _vars, context) => {
-      if (context?.previous) queryClient.setQueryData(["labels"], context.previous);
-      toast.error(e.message === "Already voted" ? "You already voted on this!" : "Vote failed");
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["labels"] });
       queryClient.invalidateQueries({ queryKey: ["votes", voterId] });
+    },
+    onError: (e: Error) => {
+      toast.error(e.message === "Already voted" ? "You already voted on this!" : "Vote failed");
     },
   });
 
@@ -167,6 +156,7 @@ export default function Index() {
         }}
         apiBase={API}
         voterId={voterId}
+        myVotes={userVotes}
       />
 
       <TopToolbar
