@@ -483,6 +483,13 @@ export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap 
           maxWidth: 280,
           className: "hoodmap-popup",
         });
+        marker.on("click", () => {
+          if (onLabelClick) {
+            const nearby = getNearbyLabels(labelsRef.current, label.lat, label.lng);
+            const name = getAreaName(label.lat, label.lng);
+            onLabelClick(label, nearby, name);
+          }
+        });
       });
     }
   }, [filteredLabels, onVote, showHeatmap]);
