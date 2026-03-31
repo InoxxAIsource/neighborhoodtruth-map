@@ -129,6 +129,8 @@ export default function Index() {
         selectedCategories={selectedCategories}
         locateUser={locateUser}
         onLocated={() => setLocateUser(false)}
+        flyToLocation={flyToLocation}
+        onFlownTo={() => setFlyToLocation(null)}
         onAreaClick={(area) => {
           toast.info(`Exploring ${area.name} — ${area.labelCount} labels nearby`);
         }}
