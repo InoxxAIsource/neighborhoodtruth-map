@@ -2,11 +2,12 @@ import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { MapView } from "@/components/MapView";
-import type { AreaSummary } from "@/components/MapView";
+import type { AreaSummary, LabelData } from "@/components/MapView";
 import { AddLabelDialog } from "@/components/AddLabelDialog";
 import { FilterSidebar, DEFAULT_FILTERS } from "@/components/FilterSidebar";
 import { TopToolbar } from "@/components/TopToolbar";
 import { HeroOverlay, MicroHints, useOnboarding } from "@/components/Onboarding";
+import { NeighborhoodChatDrawer } from "@/components/NeighborhoodChatDrawer";
 import { Button } from "@/components/ui/button";
 import { Plus, MapPin } from "lucide-react";
 import { useVoterId } from "@/hooks/useVoterId";
@@ -23,6 +24,10 @@ export default function Index() {
   const [locateUser, setLocateUser] = useState(false);
   const [flyToLocation, setFlyToLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
+  const [chatDrawerOpen, setChatDrawerOpen] = useState(false);
+  const [chatLabel, setChatLabel] = useState<LabelData | null>(null);
+  const [chatNearby, setChatNearby] = useState<LabelData[]>([]);
+  const [chatAreaName, setChatAreaName] = useState("This Area");
   const voterId = useVoterId();
   const queryClient = useQueryClient();
   const { showHero, hasInteracted, dismissHero, markInteracted } = useOnboarding();
@@ -116,6 +121,13 @@ export default function Index() {
     vote.mutate({ labelId, voteType });
   }, [vote]);
 
+  const handleLabelClick = useCallback((label: LabelData, nearbyLabels: LabelData[], areaName: string) => {
+    setChatLabel(label);
+    setChatNearby(nearbyLabels);
+    setChatAreaName(areaName);
+    setChatDrawerOpen(true);
+  }, []);
+
   return (
     <div className="h-screen w-screen relative overflow-hidden">
       <MapView
@@ -134,6 +146,7 @@ export default function Index() {
         onAreaClick={(area) => {
           toast.info(`Exploring ${area.name} — ${area.labelCount} labels nearby`);
         }}
+        onLabelClick={handleLabelClick}
       />
 
       <TopToolbar
@@ -203,6 +216,14 @@ export default function Index() {
         position={clickedPosition}
         onSubmit={(data) => addLabel.mutate(data)}
         isSubmitting={addLabel.isPending}
+      />
+
+      <NeighborhoodChatDrawer
+        open={chatDrawerOpen}
+        onOpenChange={setChatDrawerOpen}
+        clickedLabel={chatLabel}
+        nearbyLabels={chatNearby}
+        areaName={chatAreaName}
       />
     </div>
   );

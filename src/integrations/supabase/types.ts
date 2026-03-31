@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_logs: {
+        Row: {
+          ai_response: string
+          created_at: string
+          id: string
+          label_lat: number | null
+          label_lng: number | null
+          neighborhood_name: string
+          question: string
+          session_id: string
+        }
+        Insert: {
+          ai_response: string
+          created_at?: string
+          id?: string
+          label_lat?: number | null
+          label_lng?: number | null
+          neighborhood_name: string
+          question: string
+          session_id: string
+        }
+        Update: {
+          ai_response?: string
+          created_at?: string
+          id?: string
+          label_lat?: number | null
+          label_lng?: number | null
+          neighborhood_name?: string
+          question?: string
+          session_id?: string
+        }
+        Relationships: []
+      }
       labels: {
         Row: {
           category: string | null
