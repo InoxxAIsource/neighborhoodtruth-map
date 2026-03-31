@@ -8,3 +8,51 @@
 export interface HealthStatus {
   status: string;
 }
+
+export interface Label {
+  id: string;
+  lat: number;
+  lng: number;
+  text: string;
+  safety: number;
+  vibe?: string[] | null;
+  cost: string;
+  upvotes: number;
+  downvotes: number;
+  color?: string | null;
+  category?: string | null;
+  createdAt: string;
+}
+
+export interface CreateLabelInput {
+  lat: number;
+  lng: number;
+  text: string;
+  safety: number;
+  vibe?: string[];
+  cost: string;
+  color?: string;
+  category?: string | null;
+}
+
+export type VoteInputVoteType =
+  (typeof VoteInputVoteType)[keyof typeof VoteInputVoteType];
+
+export const VoteInputVoteType = {
+  upvote: "upvote",
+  downvote: "downvote",
+} as const;
+
+export interface VoteInput {
+  voterId: string;
+  voteType: VoteInputVoteType;
+}
+
+export interface Vote {
+  labelId: string;
+  voteType: string;
+}
+
+export type GetMyVotesParams = {
+  voterId: string;
+};

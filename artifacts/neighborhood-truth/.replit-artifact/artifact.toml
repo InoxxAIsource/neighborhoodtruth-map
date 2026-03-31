@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "NeighborhoodTruth"
+version = "1.0.0"
+id = "artifacts/neighborhood-truth"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23830
+
+[services.development]
+run = "pnpm --filter @workspace/neighborhood-truth run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/neighborhood-truth", "run", "build" ]
+publicDir = "artifacts/neighborhood-truth/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23830"
+BASE_PATH = "/"

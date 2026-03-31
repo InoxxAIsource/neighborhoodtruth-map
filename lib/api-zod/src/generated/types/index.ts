@@ -6,4 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./createLabelInput";
+export * from "./getMyVotesParams";
 export * from "./healthStatus";
+export * from "./label";
+export * from "./vote";
+export * from "./voteInput";
+export * from "./voteInputVoteType";

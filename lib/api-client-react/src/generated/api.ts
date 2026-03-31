@@ -5,18 +5,28 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  MutationFunction,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { HealthStatus } from "./api.schemas";
+import type {
+  CreateLabelInput,
+  GetMyVotesParams,
+  HealthStatus,
+  Label,
+  Vote,
+  VoteInput,
+} from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
-import type { ErrorType } from "../custom-fetch";
+import type { ErrorType, BodyType } from "../custom-fetch";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -99,3 +109,339 @@ export function useHealthCheck<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * Returns all neighborhood labels
+ * @summary Get all labels
+ */
+export const getGetLabelsUrl = () => {
+  return `/api/labels`;
+};
+
+export const getLabels = async (options?: RequestInit): Promise<Label[]> => {
+  return customFetch<Label[]>(getGetLabelsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetLabelsQueryKey = () => {
+  return [`/api/labels`] as const;
+};
+
+export const getGetLabelsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getLabels>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getLabels>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetLabelsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getLabels>>> = ({
+    signal,
+  }) => getLabels({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getLabels>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetLabelsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getLabels>>
+>;
+export type GetLabelsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get all labels
+ */
+
+export function useGetLabels<
+  TData = Awaited<ReturnType<typeof getLabels>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getLabels>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetLabelsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Add a new neighborhood label
+ * @summary Create a label
+ */
+export const getCreateLabelUrl = () => {
+  return `/api/labels`;
+};
+
+export const createLabel = async (
+  createLabelInput: CreateLabelInput,
+  options?: RequestInit,
+): Promise<Label> => {
+  return customFetch<Label>(getCreateLabelUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createLabelInput),
+  });
+};
+
+export const getCreateLabelMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createLabel>>,
+    TError,
+    { data: BodyType<CreateLabelInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createLabel>>,
+  TError,
+  { data: BodyType<CreateLabelInput> },
+  TContext
+> => {
+  const mutationKey = ["createLabel"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createLabel>>,
+    { data: BodyType<CreateLabelInput> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createLabel(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateLabelMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createLabel>>
+>;
+export type CreateLabelMutationBody = BodyType<CreateLabelInput>;
+export type CreateLabelMutationError = ErrorType<void>;
+
+/**
+ * @summary Create a label
+ */
+export const useCreateLabel = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createLabel>>,
+    TError,
+    { data: BodyType<CreateLabelInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createLabel>>,
+  TError,
+  { data: BodyType<CreateLabelInput> },
+  TContext
+> => {
+  return useMutation(getCreateLabelMutationOptions(options));
+};
+
+/**
+ * Returns the votes cast by a specific voter
+ * @summary Get user votes
+ */
+export const getGetMyVotesUrl = (params: GetMyVotesParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/labels/my-votes?${stringifiedParams}`
+    : `/api/labels/my-votes`;
+};
+
+export const getMyVotes = async (
+  params: GetMyVotesParams,
+  options?: RequestInit,
+): Promise<Vote[]> => {
+  return customFetch<Vote[]>(getGetMyVotesUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetMyVotesQueryKey = (params?: GetMyVotesParams) => {
+  return [`/api/labels/my-votes`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetMyVotesQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMyVotes>>,
+  TError = ErrorType<unknown>,
+>(
+  params: GetMyVotesParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getMyVotes>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetMyVotesQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyVotes>>> = ({
+    signal,
+  }) => getMyVotes(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMyVotes>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetMyVotesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getMyVotes>>
+>;
+export type GetMyVotesQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get user votes
+ */
+
+export function useGetMyVotes<
+  TData = Awaited<ReturnType<typeof getMyVotes>>,
+  TError = ErrorType<unknown>,
+>(
+  params: GetMyVotesParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getMyVotes>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetMyVotesQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Cast an upvote or downvote on a label
+ * @summary Vote on a label
+ */
+export const getVoteLabelUrl = (id: string) => {
+  return `/api/labels/${id}/vote`;
+};
+
+export const voteLabel = async (
+  id: string,
+  voteInput: VoteInput,
+  options?: RequestInit,
+): Promise<Label> => {
+  return customFetch<Label>(getVoteLabelUrl(id), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(voteInput),
+  });
+};
+
+export const getVoteLabelMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof voteLabel>>,
+    TError,
+    { id: string; data: BodyType<VoteInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof voteLabel>>,
+  TError,
+  { id: string; data: BodyType<VoteInput> },
+  TContext
+> => {
+  const mutationKey = ["voteLabel"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof voteLabel>>,
+    { id: string; data: BodyType<VoteInput> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return voteLabel(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type VoteLabelMutationResult = NonNullable<
+  Awaited<ReturnType<typeof voteLabel>>
+>;
+export type VoteLabelMutationBody = BodyType<VoteInput>;
+export type VoteLabelMutationError = ErrorType<void>;
+
+/**
+ * @summary Vote on a label
+ */
+export const useVoteLabel = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof voteLabel>>,
+    TError,
+    { id: string; data: BodyType<VoteInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof voteLabel>>,
+  TError,
+  { id: string; data: BodyType<VoteInput> },
+  TContext
+> => {
+  return useMutation(getVoteLabelMutationOptions(options));
+};

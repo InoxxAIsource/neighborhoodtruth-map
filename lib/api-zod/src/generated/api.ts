@@ -14,3 +14,80 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * Returns all neighborhood labels
+ * @summary Get all labels
+ */
+export const GetLabelsResponseItem = zod.object({
+  id: zod.string(),
+  lat: zod.number(),
+  lng: zod.number(),
+  text: zod.string(),
+  safety: zod.number(),
+  vibe: zod.array(zod.string()).nullish(),
+  cost: zod.string(),
+  upvotes: zod.number(),
+  downvotes: zod.number(),
+  color: zod.string().nullish(),
+  category: zod.string().nullish(),
+  createdAt: zod.string(),
+});
+export const GetLabelsResponse = zod.array(GetLabelsResponseItem);
+
+/**
+ * Add a new neighborhood label
+ * @summary Create a label
+ */
+export const CreateLabelBody = zod.object({
+  lat: zod.number(),
+  lng: zod.number(),
+  text: zod.string(),
+  safety: zod.number(),
+  vibe: zod.array(zod.string()).optional(),
+  cost: zod.string(),
+  color: zod.string().optional(),
+  category: zod.string().nullish(),
+});
+
+/**
+ * Returns the votes cast by a specific voter
+ * @summary Get user votes
+ */
+export const GetMyVotesQueryParams = zod.object({
+  voterId: zod.coerce.string(),
+});
+
+export const GetMyVotesResponseItem = zod.object({
+  labelId: zod.string(),
+  voteType: zod.string(),
+});
+export const GetMyVotesResponse = zod.array(GetMyVotesResponseItem);
+
+/**
+ * Cast an upvote or downvote on a label
+ * @summary Vote on a label
+ */
+export const VoteLabelParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const VoteLabelBody = zod.object({
+  voterId: zod.string(),
+  voteType: zod.enum(["upvote", "downvote"]),
+});
+
+export const VoteLabelResponse = zod.object({
+  id: zod.string(),
+  lat: zod.number(),
+  lng: zod.number(),
+  text: zod.string(),
+  safety: zod.number(),
+  vibe: zod.array(zod.string()).nullish(),
+  cost: zod.string(),
+  upvotes: zod.number(),
+  downvotes: zod.number(),
+  color: zod.string().nullish(),
+  category: zod.string().nullish(),
+  createdAt: zod.string(),
+});

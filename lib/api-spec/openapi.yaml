@@ -1,6 +1,5 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
   description: API specification
@@ -10,6 +9,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: labels
+    description: Neighborhood label operations
 paths:
   /healthz:
     get:
@@ -24,6 +25,91 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /labels:
+    get:
+      operationId: getLabels
+      tags: [labels]
+      summary: Get all labels
+      description: Returns all neighborhood labels
+      responses:
+        "200":
+          description: List of labels
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Label"
+    post:
+      operationId: createLabel
+      tags: [labels]
+      summary: Create a label
+      description: Add a new neighborhood label
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLabelInput"
+      responses:
+        "201":
+          description: Created label
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Label"
+        "400":
+          description: Invalid input
+  /labels/my-votes:
+    get:
+      operationId: getMyVotes
+      tags: [labels]
+      summary: Get user votes
+      description: Returns the votes cast by a specific voter
+      parameters:
+        - name: voterId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of votes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Vote"
+  /labels/{id}/vote:
+    post:
+      operationId: voteLabel
+      tags: [labels]
+      summary: Vote on a label
+      description: Cast an upvote or downvote on a label
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VoteInput"
+      responses:
+        "200":
+          description: Updated label
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Label"
+        "400":
+          description: Invalid vote or already voted
+        "404":
+          description: Label not found
 components:
   schemas:
     HealthStatus:
@@ -33,4 +119,94 @@ components:
           type: string
       required:
         - status
-
+    Label:
+      type: object
+      properties:
+        id:
+          type: string
+        lat:
+          type: number
+        lng:
+          type: number
+        text:
+          type: string
+        safety:
+          type: integer
+        vibe:
+          type: array
+          items:
+            type: string
+          nullable: true
+        cost:
+          type: string
+        upvotes:
+          type: integer
+        downvotes:
+          type: integer
+        color:
+          type: string
+          nullable: true
+        category:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+      required:
+        - id
+        - lat
+        - lng
+        - text
+        - safety
+        - cost
+        - upvotes
+        - downvotes
+        - createdAt
+    CreateLabelInput:
+      type: object
+      properties:
+        lat:
+          type: number
+        lng:
+          type: number
+        text:
+          type: string
+        safety:
+          type: integer
+        vibe:
+          type: array
+          items:
+            type: string
+        cost:
+          type: string
+        color:
+          type: string
+        category:
+          type: string
+          nullable: true
+      required:
+        - lat
+        - lng
+        - text
+        - safety
+        - cost
+    VoteInput:
+      type: object
+      properties:
+        voterId:
+          type: string
+        voteType:
+          type: string
+          enum: [upvote, downvote]
+      required:
+        - voterId
+        - voteType
+    Vote:
+      type: object
+      properties:
+        labelId:
+          type: string
+        voteType:
+          type: string
+      required:
+        - labelId
+        - voteType
