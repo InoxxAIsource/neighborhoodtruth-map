@@ -508,6 +508,87 @@ const SEED_LABELS: SeedLabel[] = [
   { lat: 25.7617, lng: -80.2000, text: "Art Deco strip Instagram gold", safety: 4, vibe: ["Family", "Artsy"], cost: "$$", color: "#7c3aed", category: null, upvotes: 83, downvotes: 5 },
   { lat: 25.8577, lng: -80.2786, text: "Aventura mall suburban", safety: 4, vibe: ["Family"], cost: "$$", color: "#9e9e9e", category: null, upvotes: 35, downvotes: 9 },
   { lat: 25.7680, lng: -80.1956, text: "Brickell financial district", safety: 4, vibe: ["Bougie"], cost: "$$$$", color: "#64b5f6", category: "Coworking", upvotes: 48, downvotes: 12 },
+
+  // ===== NYC CONTINUED =====
+  { lat: 40.7580, lng: -73.8290, text: "Flushing best Chinese dim sum", safety: 4, vibe: ["Family"], cost: "$", color: "#ea580c", category: "Restaurants", upvotes: 121, downvotes: 3 },
+  { lat: 40.7750, lng: -73.8770, text: "Flushing Meadows tennis open", safety: 4, vibe: ["Family", "Loud"], cost: "$$", color: "#16a34a", category: "Parks", upvotes: 63, downvotes: 4 },
+  { lat: 40.6650, lng: -73.9790, text: "Windsor Terrace quiet leafy", safety: 5, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: null, upvotes: 51, downvotes: 4 },
+  { lat: 40.7300, lng: -73.9530, text: "Long Island City skyline views", safety: 4, vibe: ["Artsy", "Chill"], cost: "$$", color: "#2563eb", category: "Art galleries", upvotes: 74, downvotes: 5 },
+  { lat: 40.7490, lng: -73.9430, text: "Astoria beer gardens amazing", safety: 4, vibe: ["Family", "Nightlife"], cost: "$$", color: "#7c3aed", category: "Bars", upvotes: 88, downvotes: 4 },
+  { lat: 40.6840, lng: -73.9760, text: "Carroll Gardens tree-lined charm", safety: 5, vibe: ["Family", "Chill"], cost: "$$$", color: "#16a34a", category: null, upvotes: 67, downvotes: 3 },
+  { lat: 40.7440, lng: -73.9660, text: "Hunters Point newer development", safety: 4, vibe: ["Chill", "Bougie"], cost: "$$", color: "#0d9488", category: "Cafes to work", upvotes: 57, downvotes: 6 },
+  { lat: 40.7690, lng: -73.9890, text: "Morningside Heights academic enclave", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#1565c0", category: "Cafes to work", upvotes: 72, downvotes: 4 },
+
+  // ===== TOKYO CONTINUED =====
+  { lat: 35.6750, lng: 139.7600, text: "Hiroo international school families", safety: 5, vibe: ["Family", "Bougie"], cost: "$$$", color: "#4caf50", category: null, upvotes: 78, downvotes: 3 },
+  { lat: 35.6130, lng: 139.7740, text: "Shinagawa transit hub busy", safety: 5, vibe: ["Loud", "Bougie"], cost: "$$$", color: "#9e9e9e", category: null, upvotes: 41, downvotes: 8 },
+  { lat: 35.6860, lng: 139.6930, text: "Ebisu upscale dining beer museum", safety: 5, vibe: ["Bougie", "Chill"], cost: "$$$", color: "#4caf50", category: "Restaurants", upvotes: 88, downvotes: 3 },
+  { lat: 35.6280, lng: 139.7780, text: "Oimachi local shopping street", safety: 4, vibe: ["Family"], cost: "$", color: "#ea580c", category: "Restaurants", upvotes: 54, downvotes: 4 },
+
+  // ===== LONDON CONTINUED =====
+  { lat: 51.5120, lng: -0.2170, text: "Shepherd's Bush market diverse", safety: 3, vibe: ["Family", "Loud"], cost: "$", color: "#ea580c", category: "Restaurants", upvotes: 64, downvotes: 9 },
+  { lat: 51.4490, lng: -0.3120, text: "Richmond park deer weekend goal", safety: 5, vibe: ["Family", "Chill"], cost: "$", color: "#16a34a", category: "Parks", upvotes: 104, downvotes: 2 },
+  { lat: 51.5090, lng: -0.0860, text: "Whitechapel incredibly diverse area", safety: 3, vibe: ["Family", "Loud"], cost: "$", color: "#ea580c", category: "Restaurants", upvotes: 57, downvotes: 12 },
+  { lat: 51.5450, lng: -0.0280, text: "Stratford Westfield shopping East", safety: 3, vibe: ["Family"], cost: "$$", color: "#9e9e9e", category: null, upvotes: 38, downvotes: 11 },
+
+  // ===== PARIS CONTINUED =====
+  { lat: 48.8600, lng: 2.2890, text: "Trocadero Eiffel photo spot", safety: 3, vibe: ["Family", "Loud"], cost: "$$", color: "#ef5350", category: "Tourist traps", upvotes: 13, downvotes: 44 },
+  { lat: 48.8940, lng: 2.2400, text: "Neuilly sur Seine quiet wealthy", safety: 5, vibe: ["Bougie", "Family"], cost: "$$$$", color: "#4caf50", category: null, upvotes: 49, downvotes: 7 },
+  { lat: 48.8060, lng: 2.3600, text: "Montrouge south Paris calm", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: null, upvotes: 42, downvotes: 5 },
+
+  // ===== BERLIN CONTINUED =====
+  { lat: 52.4970, lng: 13.5210, text: "Lichtenberg industrial transformation", safety: 3, vibe: ["Artsy"], cost: "$", color: "#7c3aed", category: null, upvotes: 44, downvotes: 15 },
+  { lat: 52.5590, lng: 13.4230, text: "Pankow quiet leafy suburb", safety: 4, vibe: ["Family", "Chill"], cost: "$", color: "#16a34a", category: null, upvotes: 51, downvotes: 4 },
+
+  // ===== SINGAPORE CONTINUED =====
+  { lat: 1.2880, lng: 103.7550, text: "West Coast Park kite flying", safety: 5, vibe: ["Family", "Chill"], cost: "$", color: "#16a34a", category: "Parks", upvotes: 76, downvotes: 2 },
+  { lat: 1.4290, lng: 103.8350, text: "Woodlands JB causeway shopping", safety: 4, vibe: ["Family", "Loud"], cost: "$$", color: "#9e9e9e", category: null, upvotes: 48, downvotes: 10 },
+
+  // ===== SYDNEY CONTINUED =====
+  { lat: -33.8870, lng: 151.1980, text: "Ultimo UTS tech hub", safety: 4, vibe: ["Chill"], cost: "$$", color: "#64b5f6", category: "Coworking", upvotes: 54, downvotes: 5 },
+  { lat: -33.9630, lng: 151.1060, text: "Kogarah Greek community food", safety: 4, vibe: ["Family"], cost: "$", color: "#ea580c", category: "Restaurants", upvotes: 62, downvotes: 4 },
+
+  // ===== DUBAI CONTINUED =====
+  { lat: 25.1890, lng: 55.2610, text: "Karama South Asian vibes", safety: 3, vibe: ["Family"], cost: "$", color: "#ea580c", category: "Restaurants", upvotes: 73, downvotes: 6 },
+  { lat: 25.2250, lng: 55.2890, text: "Bur Dubai old town heritage", safety: 3, vibe: ["Family", "Chill"], cost: "$", color: "#ea580c", category: null, upvotes: 64, downvotes: 7 },
+
+  // ===== BARCELONA CONTINUED =====
+  { lat: 41.3760, lng: 2.1740, text: "Barceloneta beach sand", safety: 3, vibe: ["Loud", "Family"], cost: "$", color: "#2563eb", category: "Parks", upvotes: 74, downvotes: 12 },
+  { lat: 41.4190, lng: 2.1780, text: "Horta peaceful uphill escape", safety: 4, vibe: ["Family", "Chill"], cost: "$", color: "#16a34a", category: "Parks", upvotes: 62, downvotes: 3 },
+
+  // ===== CHICAGO CONTINUED =====
+  { lat: 41.8559, lng: -87.6298, text: "Bronzeville jazz history revival", safety: 3, vibe: ["Artsy", "Family"], cost: "$", color: "#7c3aed", category: null, upvotes: 67, downvotes: 11 },
+  { lat: 41.9200, lng: -87.6350, text: "Bucktown farmers market Sunday", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: "Restaurants", upvotes: 71, downvotes: 4 },
+  { lat: 41.8950, lng: -87.6370, text: "Greektown Halsted Street food", safety: 4, vibe: ["Family"], cost: "$$", color: "#ea580c", category: "Restaurants", upvotes: 82, downvotes: 4 },
+
+  // ===== LISBON CONTINUED =====
+  { lat: 38.6970, lng: -9.2060, text: "Belem historical monuments", safety: 4, vibe: ["Family", "Artsy"], cost: "$$", color: "#7c3aed", category: null, upvotes: 89, downvotes: 3 },
+  { lat: 38.7380, lng: -9.1680, text: "Arroios affordable multicultural", safety: 3, vibe: ["Family", "Artsy"], cost: "$", color: "#ea580c", category: "Restaurants", upvotes: 71, downvotes: 8 },
+  { lat: 38.7130, lng: -9.1630, text: "Estrela embassies park quiet", safety: 4, vibe: ["Bougie", "Chill"], cost: "$$$", color: "#4caf50", category: "Parks", upvotes: 63, downvotes: 4 },
+
+  // ===== BANGKOK CONTINUED =====
+  { lat: 13.7020, lng: 100.5430, text: "Ari trendy locals neighbourhood", safety: 4, vibe: ["Chill", "Artsy"], cost: "$$", color: "#0d9488", category: "Cafes to work", upvotes: 84, downvotes: 5 },
+  { lat: 13.6790, lng: 100.6010, text: "Onnut BTS local area", safety: 3, vibe: ["Family"], cost: "$", color: "#9e9e9e", category: null, upvotes: 41, downvotes: 7 },
+
+  // ===== VIENNA =====
+  { lat: 48.2093, lng: 16.3728, text: "Innere Stadt imperial grandeur", safety: 5, vibe: ["Family", "Artsy"], cost: "$$$", color: "#7c3aed", category: null, upvotes: 82, downvotes: 4 },
+  { lat: 48.1980, lng: 16.3540, text: "Naschmarkt best market in Europe", safety: 5, vibe: ["Family", "Artsy"], cost: "$$", color: "#ea580c", category: "Restaurants", upvotes: 107, downvotes: 3 },
+  { lat: 48.2030, lng: 16.3340, text: "Mariahilf trendy locals area", safety: 4, vibe: ["Artsy", "Chill"], cost: "$$", color: "#7c3aed", category: "Bars", upvotes: 79, downvotes: 5 },
+  { lat: 48.2230, lng: 16.3560, text: "Alsergrund coffee house culture", safety: 4, vibe: ["Chill", "Artsy"], cost: "$$", color: "#0d9488", category: "Cafes to work", upvotes: 93, downvotes: 3 },
+  { lat: 48.2160, lng: 16.3940, text: "Prater park Riesenrad rides", safety: 4, vibe: ["Family"], cost: "$", color: "#16a34a", category: "Parks", upvotes: 88, downvotes: 4 },
+
+  // ===== CAPE TOWN CONTINUED =====
+  { lat: -33.9680, lng: 18.4660, text: "Constantia wine farms beautiful", safety: 4, vibe: ["Bougie", "Chill"], cost: "$$$", color: "#4caf50", category: "Restaurants", upvotes: 88, downvotes: 3 },
+  { lat: -33.9270, lng: 18.4680, text: "Observatory bohemian market vibes", safety: 3, vibe: ["Artsy", "Chill"], cost: "$", color: "#7c3aed", category: "Bars", upvotes: 73, downvotes: 9 },
+
+  // ===== BALI CONTINUED =====
+  { lat: -8.5080, lng: 115.2620, text: "Amed diving snorkelling gem", safety: 4, vibe: ["Chill", "Family"], cost: "$$", color: "#2563eb", category: null, upvotes: 88, downvotes: 3 },
+  { lat: -8.5940, lng: 115.1640, text: "Tegalalang rice terraces stunning", safety: 4, vibe: ["Family"], cost: "$", color: "#16a34a", category: null, upvotes: 96, downvotes: 4 },
+
+  // ===== SEOUL CONTINUED =====
+  { lat: 37.5400, lng: 126.9560, text: "Mapo arts and culture hub", safety: 5, vibe: ["Artsy", "Chill"], cost: "$$", color: "#7c3aed", category: "Art galleries", upvotes: 74, downvotes: 5 },
+  { lat: 37.4880, lng: 127.0330, text: "Gangnam luxury shopping Apgujeong", safety: 5, vibe: ["Bougie"], cost: "$$$$", color: "#4caf50", category: null, upvotes: 62, downvotes: 11 },
+  { lat: 37.5780, lng: 127.0040, text: "Jongno-gu historic centre", safety: 5, vibe: ["Family", "Artsy"], cost: "$$", color: "#7c3aed", category: null, upvotes: 81, downvotes: 4 },
 ];
 
 async function seed() {
