@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { db, labelsTable, votesTable } from "@workspace/db";
-import { eq, and, sql } from "drizzle-orm";
+import { db, labelsTable, votesTable, commentsTable } from "@workspace/db";
+import { eq, and, sql, desc } from "drizzle-orm";
 import { z } from "zod";
 
 const router: IRouter = Router();
@@ -141,6 +141,73 @@ router.post("/:id/vote", async (req, res) => {
     res.json(formatLabel(updated));
   } catch (err) {
     req.log.error({ err }, "Failed to vote");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+const createCommentSchema = z.object({
+  authorId: z.string().min(1),
+  body: z.string().min(1).max(200),
+});
+
+router.get("/:id/comments", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [label] = await db.select({ id: labelsTable.id })
+      .from(labelsTable)
+      .where(eq(labelsTable.id, id))
+      .limit(1);
+
+    if (!label) {
+      res.status(404).json({ error: "Label not found" });
+      return;
+    }
+
+    const comments = await db.select({
+      id: commentsTable.id,
+      authorId: commentsTable.authorId,
+      body: commentsTable.body,
+      createdAt: commentsTable.createdAt,
+    })
+      .from(commentsTable)
+      .where(eq(commentsTable.labelId, id))
+      .orderBy(desc(commentsTable.createdAt))
+      .limit(5);
+
+    res.json(comments.map((c) => ({ ...c, createdAt: c.createdAt.toISOString() })));
+  } catch (err) {
+    req.log.error({ err }, "Failed to fetch comments");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/:id/comments", async (req, res) => {
+  const { id } = req.params;
+  const parsed = createCommentSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid input", details: parsed.error.issues });
+    return;
+  }
+
+  try {
+    const [label] = await db.select({ id: labelsTable.id })
+      .from(labelsTable)
+      .where(eq(labelsTable.id, id))
+      .limit(1);
+
+    if (!label) {
+      res.status(404).json({ error: "Label not found" });
+      return;
+    }
+
+    const [comment] = await db.insert(commentsTable)
+      .values({ labelId: id, authorId: parsed.data.authorId, body: parsed.data.body })
+      .returning();
+
+    res.status(201).json({ ...comment, createdAt: comment.createdAt.toISOString() });
+  } catch (err) {
+    req.log.error({ err }, "Failed to post comment");
     res.status(500).json({ error: "Internal server error" });
   }
 });

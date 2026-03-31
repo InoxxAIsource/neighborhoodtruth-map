@@ -165,6 +165,7 @@ export default function Index() {
         onAreaClick={(area: AreaSummary) => {
           toast.info(`Exploring ${area.name} — ${area.labelCount} labels nearby`);
         }}
+        apiBase={API}
       />
 
       <TopToolbar

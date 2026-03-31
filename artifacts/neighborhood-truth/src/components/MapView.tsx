@@ -40,6 +40,7 @@ interface MapViewProps {
   onLocated?: () => void;
   flyToLocation?: { lat: number; lng: number; zoom?: number } | null;
   onFlownTo?: () => void;
+  apiBase: string;
 }
 
 export interface AreaSummary {
@@ -121,13 +122,64 @@ function createTextIcon(label: LabelData) {
   });
 }
 
+interface CommentItem {
+  id: string;
+  authorId: string;
+  body: string;
+  createdAt: string;
+}
+
+function timeAgo(iso: string): string {
+  const seconds = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
+function initials(authorId: string): string {
+  return authorId.slice(0, 2).toUpperCase();
+}
+
+function renderComments(list: CommentItem[]): string {
+  if (list.length === 0) {
+    return `<p style="font-size:12px;color:#9ca3af;margin:0;text-align:center;padding:8px 0;">No comments yet. Be the first!</p>`;
+  }
+  return list.map((c) => `
+    <div style="display:flex;gap:8px;margin-bottom:8px;align-items:flex-start;">
+      <div style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:#e0e7ff;color:#4338ca;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;">${escapeHtml(initials(c.authorId))}</div>
+      <div style="flex:1;min-width:0;">
+        <p style="font-size:12px;color:#1f2937;margin:0 0 2px;word-break:break-word;">${escapeHtml(c.body)}</p>
+        <span style="font-size:10px;color:#9ca3af;">${escapeHtml(timeAgo(c.createdAt))}</span>
+      </div>
+    </div>
+  `).join("");
+}
+
+async function loadAndRenderComments(commentsEl: HTMLElement, labelId: string, apiBase: string) {
+  commentsEl.innerHTML = `<p style="font-size:12px;color:#9ca3af;margin:0;text-align:center;">Loading…</p>`;
+  try {
+    const res = await fetch(`${apiBase}/labels/${labelId}/comments`);
+    const data: CommentItem[] = await res.json();
+    commentsEl.innerHTML = renderComments(data);
+  } catch {
+    commentsEl.innerHTML = `<p style="font-size:12px;color:#ef4444;margin:0;">Failed to load comments.</p>`;
+  }
+}
+
 function buildPopupContent(
   label: LabelData,
   onVote: MapViewProps["onVote"],
-) {
+  apiBase: string,
+  voterId: string,
+): { el: HTMLElement; onOpen: () => void } {
   const wrapper = document.createElement("div");
   wrapper.style.fontFamily = "system-ui, sans-serif";
-  wrapper.style.minWidth = "200px";
+  wrapper.style.minWidth = "220px";
+  wrapper.style.maxWidth = "280px";
 
   const score = getScore(label);
   const vibes = (label.vibe ?? [])
@@ -159,6 +211,15 @@ function buildPopupContent(
     <div style="margin-top:8px;">
       <button data-action="ask-ai" style="cursor:pointer;width:100%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;">✨ Ask AI about this area</button>
     </div>
+    <div style="margin-top:10px;border-top:1px solid #e5e7eb;padding-top:10px;">
+      <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 6px;text-transform:uppercase;letter-spacing:0.05em;">Comments</p>
+      <div data-comments-list style="margin-bottom:8px;"></div>
+      <div style="display:flex;gap:6px;align-items:flex-end;">
+        <textarea data-comment-input rows="2" maxlength="200" placeholder="Add a comment…" style="flex:1;font-size:12px;border:1px solid #d1d5db;border-radius:6px;padding:5px 8px;resize:none;font-family:inherit;outline:none;color:#1f2937;"></textarea>
+        <button data-action="post-comment" style="cursor:pointer;background:#6366f1;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;white-space:nowrap;height:52px;">Post</button>
+      </div>
+      <p data-comment-error style="font-size:11px;color:#ef4444;margin:4px 0 0;display:none;"></p>
+    </div>
   `;
 
   wrapper.querySelector('button[data-vote="upvote"]')?.addEventListener("click", () => onVote(label.id, "upvote"));
@@ -167,7 +228,37 @@ function buildPopupContent(
     window.dispatchEvent(new CustomEvent("hoodmap:askai", { detail: label }));
   });
 
-  return wrapper;
+  const commentsEl = wrapper.querySelector("[data-comments-list]") as HTMLElement;
+  const textareaEl = wrapper.querySelector("[data-comment-input]") as HTMLTextAreaElement;
+  const errorEl = wrapper.querySelector("[data-comment-error]") as HTMLElement;
+  const postBtn = wrapper.querySelector('button[data-action="post-comment"]') as HTMLButtonElement;
+
+  postBtn.addEventListener("click", async () => {
+    const body = textareaEl.value.trim();
+    if (!body) return;
+    errorEl.style.display = "none";
+    postBtn.disabled = true;
+    postBtn.textContent = "…";
+    try {
+      const res = await fetch(`${apiBase}/labels/${label.id}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ authorId: voterId, body }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      textareaEl.value = "";
+      await loadAndRenderComments(commentsEl, label.id, apiBase);
+    } catch {
+      errorEl.textContent = "Failed to post. Try again.";
+      errorEl.style.display = "block";
+    } finally {
+      postBtn.disabled = false;
+      postBtn.textContent = "Post";
+    }
+  });
+
+  const onOpen = () => loadAndRenderComments(commentsEl, label.id, apiBase);
+  return { el: wrapper, onOpen };
 }
 
 function getNearbyLabels(labels: LabelData[], lat: number, lng: number, radius = 0.015): LabelData[] {
@@ -226,7 +317,13 @@ export function MapView({
   onLocated,
   flyToLocation,
   onFlownTo,
+  apiBase,
 }: MapViewProps) {
+  const voterId = (() => {
+    let id = localStorage.getItem("nt_voter_id");
+    if (!id) { id = crypto.randomUUID(); localStorage.setItem("nt_voter_id", id); }
+    return id;
+  })();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
@@ -344,14 +441,15 @@ export function MapView({
     labelsToShow.forEach((label) => {
       const icon = createTextIcon(label);
       const marker = L.marker([label.lat, label.lng], { icon });
-      const popupEl = buildPopupContent(label, onVote);
+      const { el: popupEl, onOpen } = buildPopupContent(label, onVote, apiBase, voterId);
       marker.bindPopup(popupEl, { maxWidth: 320, className: "hoodmap-popup" });
+      marker.on("popupopen", onOpen);
       if (onLabelClick) {
         marker.on("click", () => onLabelClick(label));
       }
       marker.addTo(markerLayer);
     });
-  }, [filteredLabels, showLabels, selectedCategories, onVote, onLabelClick]);
+  }, [filteredLabels, showLabels, selectedCategories, onVote, onLabelClick, apiBase, voterId]);
 
   // Re-render markers on zoom
   useEffect(() => {
@@ -374,8 +472,9 @@ export function MapView({
       labelsToShow.forEach((label) => {
         const icon = createTextIcon(label);
         const marker = L.marker([label.lat, label.lng], { icon });
-        const popupEl = buildPopupContent(label, onVote);
+        const { el: popupEl, onOpen } = buildPopupContent(label, onVote, apiBase, voterId);
         marker.bindPopup(popupEl, { maxWidth: 320, className: "hoodmap-popup" });
+        marker.on("popupopen", onOpen);
         if (onLabelClick) {
           marker.on("click", () => onLabelClick(label));
         }

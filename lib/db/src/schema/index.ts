@@ -27,10 +27,21 @@ export const votesTable = pgTable("votes", {
   unique("votes_label_voter_unique").on(t.labelId, t.voterId),
 ]);
 
+export const commentsTable = pgTable("comments", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  labelId: uuid("label_id").notNull().references(() => labelsTable.id, { onDelete: "cascade" }),
+  authorId: text("author_id").notNull(),
+  body: varchar("body", { length: 200 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
 export const insertLabelSchema = createInsertSchema(labelsTable).omit({ id: true, createdAt: true });
 export const insertVoteSchema = createInsertSchema(votesTable).omit({ id: true, createdAt: true });
+export const insertCommentSchema = createInsertSchema(commentsTable).omit({ id: true, createdAt: true });
 
 export type InsertLabel = z.infer<typeof insertLabelSchema>;
 export type Label = typeof labelsTable.$inferSelect;
 export type InsertVote = z.infer<typeof insertVoteSchema>;
 export type Vote = typeof votesTable.$inferSelect;
+export type InsertComment = z.infer<typeof insertCommentSchema>;
+export type Comment = typeof commentsTable.$inferSelect;
