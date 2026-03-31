@@ -124,7 +124,6 @@ function createTextIcon(label: LabelData) {
 function buildPopupContent(
   label: LabelData,
   onVote: MapViewProps["onVote"],
-  onLabelClick?: MapViewProps["onLabelClick"],
 ) {
   const wrapper = document.createElement("div");
   wrapper.style.fontFamily = "system-ui, sans-serif";
@@ -165,7 +164,7 @@ function buildPopupContent(
   wrapper.querySelector('button[data-vote="upvote"]')?.addEventListener("click", () => onVote(label.id, "upvote"));
   wrapper.querySelector('button[data-vote="downvote"]')?.addEventListener("click", () => onVote(label.id, "downvote"));
   wrapper.querySelector('button[data-action="ask-ai"]')?.addEventListener("click", () => {
-    if (onLabelClick) onLabelClick(label);
+    window.dispatchEvent(new CustomEvent("hoodmap:askai", { detail: label }));
   });
 
   return wrapper;
@@ -345,8 +344,11 @@ export function MapView({
     labelsToShow.forEach((label) => {
       const icon = createTextIcon(label);
       const marker = L.marker([label.lat, label.lng], { icon });
-      const popupEl = buildPopupContent(label, onVote, onLabelClick);
+      const popupEl = buildPopupContent(label, onVote);
       marker.bindPopup(popupEl, { maxWidth: 320, className: "hoodmap-popup" });
+      if (onLabelClick) {
+        marker.on("click", () => onLabelClick(label));
+      }
       marker.addTo(markerLayer);
     });
   }, [filteredLabels, showLabels, selectedCategories, onVote, onLabelClick]);
@@ -372,8 +374,11 @@ export function MapView({
       labelsToShow.forEach((label) => {
         const icon = createTextIcon(label);
         const marker = L.marker([label.lat, label.lng], { icon });
-        const popupEl = buildPopupContent(label, onVote, onLabelClick);
+        const popupEl = buildPopupContent(label, onVote);
         marker.bindPopup(popupEl, { maxWidth: 320, className: "hoodmap-popup" });
+        if (onLabelClick) {
+          marker.on("click", () => onLabelClick(label));
+        }
         marker.addTo(markerLayer);
       });
     };

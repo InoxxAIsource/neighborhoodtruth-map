@@ -1,21 +1,10 @@
 import { Router, type IRouter } from "express";
 import { anthropic } from "@workspace/integrations-anthropic-ai";
+import { db, labelsTable } from "@workspace/db";
+import { eq, and, gte, lte, ne } from "drizzle-orm";
 import { z } from "zod";
 
 const router: IRouter = Router();
-
-const labelContextSchema = z.object({
-  id: z.string(),
-  text: z.string(),
-  lat: z.number(),
-  lng: z.number(),
-  safety: z.number(),
-  vibe: z.array(z.string()).nullable().optional(),
-  cost: z.string(),
-  upvotes: z.number(),
-  downvotes: z.number(),
-  category: z.string().nullable().optional(),
-});
 
 const chatMessageSchema = z.object({
   role: z.enum(["user", "assistant"]),
@@ -23,23 +12,23 @@ const chatMessageSchema = z.object({
 });
 
 const chatAskSchema = z.object({
+  labelId: z.string().uuid(),
   question: z.string().min(1).max(500),
   conversationHistory: z.array(chatMessageSchema).max(20),
-  clickedLabel: labelContextSchema,
-  nearbyLabels: z.array(labelContextSchema).max(30),
 });
 
-function buildSystemPrompt(
-  clickedLabel: z.infer<typeof labelContextSchema>,
-  nearbyLabels: z.infer<typeof labelContextSchema>[],
-) {
-  const formatLabel = (l: z.infer<typeof labelContextSchema>) => {
+const RADIUS = 0.03;
+
+type LabelRow = typeof labelsTable.$inferSelect;
+
+function buildSystemPrompt(clickedLabel: LabelRow, nearbyLabels: LabelRow[]) {
+  const formatLabel = (l: LabelRow) => {
     const score = l.upvotes - l.downvotes;
     const vibes = l.vibe?.length ? l.vibe.join(", ") : "none";
     return `• "${l.text}" — Safety: ${l.safety}/5 | Cost: ${l.cost} | Vibes: ${vibes} | Community score: ${score > 0 ? "+" : ""}${score}`;
   };
 
-  const allLabels = [clickedLabel, ...nearbyLabels.filter((l) => l.id !== clickedLabel.id)];
+  const allLabels = [clickedLabel, ...nearbyLabels];
   const labelLines = allLabels.map(formatLabel).join("\n");
 
   return `You are a hyper-local neighborhood guide for NeighborhoodTruth — a crowd-sourced map of real neighborhood insights from residents and visitors worldwide.
@@ -63,7 +52,44 @@ router.post("/ask", async (req, res) => {
     return;
   }
 
-  const { question, conversationHistory, clickedLabel, nearbyLabels } = parsed.data;
+  const { labelId, question, conversationHistory } = parsed.data;
+
+  let clickedLabel: LabelRow | undefined;
+  try {
+    const rows = await db.select().from(labelsTable).where(eq(labelsTable.id, labelId)).limit(1);
+    clickedLabel = rows[0];
+  } catch (err) {
+    req.log.error({ err }, "Failed to fetch label");
+    res.status(500).json({ error: "Internal server error" });
+    return;
+  }
+
+  if (!clickedLabel) {
+    res.status(404).json({ error: "Label not found" });
+    return;
+  }
+
+  let nearbyLabels: LabelRow[] = [];
+  try {
+    nearbyLabels = await db
+      .select()
+      .from(labelsTable)
+      .where(
+        and(
+          gte(labelsTable.lat, clickedLabel.lat - RADIUS),
+          lte(labelsTable.lat, clickedLabel.lat + RADIUS),
+          gte(labelsTable.lng, clickedLabel.lng - RADIUS),
+          lte(labelsTable.lng, clickedLabel.lng + RADIUS),
+          ne(labelsTable.id, labelId),
+        ),
+      )
+      .limit(25);
+  } catch (err) {
+    req.log.error({ err }, "Failed to fetch nearby labels");
+  }
+
+  const sortedNearby = nearbyLabels
+    .sort((a, b) => (b.upvotes - b.downvotes) - (a.upvotes - a.downvotes));
 
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
@@ -82,7 +108,7 @@ router.post("/ask", async (req, res) => {
     const stream = anthropic.messages.stream({
       model: "claude-sonnet-4-6",
       max_tokens: 8192,
-      system: buildSystemPrompt(clickedLabel, nearbyLabels),
+      system: buildSystemPrompt(clickedLabel, sortedNearby),
       messages,
     });
 

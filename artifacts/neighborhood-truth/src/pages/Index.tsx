@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MapView } from "@/components/MapView";
 import type { AreaSummary, LabelData } from "@/components/MapView";
@@ -135,6 +135,15 @@ export default function Index() {
 
   const handleLabelClick = useCallback((label: LabelData) => {
     setSelectedLabel(label);
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const label = (e as CustomEvent<LabelData>).detail;
+      if (label) setSelectedLabel(label);
+    };
+    window.addEventListener("hoodmap:askai", handler);
+    return () => window.removeEventListener("hoodmap:askai", handler);
   }, []);
 
   return (

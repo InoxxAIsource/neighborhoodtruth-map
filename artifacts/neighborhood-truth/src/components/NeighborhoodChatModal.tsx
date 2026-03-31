@@ -32,11 +32,8 @@ function getRateLimit(): RateLimitData {
   }
 }
 
-function incrementRateLimit(): RateLimitData {
-  const current = getRateLimit();
-  const next = { count: current.count + 1, date: getTodayStr() };
-  localStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(next));
-  return next;
+function setRateLimit(data: RateLimitData) {
+  localStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(data));
 }
 
 function getNearbyLabels(allLabels: LabelData[], clickedLabel: LabelData): LabelData[] {
@@ -83,7 +80,8 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase }: Ne
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [rateLimitData, setRateLimitData] = useState<RateLimitData>(() => getRateLimit());
+  const [lastFailedQuestion, setLastFailedQuestion] = useState<string | null>(null);
+  const [rateLimitData, setRateLimitDataState] = useState<RateLimitData>(() => getRateLimit());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -98,8 +96,9 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase }: Ne
       setMessages([]);
       setInput("");
       setError(null);
+      setLastFailedQuestion(null);
       setStreamingContent("");
-      setRateLimitData(getRateLimit());
+      setRateLimitDataState(getRateLimit());
     }
   }, [label]);
 
@@ -113,112 +112,103 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase }: Ne
     }
   }, [chatOpen]);
 
-  const sendMessage = useCallback(async (question: string) => {
+  const sendMessage = useCallback(async (question: string, fromRetry = false) => {
     if (!label || !question.trim() || isStreaming || isLimited) return;
 
     const trimmed = question.trim();
-    const newLimit = incrementRateLimit();
-    setRateLimitData(newLimit);
+
+    if (!fromRetry) {
+      const newLimit = { count: rateLimitData.count + 1, date: getTodayStr() };
+      setRateLimit(newLimit);
+      setRateLimitDataState(newLimit);
+    }
 
     const userMessage: ChatMessage = { role: "user", content: trimmed };
-    const newHistory = [...messages, userMessage];
-    setMessages(newHistory);
+    const historyBeforeQuestion = messages;
+    setMessages([...historyBeforeQuestion, userMessage]);
     setInput("");
     setIsStreaming(true);
     setStreamingContent("");
     setError(null);
+    setLastFailedQuestion(null);
 
     abortRef.current = new AbortController();
+
+    let accumulated = "";
+    let sseBuffer = "";
 
     try {
       const res = await fetch(`${apiBase}/chat/ask`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          labelId: label.id,
           question: trimmed,
-          conversationHistory: messages,
-          clickedLabel: {
-            id: label.id,
-            text: label.text,
-            lat: label.lat,
-            lng: label.lng,
-            safety: label.safety,
-            vibe: label.vibe ?? [],
-            cost: label.cost,
-            upvotes: label.upvotes,
-            downvotes: label.downvotes,
-            category: label.category ?? null,
-          },
-          nearbyLabels: nearbyLabels.slice(0, 20).map((l) => ({
-            id: l.id,
-            text: l.text,
-            lat: l.lat,
-            lng: l.lng,
-            safety: l.safety,
-            vibe: l.vibe ?? [],
-            cost: l.cost,
-            upvotes: l.upvotes,
-            downvotes: l.downvotes,
-            category: l.category ?? null,
-          })),
+          conversationHistory: historyBeforeQuestion,
         }),
         signal: abortRef.current.signal,
       });
 
       if (!res.ok || !res.body) {
-        throw new Error("Failed to connect to AI");
+        throw new Error(`AI request failed (${res.status})`);
       }
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
-      let accumulated = "";
+
+      const processLine = (line: string) => {
+        if (!line.startsWith("data: ")) return;
+        const jsonStr = line.slice(6).trim();
+        if (!jsonStr) return;
+        try {
+          const parsed = JSON.parse(jsonStr);
+          if (parsed.error) throw new Error(parsed.error);
+          if (parsed.done) return;
+          if (parsed.content) {
+            accumulated += parsed.content;
+            setStreamingContent(accumulated);
+          }
+        } catch (parseErr) {
+          const msg = (parseErr as Error).message;
+          if (msg !== "Unexpected end of JSON input") throw parseErr;
+        }
+      };
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n");
+        sseBuffer += decoder.decode(value, { stream: true });
+
+        const lines = sseBuffer.split("\n");
+        sseBuffer = lines.pop() ?? "";
 
         for (const line of lines) {
-          if (!line.startsWith("data: ")) continue;
-          const jsonStr = line.slice(6).trim();
-          if (!jsonStr) continue;
-
-          try {
-            const parsed = JSON.parse(jsonStr);
-            if (parsed.error) {
-              throw new Error(parsed.error);
-            }
-            if (parsed.done) {
-              setMessages((prev) => [...prev, { role: "assistant", content: accumulated }]);
-              setStreamingContent("");
-              break;
-            }
-            if (parsed.content) {
-              accumulated += parsed.content;
-              setStreamingContent(accumulated);
-            }
-          } catch (parseErr) {
-            if ((parseErr as Error).message !== "Unexpected end of JSON input") {
-              throw parseErr;
-            }
-          }
+          processLine(line);
         }
       }
+
+      if (sseBuffer) {
+        processLine(sseBuffer);
+      }
+
+      setMessages((prev) => [...prev.slice(0, -1), userMessage, { role: "assistant", content: accumulated }]);
     } catch (err) {
       if ((err as Error).name === "AbortError") return;
       const errMsg = (err as Error).message || "Something went wrong. Please try again.";
       setError(errMsg);
-      setMessages((prev) => prev.slice(0, -1));
-      setRateLimitData((prev) => ({ ...prev, count: prev.count - 1 }));
-      const restored = { count: rateLimitData.count, date: getTodayStr() };
-      localStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(restored));
+      setLastFailedQuestion(trimmed);
+      setMessages(historyBeforeQuestion);
+      if (!fromRetry) {
+        const restored = { count: rateLimitData.count, date: getTodayStr() };
+        setRateLimit(restored);
+        setRateLimitDataState(restored);
+      }
     } finally {
       setIsStreaming(false);
       setStreamingContent("");
     }
-  }, [label, messages, nearbyLabels, isStreaming, isLimited, apiBase, rateLimitData.count]);
+  }, [label, messages, isStreaming, isLimited, apiBase, rateLimitData.count]);
 
   if (!label) return null;
 
@@ -260,14 +250,17 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase }: Ne
         <div className="flex-1 overflow-y-auto">
           {/* Label details */}
           <div className="px-5 py-4 border-b bg-gray-50">
-            <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center gap-3 mb-3 flex-wrap">
               <div className="flex gap-1">
                 {Array.from({ length: 5 }, (_, i) => (
                   <span key={i} style={{ color: i < label.safety ? "#facc15" : "#e5e7eb", fontSize: 16 }}>★</span>
                 ))}
               </div>
               <span className="text-sm font-semibold text-gray-700">{label.cost}</span>
-              <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: score > 0 ? "#dcfce7" : score < 0 ? "#fee2e2" : "#f3f4f6", color: score > 0 ? "#166534" : score < 0 ? "#991b1b" : "#374151" }}>
+              <span
+                className="text-xs px-2 py-0.5 rounded-full font-semibold"
+                style={{ background: score > 0 ? "#dcfce7" : score < 0 ? "#fee2e2" : "#f3f4f6", color: score > 0 ? "#166534" : score < 0 ? "#991b1b" : "#374151" }}
+              >
                 {score > 0 ? "+" : ""}{score}
               </span>
               {label.category && (
@@ -285,7 +278,6 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase }: Ne
               </div>
             )}
 
-            {/* Nearby labels */}
             {nearbyLabels.length > 0 && (
               <div>
                 <p className="text-xs text-gray-500 font-medium mb-1.5">
@@ -298,7 +290,11 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase }: Ne
                       <span
                         key={l.id}
                         className="text-xs rounded-md px-2 py-1 font-medium border"
-                        style={{ background: s > 2 ? "#f0fdf4" : s < -2 ? "#fef2f2" : "#f9fafb", borderColor: s > 2 ? "#86efac" : s < -2 ? "#fca5a5" : "#e5e7eb", color: s > 2 ? "#166534" : s < -2 ? "#991b1b" : "#374151" }}
+                        style={{
+                          background: s > 2 ? "#f0fdf4" : s < -2 ? "#fef2f2" : "#f9fafb",
+                          borderColor: s > 2 ? "#86efac" : s < -2 ? "#fca5a5" : "#e5e7eb",
+                          color: s > 2 ? "#166534" : s < -2 ? "#991b1b" : "#374151",
+                        }}
                       >
                         {l.text}
                       </span>
@@ -316,7 +312,7 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase }: Ne
           <div className="px-5 py-3">
             <button
               onClick={() => setChatOpen((p) => !p)}
-              className="w-full flex items-center justify-between py-2 text-left group"
+              className="w-full flex items-center justify-between py-2 text-left"
             >
               <span className="flex items-center gap-2 text-sm font-semibold text-purple-700">
                 <Sparkles className="h-4 w-4" />
@@ -327,17 +323,19 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase }: Ne
 
             {chatOpen && (
               <div className="mt-2">
-                {/* Rate limit warning */}
                 {isLimited ? (
                   <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-center mb-3">
                     <p className="text-sm font-semibold text-amber-800">Daily limit reached</p>
-                    <p className="text-xs text-amber-600 mt-1">You've used all {DAILY_LIMIT} AI questions for today. Come back tomorrow!</p>
+                    <p className="text-xs text-amber-600 mt-1">
+                      You've used all {DAILY_LIMIT} AI questions for today. Come back tomorrow!
+                    </p>
                   </div>
                 ) : (
-                  <p className="text-xs text-gray-400 mb-2">{remaining} of {DAILY_LIMIT} questions remaining today</p>
+                  <p className="text-xs text-gray-400 mb-2">
+                    {remaining} of {DAILY_LIMIT} questions remaining today
+                  </p>
                 )}
 
-                {/* Suggested questions (show only when no messages yet) */}
                 {messages.length === 0 && !isLimited && (
                   <div className="flex flex-wrap gap-1.5 mb-3">
                     {SUGGESTED_QUESTIONS.map((q) => (
@@ -353,7 +351,6 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase }: Ne
                   </div>
                 )}
 
-                {/* Messages */}
                 {messages.length > 0 && (
                   <div className="space-y-3 mb-3 max-h-64 overflow-y-auto pr-1">
                     {messages.map((msg, i) => (
@@ -371,7 +368,6 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase }: Ne
                       </div>
                     ))}
 
-                    {/* Streaming message */}
                     {isStreaming && (
                       <div className="flex justify-start">
                         <div className="rounded-2xl px-4 py-2.5 text-sm max-w-[85%] leading-relaxed bg-gray-100 text-gray-900" style={{ borderBottomLeftRadius: 4 }}>
@@ -386,17 +382,26 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase }: Ne
                       </div>
                     )}
 
-                    {/* Error */}
                     {error && !isStreaming && (
                       <div className="flex justify-start">
                         <div className="rounded-2xl px-4 py-2.5 text-sm max-w-[85%] bg-red-50 text-red-700 border border-red-200" style={{ borderBottomLeftRadius: 4 }}>
-                          {error}
-                          <button
-                            onClick={() => { setError(null); }}
-                            className="block mt-1 text-xs text-red-500 underline"
-                          >
-                            Dismiss
-                          </button>
+                          <p>{error}</p>
+                          <div className="flex gap-3 mt-2">
+                            {lastFailedQuestion && (
+                              <button
+                                onClick={() => sendMessage(lastFailedQuestion, true)}
+                                className="text-xs text-red-600 font-semibold underline"
+                              >
+                                Try again
+                              </button>
+                            )}
+                            <button
+                              onClick={() => { setError(null); setLastFailedQuestion(null); }}
+                              className="text-xs text-red-400 underline"
+                            >
+                              Dismiss
+                            </button>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -405,7 +410,6 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase }: Ne
                   </div>
                 )}
 
-                {/* Input */}
                 {!isLimited && (
                   <form
                     onSubmit={(e) => { e.preventDefault(); sendMessage(input); }}
