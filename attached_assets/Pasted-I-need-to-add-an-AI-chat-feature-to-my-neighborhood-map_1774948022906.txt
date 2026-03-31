@@ -1,0 +1,146 @@
+I need to add an AI chat feature to my neighborhood mapping app. Here's what needs to happen:
+
+## CURRENT STATE
+- I have a map with clickable neighborhood labels (like "Hipster", "Expensive", "Safe", etc.)
+- Labels are stored in Supabase with these fields:
+  * neighborhood_name
+  * label_text (the vibe/tag)
+  * vote_count
+  * latitude/longitude
+  * user_comments (array or related table)
+
+## WHAT TO BUILD
+
+### 1. UI CHANGES
+When a user clicks on ANY label on the map:
+- Open a modal/drawer overlay (not a new page)
+- Show:
+  * Neighborhood name at top
+  * The clicked label with vote count
+  * All other labels for that area (sorted by votes)
+  * "💬 Ask about this area" button
+- When user clicks the chat button:
+  * Expand into a chat interface IN THE SAME MODAL
+  * Show suggested questions as chips/buttons:
+    - "What's the vibe here at night?"
+    - "Best spots in this area?"
+    - "Is it safe for solo walking?"
+    - "Why is it called [label]?"
+  * Text input for custom questions
+  * Submit button
+
+### 2. BACKEND API ROUTE
+Create `/api/neighborhood-chat` endpoint that:
+
+**Receives:**
+```json
+{
+  "neighborhood_name": "Williamsburg",
+  "user_question": "What's the vibe here at night?",
+  "conversation_history": [] // for multi-turn chat
+}
+```
+
+**Does:**
+1. Query Supabase for ALL data about this neighborhood:
+   - All labels with vote counts
+   - Recent user comments (last 50)
+   - Any cost/safety metrics we have
+   - Nearby landmarks/places
+
+2. Construct system prompt for Claude API:
+```javascript
+const systemPrompt = `You are a hyper-local neighborhood guide for ${neighborhood_name}.
+
+AVAILABLE DATA:
+- Labels: ${JSON.stringify(labels)} // e.g., {"hipster": 847, "expensive": 623}
+- Recent resident comments: ${recentComments}
+- Cost level: ${costMetrics}
+- Safety rating: ${safetyScore}
+
+RULES:
+- Keep answers under 150 words
+- Be honest, not promotional
+- Cite user data when possible ("Based on 34 reviews...")
+- If you don't have data, say so
+- Suggest specific streets/spots when relevant
+- Use casual Gen Z tone but stay helpful
+
+Answer this question: ${user_question}`;
+```
+
+3. Call Claude API:
+```javascript
+const response = await fetch('https://api.anthropic.com/v1/messages', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': process.env.ANTHROPIC_API_KEY
+  },
+  body: JSON.stringify({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 500,
+    messages: [
+      ...conversation_history, // for context
+      { role: 'user', content: user_question }
+    ],
+    system: systemPrompt
+  })
+});
+```
+
+4. Return AI response to frontend
+
+**Returns:**
+```json
+{
+  "ai_response": "Williamsburg gets pretty lively after 10pm...",
+  "sources_used": ["847 hipster votes", "34 nightlife comments"],
+  "conversation_id": "uuid" // for tracking multi-turn
+}
+```
+
+### 3. FRONTEND CHAT COMPONENT
+Build a React component with:
+- Message bubbles (user vs AI)
+- Typing indicator while AI responds
+- Suggested question chips that populate input on click
+- "Start new question" button to clear conversation
+- Auto-scroll to latest message
+- Error handling if API fails
+
+### 4. RATE LIMITING
+- Track queries per user session (localStorage or IP)
+- Free users: 5 questions per day
+- Show "Upgrade for unlimited chat" after limit
+- Store limit in Supabase if user is logged in
+
+### 5. DATABASE UPDATES
+Add to Supabase:
+- `chat_logs` table:
+  * id
+  * user_id (if logged in, else null)
+  * neighborhood_name
+  * question
+  * ai_response
+  * timestamp
+  * session_id (for anonymous users)
+
+## TECH STACK
+- Frontend: React (existing)
+- Backend: Next.js API routes or Express endpoint
+- Database: Supabase (existing)
+- AI: Claude Sonnet 4 via Anthropic API
+- Styling: Match existing map UI theme
+
+## ACCEPTANCE CRITERIA
+✅ Clicking any label opens modal with chat option
+✅ Chat gives contextual answers using neighborhood data
+✅ Suggested questions work on click
+✅ Multi-turn conversations maintain context
+✅ Rate limiting prevents abuse
+✅ Mobile responsive chat UI
+✅ Loading states during AI response
+✅ Graceful error handling if API fails
+
+## ENVIRONMENT VARIABLES NEEDED
