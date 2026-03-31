@@ -1,12 +1,13 @@
 import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MapView } from "@/components/MapView";
-import type { AreaSummary } from "@/components/MapView";
+import type { AreaSummary, LabelData } from "@/components/MapView";
 import { AddLabelDialog } from "@/components/AddLabelDialog";
 import { FilterSidebar, DEFAULT_FILTERS } from "@/components/FilterSidebar";
 import { TopToolbar } from "@/components/TopToolbar";
 import { HeroOverlay, MicroHints, useOnboarding } from "@/components/Onboarding";
 import { ZoneLegend } from "@/components/ZoneLegend";
+import { NeighborhoodChatModal } from "@/components/NeighborhoodChatModal";
 import { Button } from "@/components/ui/button";
 import { Plus, MapPin } from "lucide-react";
 import { useVoterId } from "@/hooks/useVoterId";
@@ -58,6 +59,7 @@ export default function Index() {
   const [locateUser, setLocateUser] = useState(false);
   const [flyToLocation, setFlyToLocation] = useState<{ lat: number; lng: number; zoom?: number } | null>(null);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
+  const [selectedLabel, setSelectedLabel] = useState<LabelData | null>(null);
   const voterId = useVoterId();
   const queryClient = useQueryClient();
   const { showHero, hasInteracted, dismissHero, markInteracted } = useOnboarding();
@@ -131,6 +133,10 @@ export default function Index() {
     vote.mutate({ labelId, voteType });
   }, [vote]);
 
+  const handleLabelClick = useCallback((label: LabelData) => {
+    setSelectedLabel(label);
+  }, []);
+
   return (
     <div className="h-screen w-screen relative overflow-hidden">
       <MapView
@@ -138,6 +144,7 @@ export default function Index() {
         isPlacingPin={isPlacingPin}
         onMapClick={handleMapClick}
         onVote={handleVote}
+        onLabelClick={handleLabelClick}
         showHeatmap={showHeatmap}
         filters={filters}
         showLabels={showLabels}
@@ -208,6 +215,13 @@ export default function Index() {
       />
 
       <ZoneLegend />
+
+      <NeighborhoodChatModal
+        label={selectedLabel}
+        allLabels={labels}
+        onClose={() => setSelectedLabel(null)}
+        apiBase={API}
+      />
     </div>
   );
 }

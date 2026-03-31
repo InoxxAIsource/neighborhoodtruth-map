@@ -91,6 +91,12 @@ Generated Zod schemas from the OpenAPI spec (e.g. `HealthCheckResponse`). Used b
 
 Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHealthCheck`, `healthCheck`).
 
+### `lib/integrations-anthropic-ai` (`@workspace/integrations-anthropic-ai`)
+
+Anthropic AI client library via Replit AI Integrations. Pre-configured with env vars `AI_INTEGRATIONS_ANTHROPIC_BASE_URL` and `AI_INTEGRATIONS_ANTHROPIC_API_KEY` (provisioned automatically, no user key required — billed to Replit credits). Exports:
+- `anthropic` — pre-configured `Anthropic` SDK client
+- `batchProcess` / `batchProcessWithSSE` — rate-limited batch utilities
+
 ### `scripts` (`@workspace/scripts`)
 
 Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.

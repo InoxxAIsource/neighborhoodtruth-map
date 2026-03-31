@@ -30,6 +30,7 @@ interface MapViewProps {
   isPlacingPin: boolean;
   onMapClick: (lat: number, lng: number) => void;
   onVote: (labelId: string, voteType: "upvote" | "downvote") => void;
+  onLabelClick?: (label: LabelData) => void;
   showHeatmap: boolean;
   filters: Filters;
   onAreaClick?: (area: AreaSummary) => void;
@@ -120,7 +121,11 @@ function createTextIcon(label: LabelData) {
   });
 }
 
-function buildPopupContent(label: LabelData, onVote: MapViewProps["onVote"]) {
+function buildPopupContent(
+  label: LabelData,
+  onVote: MapViewProps["onVote"],
+  onLabelClick?: MapViewProps["onLabelClick"],
+) {
   const wrapper = document.createElement("div");
   wrapper.style.fontFamily = "system-ui, sans-serif";
   wrapper.style.minWidth = "200px";
@@ -152,10 +157,16 @@ function buildPopupContent(label: LabelData, onVote: MapViewProps["onVote"]) {
       <button data-vote="downvote" style="cursor:pointer;background:#f9fafb;border:1px solid #d1d5db;border-radius:8px;padding:5px 12px;font-size:13px;display:flex;align-items:center;gap:4px;">👎 <strong>${label.downvotes}</strong></button>
       <span style="margin-left:auto;background:${scoreBadgeColor};color:${scoreBadgeText};border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;">${score > 0 ? '+' : ''}${score}</span>
     </div>
+    <div style="margin-top:8px;">
+      <button data-action="ask-ai" style="cursor:pointer;width:100%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;">✨ Ask AI about this area</button>
+    </div>
   `;
 
   wrapper.querySelector('button[data-vote="upvote"]')?.addEventListener("click", () => onVote(label.id, "upvote"));
   wrapper.querySelector('button[data-vote="downvote"]')?.addEventListener("click", () => onVote(label.id, "downvote"));
+  wrapper.querySelector('button[data-action="ask-ai"]')?.addEventListener("click", () => {
+    if (onLabelClick) onLabelClick(label);
+  });
 
   return wrapper;
 }
@@ -206,6 +217,7 @@ export function MapView({
   isPlacingPin,
   onMapClick,
   onVote,
+  onLabelClick,
   showHeatmap = false,
   filters = DEFAULT_FILTERS,
   onAreaClick,
@@ -333,11 +345,11 @@ export function MapView({
     labelsToShow.forEach((label) => {
       const icon = createTextIcon(label);
       const marker = L.marker([label.lat, label.lng], { icon });
-      const popupEl = buildPopupContent(label, onVote);
+      const popupEl = buildPopupContent(label, onVote, onLabelClick);
       marker.bindPopup(popupEl, { maxWidth: 320, className: "hoodmap-popup" });
       marker.addTo(markerLayer);
     });
-  }, [filteredLabels, showLabels, selectedCategories, onVote]);
+  }, [filteredLabels, showLabels, selectedCategories, onVote, onLabelClick]);
 
   // Re-render markers on zoom
   useEffect(() => {
@@ -360,7 +372,7 @@ export function MapView({
       labelsToShow.forEach((label) => {
         const icon = createTextIcon(label);
         const marker = L.marker([label.lat, label.lng], { icon });
-        const popupEl = buildPopupContent(label, onVote);
+        const popupEl = buildPopupContent(label, onVote, onLabelClick);
         marker.bindPopup(popupEl, { maxWidth: 320, className: "hoodmap-popup" });
         marker.addTo(markerLayer);
       });
@@ -368,7 +380,7 @@ export function MapView({
 
     map.on("zoomend", onZoom);
     return () => { map.off("zoomend", onZoom); };
-  }, [filteredLabels, showLabels, selectedCategories, onVote]);
+  }, [filteredLabels, showLabels, selectedCategories, onVote, onLabelClick]);
 
   // Update zone layer
   useEffect(() => {
