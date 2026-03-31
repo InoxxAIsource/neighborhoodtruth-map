@@ -1,9 +1,17 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { MapPin, TagsIcon, EyeOff, LocateFixed, Search, Loader2 } from "lucide-react";
+
+interface SearchResult {
+  display_name: string;
+  lat: string;
+  lon: string;
+  type: string;
+  class: string;
+}
 
 export const PLACE_CATEGORIES = {
   good: [
@@ -61,7 +69,11 @@ export function TopToolbar({
   const [placesOpen, setPlacesOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [suggestions, setSuggestions] = useState<SearchResult[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const toggleCategory = (label: string) => {
     onCategoriesChange(
@@ -74,51 +86,104 @@ export function TopToolbar({
   const clearAll = () => onCategoriesChange([]);
   const selectAll = () => onCategoriesChange(ALL_PLACE_LABELS);
 
-  const handleSearch = async () => {
-    const q = searchQuery.trim();
-    if (!q) return;
+  // Close suggestions on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const fetchSuggestions = useCallback(async (q: string) => {
+    if (q.length < 2) { setSuggestions([]); return; }
     setIsSearching(true);
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=6&addressdetails=1`
       );
-      const data = await res.json();
-      if (data.length > 0) {
-        onSearchLocation?.({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
-        setSearchQuery("");
-      }
+      const data: SearchResult[] = await res.json();
+      setSuggestions(data);
+      setShowSuggestions(data.length > 0);
     } catch {
-      // silently fail
+      setSuggestions([]);
     } finally {
       setIsSearching(false);
     }
+  }, []);
+
+  const handleInputChange = (value: string) => {
+    setSearchQuery(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchSuggestions(value), 350);
+  };
+
+  const selectSuggestion = (result: SearchResult) => {
+    onSearchLocation?.({ lat: parseFloat(result.lat), lng: parseFloat(result.lon) });
+    setSearchQuery("");
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
+
+  const handleSearch = () => {
+    if (suggestions.length > 0) {
+      selectSuggestion(suggestions[0]);
+    } else {
+      fetchSuggestions(searchQuery.trim());
+    }
+  };
+
+  const formatName = (name: string) => {
+    const parts = name.split(",").map((p) => p.trim());
+    return parts.length > 2 ? `${parts[0]}, ${parts[1]}` : parts.slice(0, 2).join(", ");
   };
 
   return (
     <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] flex items-center gap-2">
-      {/* Search city/country */}
-      <div className="flex items-center bg-card/95 backdrop-blur-sm border rounded-full shadow-md overflow-hidden">
-        <Input
-          ref={searchRef}
-          placeholder="Search city or country..."
-          className="h-8 w-40 sm:w-48 border-0 bg-transparent text-sm focus-visible:ring-0 focus-visible:ring-offset-0 pl-3"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-        />
-        <Button
-          size="sm"
-          variant="ghost"
-          className="h-8 w-8 p-0 shrink-0"
-          onClick={handleSearch}
-          disabled={isSearching || !searchQuery.trim()}
-        >
-          {isSearching ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <Search className="h-3.5 w-3.5" />
-          )}
-        </Button>
+      {/* Search with autocomplete */}
+      <div ref={wrapperRef} className="relative">
+        <div className="flex items-center bg-card/95 backdrop-blur-sm border rounded-full shadow-md overflow-hidden">
+          <Input
+            ref={searchRef}
+            placeholder="Search neighborhood, city..."
+            className="h-8 w-44 sm:w-56 border-0 bg-transparent text-sm focus-visible:ring-0 focus-visible:ring-offset-0 pl-3"
+            value={searchQuery}
+            onChange={(e) => handleInputChange(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+          />
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8 w-8 p-0 shrink-0"
+            onClick={handleSearch}
+            disabled={isSearching || !searchQuery.trim()}
+          >
+            {isSearching ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Search className="h-3.5 w-3.5" />
+            )}
+          </Button>
+        </div>
+
+        {/* Autocomplete dropdown */}
+        {showSuggestions && suggestions.length > 0 && (
+          <div className="absolute top-full left-0 right-0 mt-1 bg-card border rounded-lg shadow-xl overflow-hidden z-50">
+            {suggestions.map((s, i) => (
+              <button
+                key={`${s.lat}-${s.lon}-${i}`}
+                className="w-full text-left px-3 py-2 text-sm hover:bg-accent/60 transition-colors flex items-start gap-2 border-b border-border/30 last:border-0"
+                onClick={() => selectSuggestion(s)}
+              >
+                <MapPin className="h-3.5 w-3.5 mt-0.5 shrink-0 text-muted-foreground" />
+                <span className="text-foreground leading-snug">{formatName(s.display_name)}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* District mode toggle */}
