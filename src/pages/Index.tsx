@@ -217,6 +217,14 @@ export default function Index() {
         onSubmit={(data) => addLabel.mutate(data)}
         isSubmitting={addLabel.isPending}
       />
+
+      <NeighborhoodChatDrawer
+        open={chatDrawerOpen}
+        onOpenChange={setChatDrawerOpen}
+        clickedLabel={chatLabel}
+        nearbyLabels={chatNearby}
+        areaName={chatAreaName}
+      />
     </div>
   );
 }
