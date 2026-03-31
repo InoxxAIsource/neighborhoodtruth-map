@@ -655,6 +655,9 @@ const SEED_LABELS: SeedLabel[] = [
   { lat: 31.7759, lng: 35.2083, text: "Rehavia leafy prestigious area", safety: 5, vibe: ["Bougie", "Chill"], cost: "$$$", color: "#4caf50", category: null, upvotes: 61, downvotes: 5 },
   { lat: 31.7780, lng: 35.2202, text: "Mamilla luxury mall near Old City", safety: 5, vibe: ["Bougie", "Family"], cost: "$$$$", color: "#4caf50", category: null, upvotes: 55, downvotes: 9 },
   { lat: 31.7692, lng: 35.2027, text: "Ein Kerem artist village serene", safety: 5, vibe: ["Artsy", "Chill"], cost: "$$", color: "#7c3aed", category: "Art galleries", upvotes: 77, downvotes: 3 },
+  { lat: 32.0928, lng: 34.7851, text: "Ramat Aviv university calm enclave", safety: 5, vibe: ["Chill", "Family"], cost: "$$$", color: "#1565c0", category: "Cafes to work", upvotes: 62, downvotes: 4 },
+  { lat: 32.0836, lng: 34.7978, text: "Yarkon Park Tel Aviv green lung", safety: 5, vibe: ["Family", "Chill"], cost: "$", color: "#16a34a", category: "Parks", upvotes: 88, downvotes: 2 },
+  { lat: 31.7916, lng: 35.2205, text: "Mea Shearim ultra-orthodox quarter", safety: 3, vibe: ["Family", "Chill"], cost: "$", color: "#9e9e9e", category: null, upvotes: 44, downvotes: 16 },
 
   // ===== KARACHI =====
   { lat: 24.8120, lng: 67.0313, text: "Clifton sea breezes upscale feel", safety: 4, vibe: ["Bougie", "Chill"], cost: "$$$", color: "#4caf50", category: null, upvotes: 67, downvotes: 9 },
@@ -679,8 +682,8 @@ const SEED_LABELS: SeedLabel[] = [
 async function seed() {
   const [{ value: existingCount }] = await db.select({ value: count() }).from(labelsTable);
   
-  if (existingCount >= 510) {
-    console.log(`Database already has ${existingCount} labels, skipping seed.`);
+  if (existingCount >= SEED_LABELS.length) {
+    console.log(`Database already has ${existingCount} labels (${SEED_LABELS.length} defined), skipping seed.`);
     process.exit(0);
   }
 
