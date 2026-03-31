@@ -101,17 +101,26 @@ function aggregateArea(labels: LabelRow[]) {
 }
 
 function matchesIntent(label: LabelRow, intent: string): boolean {
+  const vibe = label.vibe ?? [];
   switch (intent) {
     case "safe":
       return label.safety >= 4;
     case "affordable":
       return label.cost === "$" || label.cost === "$$";
     case "nightlife":
-      return (label.vibe ?? []).some((v) => ["Nightlife", "Bars", "Loud"].includes(v)) ||
-        label.category === "Bars";
+      return vibe.some((v) => ["Nightlife", "Bars", "Loud"].includes(v)) || label.category === "Bars";
     case "family":
-      return (label.vibe ?? []).includes("Family") ||
-        label.category === "Parks";
+      return vibe.includes("Family") || label.category === "Parks";
+    case "students":
+      return (label.cost === "$" || label.cost === "$$") &&
+        (vibe.some((v) => ["Artsy", "Chill", "Bars", "Nightlife"].includes(v)) || label.safety >= 3);
+    case "young-professionals":
+      return label.safety >= 3 &&
+        (vibe.some((v) => ["Artsy", "Chill", "Bougie", "Bars"].includes(v)) || label.cost === "$$$");
+    case "quiet":
+      return !vibe.includes("Loud") && !vibe.includes("Nightlife") && label.safety >= 3;
+    case "expensive":
+      return label.cost === "$$$" || label.cost === "$$$$";
     default:
       return true;
   }
@@ -122,6 +131,10 @@ const INTENT_SLUGS: Record<string, string> = {
   "affordable-areas": "affordable",
   "nightlife-areas": "nightlife",
   "family-friendly": "family",
+  "best-areas-for-students": "students",
+  "best-areas-for-young-professionals": "young-professionals",
+  "quiet-neighborhoods": "quiet",
+  "expensive-neighborhoods": "expensive",
 };
 
 const INTENT_LABELS: Record<string, string> = {
@@ -129,6 +142,10 @@ const INTENT_LABELS: Record<string, string> = {
   affordable: "Affordable Areas",
   nightlife: "Nightlife Areas",
   family: "Family-Friendly Neighborhoods",
+  students: "Best Areas for Students",
+  "young-professionals": "Best Areas for Young Professionals",
+  quiet: "Quiet Neighborhoods",
+  expensive: "Expensive Neighborhoods",
 };
 
 router.get("/cities", async (_req, res) => {

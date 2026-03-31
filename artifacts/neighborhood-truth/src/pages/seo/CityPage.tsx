@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams, Link } from "wouter";
 import { Helmet } from "react-helmet-async";
-import { MapPin, TrendingUp, Shield, DollarSign, Star, Music, Home } from "lucide-react";
+import { MapPin, TrendingUp, Shield, DollarSign, Star, Music, Home, GraduationCap, Briefcase, Leaf, Calendar } from "lucide-react";
 import { SEOLayout, API, StatBadge, AreaCard, LoadingState, ErrorState, safetyLabel, slugify } from "./SEOLayout";
 
 interface CityData {
@@ -30,11 +30,18 @@ interface CityData {
   intents: Array<{ slug: string; label: string; url: string }>;
 }
 
-const INTENT_ICONS: Record<string, string> = {
+const PRIMARY_INTENT_ICONS: Record<string, string> = {
   "safe-neighborhoods": "🛡️",
   "affordable-areas": "💰",
   "nightlife-areas": "🎉",
   "family-friendly": "👨‍👩‍👧‍👦",
+};
+
+const SECONDARY_INTENT_ICONS: Record<string, string> = {
+  "best-areas-for-students": "🎓",
+  "best-areas-for-young-professionals": "💼",
+  "quiet-neighborhoods": "🌿",
+  "expensive-neighborhoods": "💎",
 };
 
 const COST_FULL: Record<string, string> = {
@@ -43,6 +50,11 @@ const COST_FULL: Record<string, string> = {
   "$$$": "moderately expensive",
   "$$$$": "expensive (premium)",
 };
+
+function getUpdatedLabel(): string {
+  const now = new Date();
+  return now.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+}
 
 export default function CityPage() {
   const { city } = useParams<{ city: string }>();
@@ -64,9 +76,12 @@ export default function CityPage() {
   const nightlifeAreas = areas.filter((a) => (a.vibe ?? []).some((v) => ["Nightlife", "Bars", "Loud"].includes(v)) || a.category === "Bars").slice(0, 5);
   const familyAreas = areas.filter((a) => (a.vibe ?? []).includes("Family") || a.category === "Parks").slice(0, 5);
 
+  const primaryIntents = intents.filter((i) => Object.keys(PRIMARY_INTENT_ICONS).includes(i.slug));
+  const secondaryIntents = intents.filter((i) => Object.keys(SECONDARY_INTENT_ICONS).includes(i.slug));
+
   const year = new Date().getFullYear();
-  const title = `Best Neighborhoods in ${cityInfo.name} (${year} Guide)`;
-  const description = `Discover the best neighborhoods in ${cityInfo.name} based on ${stats.labelCount} crowd-sourced insights. Average safety ${stats.avgSafety}/5. Top areas: ${top5.slice(0, 3).map((a) => a.text).join(", ")}. Find where to live, visit, and explore in ${cityInfo.name}.`;
+  const title = `${stats.labelCount} Best Neighborhoods in ${cityInfo.name} (Safe, Affordable & Ranked ${year})`;
+  const description = `Discover the ${stats.labelCount} best neighborhoods in ${cityInfo.name} based on ${stats.labelCount} real community signals. Safety: ${stats.avgSafety}/5. Cost: ${stats.modeCost}. Top area: "${stats.topLabel}". Find where to live, visit & explore.`;
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -86,7 +101,7 @@ export default function CityPage() {
         "name": `What are the best neighborhoods in ${cityInfo.name}?`,
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": `The top-rated neighborhoods in ${cityInfo.name} based on community data are: ${top5.map((a) => a.text).join(", ")}. These areas have the highest community sentiment scores.`,
+          "text": `The top-rated neighborhoods in ${cityInfo.name} based on ${stats.labelCount} community signals are: ${top5.map((a) => a.text).join(", ")}. These areas have the highest community sentiment scores.`,
         },
       },
       {
@@ -94,7 +109,7 @@ export default function CityPage() {
         "name": `Is ${cityInfo.name} safe to live in?`,
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": `${cityInfo.name} has an average safety rating of ${stats.avgSafety}/5 across ${stats.labelCount} community insights, which is considered "${safetyLabel(stats.avgSafety)}". The safest areas include ${safeAreas.slice(0, 3).map((a) => a.text).join(", ")}.`,
+          "text": `${cityInfo.name} has an average safety rating of ${stats.avgSafety}/5 across ${stats.labelCount} community insights, which is considered "${safetyLabel(stats.avgSafety)}". Safest areas include ${safeAreas.slice(0, 3).map((a) => a.text).join(", ")}.`,
         },
       },
       {
@@ -103,6 +118,14 @@ export default function CityPage() {
         "acceptedAnswer": {
           "@type": "Answer",
           "text": `Most areas in ${cityInfo.name} are rated ${stats.modeCost} (${COST_FULL[stats.modeCost] || stats.modeCost}) by the community. Budget-friendly options include ${affordableAreas.slice(0, 2).map((a) => a.text).join(" and ")}.`,
+        },
+      },
+      {
+        "@type": "Question",
+        "name": `Where should I live in ${cityInfo.name}?`,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": `Where to live in ${cityInfo.name} depends on your priorities. For safety, consider ${safeAreas.slice(0, 2).map((a) => a.text).join(" or ")}. For affordability, look at ${affordableAreas.slice(0, 2).map((a) => a.text).join(" or ")}. For nightlife, ${nightlifeAreas.slice(0, 2).map((a) => a.text).join(" or ")} are community favorites.`,
         },
       },
     ],
@@ -121,6 +144,12 @@ export default function CityPage() {
         <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
       </Helmet>
 
+      {/* Freshness badge */}
+      <div className="flex items-center gap-2 text-xs text-gray-400 mb-4">
+        <Calendar className="h-3 w-3" />
+        <span>Updated {getUpdatedLabel()} · Based on {stats.labelCount} real local signals · Safety score {stats.avgSafety}/5</span>
+      </div>
+
       {/* Hero */}
       <div className="mb-8">
         <div className="flex items-center gap-2 text-teal-600 text-sm mb-2">
@@ -128,64 +157,74 @@ export default function CityPage() {
           <span>{cityInfo.country}</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
-          Best Neighborhoods in {cityInfo.name} ({year} Guide)
+          {stats.labelCount} Best Neighborhoods in {cityInfo.name} ({year})
         </h1>
         <p className="text-gray-600 text-lg leading-relaxed max-w-2xl">
-          Based on <strong>{stats.labelCount} real insights</strong> from locals and visitors.
-          Average safety rating: <strong>{stats.avgSafety}/5</strong> ({safetyLabel(stats.avgSafety)}).
-          Typical cost: <strong>{stats.modeCost}</strong>.
+          Based on <strong>{stats.labelCount} real local signals</strong> — safety, cost, and vibe data from actual residents and visitors.
+          Average safety: <strong>{stats.avgSafety}/5 ({safetyLabel(stats.avgSafety)})</strong>. Typical cost: <strong>{stats.modeCost}</strong>.
         </p>
       </div>
 
-      {/* Stats row */}
+      {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-        <StatBadge label="Avg Safety" value={`${stats.avgSafety}/5`} color="bg-green-50 text-green-800" />
+        <StatBadge label="Safety Score" value={`${stats.avgSafety}/5`} color="bg-green-50 text-green-800" />
         <StatBadge label="Typical Cost" value={stats.modeCost} color="bg-blue-50 text-blue-800" />
         <StatBadge label="Community Score" value={`+${stats.sentiment}`} color="bg-purple-50 text-purple-800" />
-        <StatBadge label="Insights" value={stats.labelCount} color="bg-orange-50 text-orange-800" />
+        <StatBadge label="Local Signals" value={stats.labelCount} color="bg-orange-50 text-orange-800" />
       </div>
 
       {/* Overview */}
       <section className="bg-gradient-to-r from-teal-50 to-blue-50 rounded-2xl border border-teal-100 p-6 mb-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-3">Overview</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-3">Overview: Where to Live in {cityInfo.name}</h2>
         <p className="text-gray-700 leading-relaxed mb-3">
-          {cityInfo.name} is a city with <strong>{stats.labelCount}</strong> community-verified neighborhood insights covering safety, cost of living, and local vibes.
-          The community rates the city <strong>{stats.avgSafety}/5 for safety</strong> — considered <strong>{safetyLabel(stats.avgSafety)}</strong> overall —
-          with most areas in the <strong>{stats.modeCost}</strong> price range.
+          {cityInfo.name} has <strong>{stats.labelCount} verified neighborhood signals</strong> covering safety, cost of living, and local vibes.
+          The community rates the city <strong>{stats.avgSafety}/5 for safety</strong> ({safetyLabel(stats.avgSafety)}) with most areas in the <strong>{stats.modeCost}</strong> price range.
+          The standout area is <strong>"{stats.topLabel}"</strong> — the city's highest-rated neighborhood.
         </p>
         <p className="text-gray-700 leading-relaxed">
-          The standout area according to locals is <strong>"{stats.topLabel}"</strong>, which tops the charts for community sentiment.
-          Popular local vibes include {stats.vibes.slice(0, 4).map((v) => `"${v}"`).join(", ")}.
-          Whether you're looking for{" "}
-          <Link href={`/${cityInfo.slug}/safe-neighborhoods`} className="text-teal-700 font-medium hover:underline">safe areas</Link>,{" "}
-          <Link href={`/${cityInfo.slug}/affordable-areas`} className="text-teal-700 font-medium hover:underline">budget-friendly neighborhoods</Link>, or{" "}
-          <Link href={`/${cityInfo.slug}/nightlife-areas`} className="text-teal-700 font-medium hover:underline">vibrant nightlife</Link>,
-          {" "}{cityInfo.name} has something for everyone.
+          Popular local vibes: {stats.vibes.slice(0, 4).map((v) => `"${v}"`).join(", ")}.
+          Whether you're looking for <Link href={`/${cityInfo.slug}/safe-neighborhoods`} className="text-teal-700 font-medium hover:underline">the safest neighborhoods in {cityInfo.name}</Link>,{" "}
+          <Link href={`/${cityInfo.slug}/affordable-areas`} className="text-teal-700 font-medium hover:underline">cheap areas in {cityInfo.name}</Link>, or{" "}
+          <Link href={`/${cityInfo.slug}/nightlife-areas`} className="text-teal-700 font-medium hover:underline">the best nightlife neighborhoods in {cityInfo.name}</Link>,
+          this guide has you covered.
         </p>
       </section>
 
-      {/* Browse by Need */}
-      <section className="mb-10">
+      {/* Browse by Need — primary */}
+      <section className="mb-6">
         <h2 className="text-lg font-bold text-gray-800 mb-3">Browse {cityInfo.name} by Need</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {intents.map((intent) => (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
+          {primaryIntents.map((intent) => (
             <Link key={intent.slug} href={`/${cityInfo.slug}/${intent.slug}`}>
               <div className="bg-white border border-gray-200 rounded-xl p-4 text-center hover:border-teal-300 hover:shadow-md transition-all cursor-pointer">
-                <div className="text-2xl mb-1">{INTENT_ICONS[intent.slug] || "📍"}</div>
+                <div className="text-2xl mb-1">{PRIMARY_INTENT_ICONS[intent.slug] || "📍"}</div>
                 <p className="text-sm font-semibold text-gray-800">{intent.label}</p>
               </div>
             </Link>
           ))}
         </div>
+        {/* Secondary intent pills */}
+        {secondaryIntents.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {secondaryIntents.map((intent) => (
+              <Link key={intent.slug} href={`/${cityInfo.slug}/${intent.slug}`}>
+                <span className="inline-flex items-center gap-1.5 bg-white border border-gray-200 text-gray-700 rounded-full px-3 py-1.5 text-sm hover:border-purple-300 hover:text-purple-700 transition-colors cursor-pointer">
+                  <span>{SECONDARY_INTENT_ICONS[intent.slug]}</span>
+                  {intent.label}
+                </span>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
 
-      {/* Top Neighborhoods (top 5 with table) */}
+      {/* Top Neighborhoods table */}
       <section className="mb-10">
         <div className="flex items-center gap-2 mb-4">
           <TrendingUp className="h-5 w-5 text-teal-600" />
-          <h2 className="text-xl font-bold text-gray-900">Top Neighborhoods in {cityInfo.name}</h2>
+          <h2 className="text-xl font-bold text-gray-900">Top {top5.length} Neighborhoods in {cityInfo.name} (Ranked)</h2>
         </div>
-        <p className="text-sm text-gray-500 mb-4">Ranked by community sentiment score — higher is better rated by locals.</p>
+        <p className="text-sm text-gray-500 mb-4">Ranked by community sentiment score based on {stats.totalUpvotes.toLocaleString()} upvotes from real locals.</p>
         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden mb-4">
           <table className="w-full text-sm">
             <thead>
@@ -195,53 +234,63 @@ export default function CityPage() {
                 <th className="text-center px-3 py-3 text-gray-500 font-medium">Safety</th>
                 <th className="text-center px-3 py-3 text-gray-500 font-medium">Cost</th>
                 <th className="text-center px-3 py-3 text-gray-500 font-medium hidden sm:table-cell">Score</th>
+                <th className="text-center px-3 py-3 text-gray-500 font-medium hidden sm:table-cell">% Pos</th>
               </tr>
             </thead>
             <tbody className="divide-y">
-              {top5.map((area, i) => (
-                <tr key={area.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3 text-gray-400 font-medium">{i + 1}</td>
-                  <td className="px-4 py-3">
-                    <Link href={`/${cityInfo.slug}/${area.slug || slugify(area.text)}`} className="font-medium text-gray-900 hover:text-teal-700 transition-colors">
-                      {area.text}
-                    </Link>
-                    {area.vibe.length > 0 && (
-                      <div className="flex gap-1 mt-0.5 flex-wrap">
-                        {area.vibe.slice(0, 2).map((v) => (
-                          <span key={v} className="text-xs text-gray-400">{v}</span>
-                        ))}
-                      </div>
-                    )}
-                  </td>
-                  <td className="text-center px-3 py-3">
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${area.safety >= 4 ? "bg-green-100 text-green-700" : area.safety >= 3 ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>
-                      {area.safety}/5
-                    </span>
-                  </td>
-                  <td className="text-center px-3 py-3 font-medium text-gray-700">{area.cost}</td>
-                  <td className={`text-center px-3 py-3 font-bold hidden sm:table-cell ${area.sentiment > 0 ? "text-green-700" : "text-red-700"}`}>
-                    {area.sentiment > 0 ? "+" : ""}{area.sentiment}
-                  </td>
-                </tr>
-              ))}
+              {top5.map((area, i) => {
+                const totalVotes = area.upvotes + area.downvotes;
+                const pct = totalVotes > 0 ? Math.round((area.upvotes / totalVotes) * 100) : 0;
+                return (
+                  <tr key={area.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-4 py-3 text-gray-400 font-bold">{i + 1}</td>
+                    <td className="px-4 py-3">
+                      <Link href={`/${cityInfo.slug}/${area.slug || slugify(area.text)}`} className="font-medium text-gray-900 hover:text-teal-700 transition-colors">
+                        {area.text}
+                      </Link>
+                      {area.vibe.length > 0 && (
+                        <div className="flex gap-1 mt-0.5 flex-wrap">
+                          {area.vibe.slice(0, 2).map((v) => (
+                            <span key={v} className="text-xs text-gray-400">{v}</span>
+                          ))}
+                        </div>
+                      )}
+                    </td>
+                    <td className="text-center px-3 py-3">
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${area.safety >= 4 ? "bg-green-100 text-green-700" : area.safety >= 3 ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>
+                        {area.safety}/5
+                      </span>
+                    </td>
+                    <td className="text-center px-3 py-3 font-medium text-gray-700">{area.cost}</td>
+                    <td className={`text-center px-3 py-3 font-bold hidden sm:table-cell ${area.sentiment > 0 ? "text-green-700" : "text-red-700"}`}>
+                      {area.sentiment > 0 ? "+" : ""}{area.sentiment}
+                    </td>
+                    <td className="text-center px-3 py-3 hidden sm:table-cell">
+                      <span className={`text-xs font-semibold ${pct >= 70 ? "text-green-600" : pct >= 50 ? "text-yellow-600" : "text-red-600"}`}>{pct}%</span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
-        <div className="grid gap-3">
-          {top10.slice(5).map((area, i) => (
-            <AreaCard
-              key={area.id}
-              text={area.text}
-              citySlug={cityInfo.slug}
-              areaSlug={area.slug || slugify(area.text)}
-              safety={area.safety}
-              cost={area.cost}
-              vibes={area.vibe}
-              sentiment={area.sentiment}
-              rank={i + 6}
-            />
-          ))}
-        </div>
+        {top10.slice(5).length > 0 && (
+          <div className="grid gap-3">
+            {top10.slice(5).map((area, i) => (
+              <AreaCard
+                key={area.id}
+                text={area.text}
+                citySlug={cityInfo.slug}
+                areaSlug={area.slug || slugify(area.text)}
+                safety={area.safety}
+                cost={area.cost}
+                vibes={area.vibe}
+                sentiment={area.sentiment}
+                rank={i + 6}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Safest Areas */}
@@ -249,10 +298,10 @@ export default function CityPage() {
         <section className="mb-10">
           <div className="flex items-center gap-2 mb-2">
             <Shield className="h-5 w-5 text-green-600" />
-            <h2 className="text-xl font-bold text-gray-900">Safest Areas in {cityInfo.name}</h2>
+            <h2 className="text-xl font-bold text-gray-900">Safest Neighborhoods in {cityInfo.name}</h2>
           </div>
           <p className="text-sm text-gray-500 mb-4">
-            Areas rated 4/5 or higher for safety by the community. Perfect for{" "}
+            Areas rated 4/5 or higher for safety based on {stats.labelCount} local signals. Perfect for{" "}
             <Link href={`/${cityInfo.slug}/family-friendly`} className="text-teal-600 hover:underline">families</Link> and solo travelers.
           </p>
           <div className="grid sm:grid-cols-2 gap-3">
@@ -263,18 +312,14 @@ export default function CityPage() {
                     <p className="text-sm font-medium text-gray-900 truncate">{area.text}</p>
                     <p className="text-xs text-gray-400">{area.cost} · {area.vibe.slice(0, 2).join(", ")}</p>
                   </div>
-                  <div className="flex-shrink-0 ml-3">
-                    <span className="text-xs font-bold bg-green-100 text-green-700 rounded-full px-2 py-0.5">
-                      {"★".repeat(area.safety)}/5
-                    </span>
-                  </div>
+                  <span className="flex-shrink-0 text-xs font-bold bg-green-100 text-green-700 rounded-full px-2 py-0.5 ml-3">{area.safety}/5 ★</span>
                 </div>
               </Link>
             ))}
           </div>
           <div className="mt-3">
             <Link href={`/${cityInfo.slug}/safe-neighborhoods`} className="text-sm text-teal-600 hover:underline font-medium">
-              See all safe neighborhoods in {cityInfo.name} →
+              → See all {safeAreas.length}+ safest neighborhoods in {cityInfo.name}
             </Link>
           </div>
         </section>
@@ -288,7 +333,7 @@ export default function CityPage() {
             <h2 className="text-xl font-bold text-gray-900">Affordable Areas in {cityInfo.name}</h2>
           </div>
           <p className="text-sm text-gray-500 mb-4">
-            Budget-friendly neighborhoods rated $ or $$ by the community. Great for long-term living without breaking the bank.
+            Budget-friendly neighborhoods rated $ or $$ — the cheapest places to live in {cityInfo.name} according to community data.
           </p>
           <div className="grid sm:grid-cols-2 gap-3">
             {affordableAreas.map((area) => (
@@ -296,7 +341,7 @@ export default function CityPage() {
                 <div className="flex items-center justify-between bg-white border border-gray-200 rounded-xl px-4 py-3 hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">{area.text}</p>
-                    <p className="text-xs text-gray-400">{"★".repeat(area.safety)}/5 safety</p>
+                    <p className="text-xs text-gray-400">{area.safety}/5 safety · {area.vibe.slice(0, 1).join(", ")}</p>
                   </div>
                   <span className="flex-shrink-0 text-sm font-bold text-blue-700 ml-3">{area.cost}</span>
                 </div>
@@ -305,7 +350,7 @@ export default function CityPage() {
           </div>
           <div className="mt-3">
             <Link href={`/${cityInfo.slug}/affordable-areas`} className="text-sm text-teal-600 hover:underline font-medium">
-              See all affordable areas in {cityInfo.name} →
+              → See all affordable areas in {cityInfo.name}
             </Link>
           </div>
         </section>
@@ -318,24 +363,15 @@ export default function CityPage() {
             <Music className="h-5 w-5 text-purple-600" />
             <h2 className="text-xl font-bold text-gray-900">Best Nightlife Areas in {cityInfo.name}</h2>
           </div>
-          <p className="text-sm text-gray-500 mb-4">Neighborhoods known for bars, clubs, and after-dark energy according to locals.</p>
+          <p className="text-sm text-gray-500 mb-4">Neighborhoods with bars, clubs, and after-dark energy — {cityInfo.name}'s best nightlife scene according to locals.</p>
           <div className="grid gap-3">
             {nightlifeAreas.map((area) => (
-              <AreaCard
-                key={area.id}
-                text={area.text}
-                citySlug={cityInfo.slug}
-                areaSlug={area.slug || slugify(area.text)}
-                safety={area.safety}
-                cost={area.cost}
-                vibes={area.vibe}
-                sentiment={area.sentiment}
-              />
+              <AreaCard key={area.id} text={area.text} citySlug={cityInfo.slug} areaSlug={area.slug || slugify(area.text)} safety={area.safety} cost={area.cost} vibes={area.vibe} sentiment={area.sentiment} />
             ))}
           </div>
           <div className="mt-3">
             <Link href={`/${cityInfo.slug}/nightlife-areas`} className="text-sm text-teal-600 hover:underline font-medium">
-              See all nightlife areas in {cityInfo.name} →
+              → See all best nightlife neighborhoods in {cityInfo.name}
             </Link>
           </div>
         </section>
@@ -348,25 +384,33 @@ export default function CityPage() {
             <Home className="h-5 w-5 text-amber-600" />
             <h2 className="text-xl font-bold text-gray-900">Family-Friendly Neighborhoods in {cityInfo.name}</h2>
           </div>
-          <p className="text-sm text-gray-500 mb-4">Quiet, safe areas with parks and a community vibe — perfect for raising a family.</p>
+          <p className="text-sm text-gray-500 mb-4">Quiet, safe areas with parks and community vibe — top family neighborhoods in {cityInfo.name}.</p>
           <div className="grid gap-3">
             {familyAreas.map((area) => (
-              <AreaCard
-                key={area.id}
-                text={area.text}
-                citySlug={cityInfo.slug}
-                areaSlug={area.slug || slugify(area.text)}
-                safety={area.safety}
-                cost={area.cost}
-                vibes={area.vibe}
-                sentiment={area.sentiment}
-              />
+              <AreaCard key={area.id} text={area.text} citySlug={cityInfo.slug} areaSlug={area.slug || slugify(area.text)} safety={area.safety} cost={area.cost} vibes={area.vibe} sentiment={area.sentiment} />
             ))}
           </div>
           <div className="mt-3">
             <Link href={`/${cityInfo.slug}/family-friendly`} className="text-sm text-teal-600 hover:underline font-medium">
-              See all family-friendly areas in {cityInfo.name} →
+              → See all family-friendly neighborhoods in {cityInfo.name}
             </Link>
+          </div>
+        </section>
+      )}
+
+      {/* Secondary intent quicklinks */}
+      {secondaryIntents.length > 0 && (
+        <section className="mb-10 bg-white rounded-2xl border border-gray-200 p-5">
+          <h2 className="text-base font-bold text-gray-900 mb-3">More {cityInfo.name} Neighborhood Guides</h2>
+          <div className="grid sm:grid-cols-2 gap-2">
+            {secondaryIntents.map((intent) => (
+              <Link key={intent.slug} href={`/${cityInfo.slug}/${intent.slug}`}>
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-gray-50 border border-gray-100 hover:border-gray-200 transition-colors cursor-pointer">
+                  <span className="text-lg">{SECONDARY_INTENT_ICONS[intent.slug]}</span>
+                  <span className="text-sm font-medium text-gray-800">{intent.label} in {cityInfo.name}</span>
+                </div>
+              </Link>
+            ))}
           </div>
         </section>
       )}
@@ -386,22 +430,26 @@ export default function CityPage() {
         </section>
       )}
 
-      {/* FAQ section */}
+      {/* FAQ */}
       <section className="mb-10">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
-        <div className="space-y-4">
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Frequently Asked Questions About {cityInfo.name}</h2>
+        <div className="space-y-3">
           {[
             {
               q: `What are the best neighborhoods in ${cityInfo.name}?`,
-              a: `The top-rated neighborhoods in ${cityInfo.name} based on community data are: ${top5.map((a) => a.text).join(", ")}. These are ranked by community sentiment — the more locals recommend an area, the higher it ranks.`,
+              a: `The top-rated neighborhoods in ${cityInfo.name} based on ${stats.labelCount} community signals are: ${top5.map((a) => a.text).join(", ")}. Ranked by community sentiment score.`,
             },
             {
-              q: `Is ${cityInfo.name} safe?`,
-              a: `${cityInfo.name} has an average safety rating of ${stats.avgSafety}/5 across ${stats.labelCount} crowd-sourced data points, which is considered "${safetyLabel(stats.avgSafety)}". ${safeAreas.length} areas score 4/5 or higher for safety. Browse ${cityInfo.name}'s safest neighborhoods for detailed breakdowns.`,
+              q: `Is ${cityInfo.name} safe to live in?`,
+              a: `${cityInfo.name} has an average safety rating of ${stats.avgSafety}/5 across ${stats.labelCount} crowd-sourced data points — considered "${safetyLabel(stats.avgSafety)}". ${safeAreas.length} areas score 4/5 or higher for safety.`,
             },
             {
               q: `What is the cost of living in ${cityInfo.name}?`,
-              a: `Most areas in ${cityInfo.name} fall in the ${stats.modeCost} (${COST_FULL[stats.modeCost] || stats.modeCost}) cost bracket according to community data. Budget-friendly options include ${affordableAreas.slice(0, 3).map((a) => a.text).join(", ")}.`,
+              a: `Most areas in ${cityInfo.name} fall in the ${stats.modeCost} (${COST_FULL[stats.modeCost] || stats.modeCost}) cost bracket according to ${stats.labelCount} community data points. Budget-friendly options include ${affordableAreas.slice(0, 3).map((a) => a.text).join(", ")}.`,
+            },
+            {
+              q: `Where should I live in ${cityInfo.name}?`,
+              a: `It depends on your priorities. For safety: ${safeAreas.slice(0, 2).map((a) => a.text).join(", ")}. For affordability: ${affordableAreas.slice(0, 2).map((a) => a.text).join(", ")}. For nightlife: ${nightlifeAreas.slice(0, 2).map((a) => a.text).join(", ")}.`,
             },
           ].map(({ q, a }) => (
             <details key={q} className="bg-white rounded-xl border border-gray-200 group">
@@ -418,24 +466,26 @@ export default function CityPage() {
       {/* SEO prose */}
       <section className="bg-white rounded-2xl border border-gray-200 p-6">
         <h2 className="text-lg font-bold text-gray-900 mb-3">
-          Where to Live in {cityInfo.name} — {year} Insider Guide
+          Where to Live in {cityInfo.name} — {year} Guide
         </h2>
         <div className="prose prose-sm text-gray-600 max-w-none space-y-3">
           <p>
-            Looking for the best neighborhoods in {cityInfo.name}? Our crowd-sourced data covers {stats.labelCount} areas contributed by real locals and visitors.
+            Looking for the <strong>best neighborhoods in {cityInfo.name}</strong>? Our crowd-sourced guide covers {stats.labelCount} areas based on real local signals.
             The city earns an overall safety rating of <strong>{stats.avgSafety}/5</strong> ({safetyLabel(stats.avgSafety)}),
-            with a typical cost level of <strong>{stats.modeCost}</strong>.
+            with a typical cost of <strong>{stats.modeCost}</strong>.
           </p>
           <p>
-            The highest-rated spot is <strong>"{stats.topLabel}"</strong> based on community upvotes.
-            Popular vibes across {cityInfo.name} include {stats.vibes.slice(0, 4).map((v) => `"${v}"`).join(", ")}.
+            The highest-rated neighborhood is <strong>"{stats.topLabel}"</strong>.
+            Popular local vibes: {stats.vibes.slice(0, 4).map((v) => `"${v}"`).join(", ")}.
           </p>
           <p>
-            Use our curated guides to narrow your search:{" "}
+            Use our guides to narrow your search:{" "}
             <Link href={`/${cityInfo.slug}/safe-neighborhoods`} className="text-teal-700 hover:underline">safest neighborhoods in {cityInfo.name}</Link>,{" "}
-            <Link href={`/${cityInfo.slug}/affordable-areas`} className="text-teal-700 hover:underline">cheap areas in {cityInfo.name}</Link>,{" "}
-            <Link href={`/${cityInfo.slug}/nightlife-areas`} className="text-teal-700 hover:underline">best nightlife areas in {cityInfo.name}</Link>, and{" "}
-            <Link href={`/${cityInfo.slug}/family-friendly`} className="text-teal-700 hover:underline">family-friendly neighborhoods in {cityInfo.name}</Link>.
+            <Link href={`/${cityInfo.slug}/affordable-areas`} className="text-teal-700 hover:underline">affordable areas in {cityInfo.name}</Link>,{" "}
+            <Link href={`/${cityInfo.slug}/nightlife-areas`} className="text-teal-700 hover:underline">best nightlife neighborhoods in {cityInfo.name}</Link>,{" "}
+            <Link href={`/${cityInfo.slug}/family-friendly`} className="text-teal-700 hover:underline">family-friendly neighborhoods in {cityInfo.name}</Link>,{" "}
+            <Link href={`/${cityInfo.slug}/best-areas-for-students`} className="text-teal-700 hover:underline">best areas for students in {cityInfo.name}</Link>, and{" "}
+            <Link href={`/${cityInfo.slug}/quiet-neighborhoods`} className="text-teal-700 hover:underline">quiet neighborhoods in {cityInfo.name}</Link>.
           </p>
         </div>
       </section>

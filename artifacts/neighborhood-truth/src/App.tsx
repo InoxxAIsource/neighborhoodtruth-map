@@ -27,6 +27,10 @@ function App() {
             <Route path="/:city/affordable-areas" component={IntentPage} />
             <Route path="/:city/nightlife-areas" component={IntentPage} />
             <Route path="/:city/family-friendly" component={IntentPage} />
+            <Route path="/:city/best-areas-for-students" component={IntentPage} />
+            <Route path="/:city/best-areas-for-young-professionals" component={IntentPage} />
+            <Route path="/:city/quiet-neighborhoods" component={IntentPage} />
+            <Route path="/:city/expensive-neighborhoods" component={IntentPage} />
             <Route path="/:city/:area" component={AreaPage} />
             <Route path="/:city" component={CityPage} />
             <Route path="/" component={Index} />
