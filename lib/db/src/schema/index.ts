@@ -1,4 +1,4 @@
-import { pgTable, uuid, doublePrecision, varchar, smallint, text, integer, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, uuid, doublePrecision, varchar, smallint, text, integer, timestamp, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -23,7 +23,9 @@ export const votesTable = pgTable("votes", {
   voterId: text("voter_id").notNull(),
   voteType: text("vote_type").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-});
+}, (t) => [
+  unique("votes_label_voter_unique").on(t.labelId, t.voterId),
+]);
 
 export const insertLabelSchema = createInsertSchema(labelsTable).omit({ id: true, createdAt: true });
 export const insertVoteSchema = createInsertSchema(votesTable).omit({ id: true, createdAt: true });

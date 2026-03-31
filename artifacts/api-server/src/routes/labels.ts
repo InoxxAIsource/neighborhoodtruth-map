@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, labelsTable, votesTable } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { z } from "zod";
 
 const router: IRouter = Router();
@@ -105,7 +105,7 @@ router.post("/:id/vote", async (req, res) => {
   const { voterId, voteType } = parsed.data;
 
   try {
-    const [existing] = await db.select({ id: labelsTable.id, upvotes: labelsTable.upvotes, downvotes: labelsTable.downvotes })
+    const [existing] = await db.select({ id: labelsTable.id })
       .from(labelsTable)
       .where(eq(labelsTable.id, id))
       .limit(1);
@@ -115,23 +115,26 @@ router.post("/:id/vote", async (req, res) => {
       return;
     }
 
-    const [existingVote] = await db.select({ id: votesTable.id })
-      .from(votesTable)
-      .where(and(eq(votesTable.labelId, id), eq(votesTable.voterId, voterId)))
-      .limit(1);
-
-    if (existingVote) {
-      res.status(400).json({ error: "Already voted" });
-      return;
+    try {
+      await db.insert(votesTable).values({ labelId: id, voterId, voteType });
+    } catch (insertErr: unknown) {
+      const msg = insertErr instanceof Error ? insertErr.message : String(insertErr);
+      if (msg.includes("votes_label_voter_unique") || msg.includes("unique") || msg.includes("duplicate")) {
+        res.status(400).json({ error: "Already voted" });
+        return;
+      }
+      throw insertErr;
     }
 
-    await db.insert(votesTable).values({ labelId: id, voterId, voteType });
-
-    const newUpvotes = voteType === "upvote" ? existing.upvotes + 1 : existing.upvotes;
-    const newDownvotes = voteType === "downvote" ? existing.downvotes + 1 : existing.downvotes;
-
     const [updated] = await db.update(labelsTable)
-      .set({ upvotes: newUpvotes, downvotes: newDownvotes })
+      .set({
+        upvotes: voteType === "upvote"
+          ? sql`${labelsTable.upvotes} + 1`
+          : labelsTable.upvotes,
+        downvotes: voteType === "downvote"
+          ? sql`${labelsTable.downvotes} + 1`
+          : labelsTable.downvotes,
+      })
       .where(eq(labelsTable.id, id))
       .returning();
 
