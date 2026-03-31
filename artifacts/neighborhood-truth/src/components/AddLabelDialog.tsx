@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -15,6 +16,11 @@ import { validateLabelText } from "@/lib/profanityFilter";
 
 const VIBE_OPTIONS = ["Chill", "Loud", "Bougie", "Artsy", "Family", "Nightlife"];
 const COST_OPTIONS = ["$", "$$", "$$$", "$$$$"];
+const CATEGORY_OPTIONS = [
+  "Cafes to work", "Coworking", "Yoga studios", "Parks", "Playgrounds", "Gyms",
+  "Restaurants", "Bars", "Art galleries", "Bookstores",
+  "Hotels", "Fast food", "Gambling", "Pawn shops", "Tourist traps",
+];
 const COLOR_OPTIONS = [
   { label: "Red", value: "#dc2626" },
   { label: "Orange", value: "#ea580c" },
@@ -51,6 +57,7 @@ export function AddLabelDialog({ open, onOpenChange, position, onSubmit, isSubmi
   const [selectedVibes, setSelectedVibes] = useState<string[]>([]);
   const [cost, setCost] = useState("$$");
   const [color, setColor] = useState("#0d9488");
+  const [category, setCategory] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const toggleVibe = (v: string) => {
@@ -76,13 +83,14 @@ export function AddLabelDialog({ open, onOpenChange, position, onSubmit, isSubmi
       vibe: selectedVibes,
       cost,
       color,
-      category: null,
+      category,
     });
     setText("");
     setSafety(3);
     setSelectedVibes([]);
     setCost("$$");
     setColor("#0d9488");
+    setCategory(null);
   };
 
   return (
@@ -93,6 +101,9 @@ export function AddLabelDialog({ open, onOpenChange, position, onSubmit, isSubmi
             <MapPin className="h-5 w-5 text-primary" />
             Drop a Label
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Add a label to describe what this neighborhood is like
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -158,6 +169,22 @@ export function AddLabelDialog({ open, onOpenChange, position, onSubmit, isSubmi
                 >
                   {c}
                 </Button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <Label>Category <span className="text-muted-foreground font-normal">(optional)</span></Label>
+            <div className="flex flex-wrap gap-1.5 mt-1">
+              {CATEGORY_OPTIONS.map((c) => (
+                <Badge
+                  key={c}
+                  variant={category === c ? "default" : "outline"}
+                  className="cursor-pointer text-xs select-none"
+                  onClick={() => setCategory(category === c ? null : c)}
+                >
+                  {c}
+                </Badge>
               ))}
             </div>
           </div>
