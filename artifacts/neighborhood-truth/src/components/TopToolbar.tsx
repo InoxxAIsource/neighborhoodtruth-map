@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { MapPin, TagsIcon, EyeOff, LocateFixed, Search, Loader2, Globe } from "lucide-react";
+import { MapPin, TagsIcon, EyeOff, LocateFixed, Search, Loader2, Globe, SlidersHorizontal } from "lucide-react";
 
 export const PLACE_CATEGORIES = {
   good: [
@@ -90,6 +90,7 @@ export function TopToolbar({
   const [isSearching, setIsSearching] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [citiesOpen, setCitiesOpen] = useState(false);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
 
   const toggleCategory = (label: string) => {
     const next = selectedCategories.includes(label)
@@ -118,13 +119,15 @@ export function TopToolbar({
   };
 
   return (
-    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] flex items-center gap-2">
-      <div className="bg-card/95 backdrop-blur-sm rounded-lg shadow-lg border flex items-center gap-1 px-2 py-1.5">
+    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] flex items-center gap-2 px-2 max-w-[calc(100vw-16px)]">
+      <div className="bg-card/95 backdrop-blur-sm rounded-lg shadow-lg border flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-1.5">
+
+        {/* Search */}
         <Popover open={searchOpen} onOpenChange={setSearchOpen}>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="sm" className="gap-1.5 text-xs h-8">
-              <Search className="h-3.5 w-3.5" />
-              Search
+            <Button variant="ghost" size="sm" className="gap-1 sm:gap-1.5 text-xs h-8 px-2 sm:px-3">
+              <Search className="h-3.5 w-3.5 flex-shrink-0" />
+              <span className="hidden sm:inline">Search</span>
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-72 p-3" align="center">
@@ -146,25 +149,28 @@ export function TopToolbar({
 
         <div className="w-px h-5 bg-border" />
 
+        {/* Labels toggle */}
         <Button
           variant="ghost"
           size="sm"
-          className="gap-1.5 text-xs h-8"
+          className="gap-1 sm:gap-1.5 text-xs h-8 px-2 sm:px-3"
           onClick={onToggleLabels}
+          title={showLabels ? "Hide labels" : "Show labels"}
         >
-          {showLabels ? <TagsIcon className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-          {showLabels ? "Labels On" : "Labels Off"}
+          {showLabels ? <TagsIcon className="h-3.5 w-3.5 flex-shrink-0" /> : <EyeOff className="h-3.5 w-3.5 flex-shrink-0" />}
+          <span className="hidden sm:inline">{showLabels ? "Labels" : "Hidden"}</span>
         </Button>
 
         <div className="w-px h-5 bg-border" />
 
-        <Popover>
+        {/* Categories */}
+        <Popover open={categoriesOpen} onOpenChange={setCategoriesOpen}>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="sm" className="gap-1.5 text-xs h-8">
-              <MapPin className="h-3.5 w-3.5" />
-              Categories
+            <Button variant="ghost" size="sm" className="gap-1 sm:gap-1.5 text-xs h-8 px-2 sm:px-3 relative">
+              <SlidersHorizontal className="h-3.5 w-3.5 flex-shrink-0" />
+              <span className="hidden sm:inline">Filter</span>
               {selectedCategories.length > 0 && (
-                <span className="ml-1 bg-primary text-primary-foreground rounded-full px-1.5 text-[10px] font-bold">
+                <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center text-[9px] font-bold">
                   {selectedCategories.length}
                 </span>
               )}
@@ -218,11 +224,12 @@ export function TopToolbar({
 
         <div className="w-px h-5 bg-border" />
 
+        {/* Cities */}
         <Popover open={citiesOpen} onOpenChange={setCitiesOpen}>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="sm" className="gap-1.5 text-xs h-8">
-              <Globe className="h-3.5 w-3.5" />
-              Cities
+            <Button variant="ghost" size="sm" className="gap-1 sm:gap-1.5 text-xs h-8 px-2 sm:px-3">
+              <Globe className="h-3.5 w-3.5 flex-shrink-0" />
+              <span className="hidden sm:inline">Cities</span>
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-56 p-2" align="center">
@@ -247,15 +254,17 @@ export function TopToolbar({
 
         <div className="w-px h-5 bg-border" />
 
+        {/* Locate */}
         <Button
           variant="ghost"
           size="sm"
-          className="gap-1.5 text-xs h-8"
+          className="gap-1 sm:gap-1.5 text-xs h-8 px-2 sm:px-3"
           onClick={onLocate}
           disabled={isLocating}
+          title="Locate me"
         >
-          {isLocating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <LocateFixed className="h-3.5 w-3.5" />}
-          Locate
+          {isLocating ? <Loader2 className="h-3.5 w-3.5 animate-spin flex-shrink-0" /> : <LocateFixed className="h-3.5 w-3.5 flex-shrink-0" />}
+          <span className="hidden sm:inline">Locate</span>
         </Button>
       </div>
     </div>
