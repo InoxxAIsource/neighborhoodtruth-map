@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-import { MapPin, TagsIcon, EyeOff, LocateFixed } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { MapPin, TagsIcon, EyeOff, LocateFixed, Search, Loader2 } from "lucide-react";
 
 export const PLACE_CATEGORIES = {
   good: [
@@ -43,6 +44,7 @@ interface TopToolbarProps {
   onToggleHeatmap: () => void;
   isLocating: boolean;
   onLocate: () => void;
+  onSearchLocation?: (coords: { lat: number; lng: number }) => void;
 }
 
 export function TopToolbar({
@@ -54,8 +56,12 @@ export function TopToolbar({
   onToggleHeatmap,
   isLocating,
   onLocate,
+  onSearchLocation,
 }: TopToolbarProps) {
   const [placesOpen, setPlacesOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   const toggleCategory = (label: string) => {
     onCategoriesChange(
@@ -68,8 +74,53 @@ export function TopToolbar({
   const clearAll = () => onCategoriesChange([]);
   const selectAll = () => onCategoriesChange(ALL_PLACE_LABELS);
 
+  const handleSearch = async () => {
+    const q = searchQuery.trim();
+    if (!q) return;
+    setIsSearching(true);
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`
+      );
+      const data = await res.json();
+      if (data.length > 0) {
+        onSearchLocation?.({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
+        setSearchQuery("");
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   return (
     <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] flex items-center gap-2">
+      {/* Search city/country */}
+      <div className="flex items-center bg-card/95 backdrop-blur-sm border rounded-full shadow-md overflow-hidden">
+        <Input
+          ref={searchRef}
+          placeholder="Search city or country..."
+          className="h-8 w-40 sm:w-48 border-0 bg-transparent text-sm focus-visible:ring-0 focus-visible:ring-offset-0 pl-3"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+        />
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-8 w-8 p-0 shrink-0"
+          onClick={handleSearch}
+          disabled={isSearching || !searchQuery.trim()}
+        >
+          {isSearching ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Search className="h-3.5 w-3.5" />
+          )}
+        </Button>
+      </div>
+
       {/* District mode toggle */}
       <Button
         size="sm"
