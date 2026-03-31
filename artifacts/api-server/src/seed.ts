@@ -585,16 +585,101 @@ const SEED_LABELS: SeedLabel[] = [
   { lat: -8.5080, lng: 115.2620, text: "Amed diving snorkelling gem", safety: 4, vibe: ["Chill", "Family"], cost: "$$", color: "#2563eb", category: null, upvotes: 88, downvotes: 3 },
   { lat: -8.5940, lng: 115.1640, text: "Tegalalang rice terraces stunning", safety: 4, vibe: ["Family"], cost: "$", color: "#16a34a", category: null, upvotes: 96, downvotes: 4 },
 
-  // ===== SEOUL CONTINUED =====
+  // ===== SEOUL (EXPANDED) =====
   { lat: 37.5400, lng: 126.9560, text: "Mapo arts and culture hub", safety: 5, vibe: ["Artsy", "Chill"], cost: "$$", color: "#7c3aed", category: "Art galleries", upvotes: 74, downvotes: 5 },
   { lat: 37.4880, lng: 127.0330, text: "Gangnam luxury shopping Apgujeong", safety: 5, vibe: ["Bougie"], cost: "$$$$", color: "#4caf50", category: null, upvotes: 62, downvotes: 11 },
   { lat: 37.5780, lng: 127.0040, text: "Jongno-gu historic centre", safety: 5, vibe: ["Family", "Artsy"], cost: "$$", color: "#7c3aed", category: null, upvotes: 81, downvotes: 4 },
+  { lat: 37.5519, lng: 126.9237, text: "Hongdae indie music scene", safety: 5, vibe: ["Artsy", "Nightlife"], cost: "$$", color: "#7c3aed", category: "Bars", upvotes: 97, downvotes: 6 },
+  { lat: 37.5510, lng: 126.9220, text: "Hongdae streets alive at midnight", safety: 4, vibe: ["Nightlife", "Loud"], cost: "$$", color: "#424242", category: "Bars", upvotes: 83, downvotes: 9 },
+  { lat: 37.5347, lng: 126.9940, text: "Itaewon multicultural expat hub", safety: 4, vibe: ["Nightlife", "Artsy"], cost: "$$$", color: "#7c3aed", category: "Restaurants", upvotes: 72, downvotes: 14 },
+  { lat: 37.5360, lng: 126.9960, text: "Best foreign food in Seoul here", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#ea580c", category: "Restaurants", upvotes: 88, downvotes: 5 },
+  { lat: 37.5592, lng: 126.9364, text: "Sinchon cheap student eats", safety: 5, vibe: ["Chill", "Loud"], cost: "$", color: "#ea580c", category: "Restaurants", upvotes: 91, downvotes: 4 },
+  { lat: 37.5816, lng: 126.9840, text: "Bukchon Hanok Village stunning", safety: 5, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: null, upvotes: 104, downvotes: 3 },
+  { lat: 37.5736, lng: 126.9863, text: "Insadong traditional tea houses", safety: 5, vibe: ["Artsy", "Family"], cost: "$$", color: "#ea580c", category: "Cafes to work", upvotes: 79, downvotes: 4 },
+  { lat: 37.5636, lng: 126.9830, text: "Myeongdong K-beauty shopping paradise", safety: 5, vibe: ["Loud", "Bougie"], cost: "$$$", color: "#db2777", category: null, upvotes: 55, downvotes: 18 },
+  { lat: 37.5714, lng: 127.0100, text: "Dongdaemun 24-hour fashion market", safety: 4, vibe: ["Loud", "Nightlife"], cost: "$$", color: "#9e9e9e", category: null, upvotes: 66, downvotes: 7 },
+  { lat: 37.5443, lng: 127.0560, text: "Seongsu-dong Seoul Brooklyn", safety: 5, vibe: ["Artsy", "Chill"], cost: "$$", color: "#7c3aed", category: "Cafes to work", upvotes: 93, downvotes: 4 },
+  { lat: 37.4979, lng: 127.0276, text: "Gangnam clean and polished", safety: 5, vibe: ["Bougie", "Family"], cost: "$$$", color: "#4caf50", category: null, upvotes: 58, downvotes: 9 },
+  { lat: 37.5128, lng: 127.1007, text: "Jamsil Lotte World family zone", safety: 5, vibe: ["Family", "Loud"], cost: "$$", color: "#16a34a", category: null, upvotes: 71, downvotes: 5 },
+  { lat: 37.5170, lng: 127.0470, text: "Apgujeong Rodeo Street fashion", safety: 5, vibe: ["Bougie", "Artsy"], cost: "$$$$", color: "#4caf50", category: null, upvotes: 47, downvotes: 12 },
+
+  // ===== HONG KONG =====
+  { lat: 22.2822, lng: 114.1581, text: "Central finance district glamour", safety: 5, vibe: ["Bougie", "Loud"], cost: "$$$$", color: "#4caf50", category: "Coworking", upvotes: 68, downvotes: 9 },
+  { lat: 22.2810, lng: 114.1570, text: "IFC Mall stunning harbour views", safety: 5, vibe: ["Bougie", "Family"], cost: "$$$$", color: "#2563eb", category: null, upvotes: 81, downvotes: 4 },
+  { lat: 22.2975, lng: 114.1722, text: "TST harbourfront iconic views", safety: 5, vibe: ["Family", "Loud"], cost: "$$$", color: "#2563eb", category: null, upvotes: 96, downvotes: 5 },
+  { lat: 22.2990, lng: 114.1740, text: "Nathan Road nonstop shopping", safety: 4, vibe: ["Loud", "Family"], cost: "$$", color: "#9e9e9e", category: null, upvotes: 43, downvotes: 17 },
+  { lat: 22.3193, lng: 114.1694, text: "Mong Kok chaotic energy city", safety: 4, vibe: ["Loud", "Family"], cost: "$", color: "#424242", category: null, upvotes: 37, downvotes: 24 },
+  { lat: 22.3200, lng: 114.1700, text: "Ladies Market great bargains", safety: 4, vibe: ["Family", "Loud"], cost: "$", color: "#ea580c", category: null, upvotes: 74, downvotes: 8 },
+  { lat: 22.2777, lng: 114.1722, text: "Wan Chai gritty and vibrant", safety: 4, vibe: ["Nightlife", "Artsy"], cost: "$$", color: "#7c3aed", category: "Bars", upvotes: 65, downvotes: 11 },
+  { lat: 22.2805, lng: 114.1838, text: "Causeway Bay shopping never stops", safety: 5, vibe: ["Loud", "Bougie"], cost: "$$$", color: "#db2777", category: null, upvotes: 52, downvotes: 14 },
+  { lat: 22.2866, lng: 114.1506, text: "Sheung Wan indie galleries cool", safety: 5, vibe: ["Artsy", "Chill"], cost: "$$", color: "#7c3aed", category: "Art galleries", upvotes: 88, downvotes: 4 },
+  { lat: 22.3308, lng: 114.1622, text: "Sham Shui Po electronics bargains", safety: 3, vibe: ["Family", "Loud"], cost: "$", color: "#9e9e9e", category: null, upvotes: 61, downvotes: 7 },
+  { lat: 22.2195, lng: 114.2141, text: "Stanley beach relaxed expat life", safety: 5, vibe: ["Family", "Chill"], cost: "$$$", color: "#16a34a", category: "Restaurants", upvotes: 83, downvotes: 3 },
+  { lat: 22.2817, lng: 114.1283, text: "Kennedy Town local and authentic", safety: 5, vibe: ["Chill", "Family"], cost: "$$", color: "#0d9488", category: "Cafes to work", upvotes: 77, downvotes: 5 },
+  { lat: 22.3360, lng: 114.1760, text: "Diamond Hill quiet residential", safety: 5, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: null, upvotes: 44, downvotes: 6 },
+  { lat: 22.2690, lng: 114.1820, text: "Aberdeen fishing village heritage", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: null, upvotes: 56, downvotes: 7 },
+  { lat: 22.3825, lng: 114.1944, text: "Sha Tin New Territories escape", safety: 5, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: "Parks", upvotes: 63, downvotes: 4 },
+  { lat: 22.3756, lng: 114.1218, text: "Tsuen Wan affordable local vibe", safety: 4, vibe: ["Family"], cost: "$", color: "#9e9e9e", category: null, upvotes: 38, downvotes: 8 },
+
+  // ===== TEHRAN =====
+  { lat: 35.8053, lng: 51.4448, text: "Niavaran wealthy leafy north Tehran", safety: 4, vibe: ["Bougie", "Chill"], cost: "$$$", color: "#4caf50", category: null, upvotes: 71, downvotes: 6 },
+  { lat: 35.8120, lng: 51.4473, text: "Niavaran palace gardens beautiful", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: "Parks", upvotes: 85, downvotes: 3 },
+  { lat: 35.6720, lng: 51.4186, text: "Grand Bazaar ancient trading city", safety: 3, vibe: ["Family", "Loud"], cost: "$", color: "#ea580c", category: "Restaurants", upvotes: 93, downvotes: 8 },
+  { lat: 35.6730, lng: 51.4200, text: "Bazaar sensory overload and chaos", safety: 3, vibe: ["Loud"], cost: "$", color: "#424242", category: null, upvotes: 42, downvotes: 21 },
+  { lat: 35.7997, lng: 51.4314, text: "Tajrish traditional local bazaar", safety: 4, vibe: ["Family", "Chill"], cost: "$", color: "#ea580c", category: "Restaurants", upvotes: 78, downvotes: 5 },
+  { lat: 35.8000, lng: 51.4300, text: "Darband mountain trail entrance", safety: 4, vibe: ["Family", "Chill"], cost: "$", color: "#16a34a", category: "Parks", upvotes: 104, downvotes: 4 },
+  { lat: 35.7577, lng: 51.4165, text: "Vanak square upscale dining", safety: 4, vibe: ["Bougie", "Chill"], cost: "$$$", color: "#4caf50", category: "Restaurants", upvotes: 67, downvotes: 7 },
+  { lat: 35.7619, lng: 51.4086, text: "Jordan Ave cafes and restaurants", safety: 4, vibe: ["Chill", "Artsy"], cost: "$$$", color: "#0d9488", category: "Cafes to work", upvotes: 79, downvotes: 5 },
+  { lat: 35.7813, lng: 51.4117, text: "Elahieh most expensive Tehran", safety: 5, vibe: ["Bougie"], cost: "$$$$", color: "#4caf50", category: null, upvotes: 54, downvotes: 9 },
+  { lat: 35.7014, lng: 51.3911, text: "University area young and vibrant", safety: 3, vibe: ["Chill", "Artsy"], cost: "$", color: "#1565c0", category: "Cafes to work", upvotes: 66, downvotes: 10 },
+  { lat: 35.7200, lng: 51.4300, text: "Abbas Abad government district", safety: 4, vibe: ["Chill"], cost: "$$", color: "#9e9e9e", category: null, upvotes: 27, downvotes: 12 },
+  { lat: 35.7446, lng: 51.3763, text: "Azadi Tower national symbol area", safety: 4, vibe: ["Family", "Chill"], cost: "$", color: "#16a34a", category: null, upvotes: 72, downvotes: 4 },
+  { lat: 35.7560, lng: 51.3940, text: "Ekbatan huge modern complex", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#9e9e9e", category: null, upvotes: 41, downvotes: 7 },
+  { lat: 35.7690, lng: 51.4520, text: "Pasdaran calm and residential", safety: 4, vibe: ["Family", "Chill"], cost: "$$$", color: "#16a34a", category: null, upvotes: 55, downvotes: 4 },
+  { lat: 35.6985, lng: 51.4270, text: "South Tehran authentic and cheap", safety: 2, vibe: ["Family", "Loud"], cost: "$", color: "#424242", category: null, upvotes: 33, downvotes: 19 },
+
+  // ===== TEL AVIV =====
+  { lat: 32.0793, lng: 34.7744, text: "Dizengoff Bauhaus architecture amazing", safety: 5, vibe: ["Artsy", "Chill"], cost: "$$$", color: "#7c3aed", category: null, upvotes: 86, downvotes: 4 },
+  { lat: 32.0800, lng: 34.7750, text: "Tel Aviv cafe culture world class", safety: 5, vibe: ["Chill", "Artsy"], cost: "$$$", color: "#0d9488", category: "Cafes to work", upvotes: 97, downvotes: 3 },
+  { lat: 32.0563, lng: 34.7742, text: "Florentin street art hipster zone", safety: 4, vibe: ["Artsy", "Nightlife"], cost: "$$", color: "#7c3aed", category: "Bars", upvotes: 83, downvotes: 8 },
+  { lat: 32.0524, lng: 34.7521, text: "Jaffa ancient port timeless beauty", safety: 4, vibe: ["Artsy", "Family"], cost: "$$", color: "#ea580c", category: null, upvotes: 104, downvotes: 5 },
+  { lat: 32.0641, lng: 34.7658, text: "Neve Tzedek boutique gallery gem", safety: 5, vibe: ["Artsy", "Bougie"], cost: "$$$", color: "#4caf50", category: "Art galleries", upvotes: 91, downvotes: 4 },
+  { lat: 32.0989, lng: 34.7731, text: "Tel Aviv Port nightlife waterfront", safety: 5, vibe: ["Nightlife", "Bougie"], cost: "$$$", color: "#2563eb", category: "Bars", upvotes: 78, downvotes: 7 },
+  { lat: 32.0690, lng: 34.7793, text: "Rothschild Boulevard vibrant", safety: 5, vibe: ["Chill", "Bougie"], cost: "$$$", color: "#4caf50", category: null, upvotes: 88, downvotes: 3 },
+
+  // ===== JERUSALEM =====
+  { lat: 31.7767, lng: 35.2345, text: "Old City world religions converge", safety: 3, vibe: ["Family", "Loud"], cost: "$", color: "#7c3aed", category: null, upvotes: 112, downvotes: 11 },
+  { lat: 31.7780, lng: 35.2310, text: "Western Wall profound experience", safety: 4, vibe: ["Family", "Chill"], cost: "$", color: "#2563eb", category: null, upvotes: 94, downvotes: 4 },
+  { lat: 31.7839, lng: 35.2101, text: "Mahane Yehuda market day and night", safety: 4, vibe: ["Family", "Nightlife"], cost: "$$", color: "#ea580c", category: "Restaurants", upvotes: 88, downvotes: 6 },
+  { lat: 31.7610, lng: 35.2184, text: "German Colony quiet cafe streets", safety: 5, vibe: ["Chill", "Family"], cost: "$$$", color: "#0d9488", category: "Cafes to work", upvotes: 73, downvotes: 4 },
+  { lat: 31.7759, lng: 35.2083, text: "Rehavia leafy prestigious area", safety: 5, vibe: ["Bougie", "Chill"], cost: "$$$", color: "#4caf50", category: null, upvotes: 61, downvotes: 5 },
+  { lat: 31.7780, lng: 35.2202, text: "Mamilla luxury mall near Old City", safety: 5, vibe: ["Bougie", "Family"], cost: "$$$$", color: "#4caf50", category: null, upvotes: 55, downvotes: 9 },
+  { lat: 31.7692, lng: 35.2027, text: "Ein Kerem artist village serene", safety: 5, vibe: ["Artsy", "Chill"], cost: "$$", color: "#7c3aed", category: "Art galleries", upvotes: 77, downvotes: 3 },
+
+  // ===== KARACHI =====
+  { lat: 24.8120, lng: 67.0313, text: "Clifton sea breezes upscale feel", safety: 4, vibe: ["Bougie", "Chill"], cost: "$$$", color: "#4caf50", category: null, upvotes: 67, downvotes: 9 },
+  { lat: 24.8218, lng: 67.0367, text: "Zamzama dining street restaurant row", safety: 4, vibe: ["Bougie", "Family"], cost: "$$$", color: "#ea580c", category: "Restaurants", upvotes: 83, downvotes: 5 },
+  { lat: 24.8037, lng: 67.0540, text: "DHA Defence gated community calm", safety: 5, vibe: ["Family", "Chill"], cost: "$$$", color: "#4caf50", category: null, upvotes: 71, downvotes: 7 },
+  { lat: 24.8556, lng: 67.0127, text: "Saddar colonial era commerce hub", safety: 3, vibe: ["Loud", "Family"], cost: "$$", color: "#9e9e9e", category: null, upvotes: 38, downvotes: 19 },
+  { lat: 24.9337, lng: 67.1057, text: "Gulshan-e-Iqbal middle class heart", safety: 3, vibe: ["Family"], cost: "$", color: "#9e9e9e", category: null, upvotes: 44, downvotes: 13 },
+  { lat: 24.8745, lng: 67.0548, text: "PECHS quiet residential streets", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: null, upvotes: 52, downvotes: 6 },
+  { lat: 24.9050, lng: 67.0850, text: "North Nazimabad affordable living", safety: 3, vibe: ["Family"], cost: "$", color: "#9e9e9e", category: null, upvotes: 31, downvotes: 11 },
+
+  // ===== LAHORE =====
+  { lat: 31.5218, lng: 74.3462, text: "Gulberg upscale Lahore lifestyle", safety: 4, vibe: ["Bougie", "Chill"], cost: "$$$", color: "#4caf50", category: "Restaurants", upvotes: 76, downvotes: 6 },
+  { lat: 31.5099, lng: 74.3437, text: "Liberty Market fashion and food", safety: 4, vibe: ["Family", "Loud"], cost: "$$", color: "#ea580c", category: null, upvotes: 64, downvotes: 9 },
+  { lat: 31.5804, lng: 74.3214, text: "Walled City Mughal heritage alive", safety: 3, vibe: ["Family", "Artsy"], cost: "$", color: "#7c3aed", category: null, upvotes: 92, downvotes: 8 },
+  { lat: 31.5820, lng: 74.3240, text: "Lahore Fort and Badshahi Mosque", safety: 4, vibe: ["Family", "Chill"], cost: "$", color: "#16a34a", category: null, upvotes: 107, downvotes: 4 },
+  { lat: 31.4825, lng: 74.3971, text: "DHA Lahore modern gated living", safety: 5, vibe: ["Family", "Chill"], cost: "$$$", color: "#4caf50", category: null, upvotes: 63, downvotes: 7 },
+  { lat: 31.4949, lng: 74.3120, text: "Model Town colonial garden city", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: "Parks", upvotes: 55, downvotes: 5 },
+  { lat: 31.4697, lng: 74.2681, text: "Johar Town dense and affordable", safety: 3, vibe: ["Family", "Loud"], cost: "$", color: "#9e9e9e", category: null, upvotes: 41, downvotes: 12 },
+  { lat: 31.5507, lng: 74.3436, text: "Mall Road colonial promenade", safety: 4, vibe: ["Family", "Artsy"], cost: "$$", color: "#16a34a", category: null, upvotes: 69, downvotes: 5 },
 ];
 
 async function seed() {
   const [{ value: existingCount }] = await db.select({ value: count() }).from(labelsTable);
   
-  if (existingCount >= 100) {
+  if (existingCount >= 510) {
     console.log(`Database already has ${existingCount} labels, skipping seed.`);
     process.exit(0);
   }

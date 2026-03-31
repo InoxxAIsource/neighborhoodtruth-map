@@ -50,10 +50,12 @@ function getNearbyLabels(allLabels: LabelData[], clickedLabel: LabelData): Label
 const SUGGESTED_QUESTIONS = [
   "What's the vibe here?",
   "Is it safe at night?",
-  "Best spots nearby?",
-  "What's the cost of living like?",
+  "What's the lifestyle like?",
+  "What's the religious & cultural makeup?",
   "Good for families?",
   "Nightlife scene?",
+  "How's the cost of living?",
+  "What's the local population like?",
 ];
 
 const CATEGORY_COLORS: Record<string, string> = {
