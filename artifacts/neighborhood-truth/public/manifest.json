@@ -1,6 +1,6 @@
 {
-  "name": "NeighborhoodTruth",
-  "short_name": "NT Map",
+  "name": "PlaceLabels",
+  "short_name": "PlaceLabels",
   "description": "Crowd-sourced global neighborhood map — see what locals really think",
   "start_url": "./",
   "display": "standalone",

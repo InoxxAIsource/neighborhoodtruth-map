@@ -147,7 +147,7 @@ export default function IntentPage() {
   const primaryIntents = allIntents.filter((i) => PRIMARY_INTENTS.includes(i.slug));
   const secondaryIntents = allIntents.filter((i) => SECONDARY_INTENTS.includes(i.slug));
 
-  const title = `${meta.headline(cityInfo.name, areas.length, year)} — HoodSignal`;
+  const title = `${meta.headline(cityInfo.name, areas.length, year)} — PlaceLabels`;
   const description = stats
     ? meta.intro(cityInfo.name, areas.length, stats.avgSafety)
     : `${intent.label} in ${cityInfo.name} — crowd-sourced neighborhood guide.`;
@@ -156,9 +156,9 @@ export default function IntentPage() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "HoodSignal", "item": "https://hoodsignal.com" },
-      { "@type": "ListItem", "position": 2, "name": cityInfo.name, "item": `https://hoodsignal.com/${cityInfo.slug}` },
-      { "@type": "ListItem", "position": 3, "name": intent.label, "item": `https://hoodsignal.com/${cityInfo.slug}/${intent.slug}` },
+      { "@type": "ListItem", "position": 1, "name": "PlaceLabels", "item": "https://placelabels.com" },
+      { "@type": "ListItem", "position": 2, "name": cityInfo.name, "item": `https://placelabels.com/${cityInfo.slug}` },
+      { "@type": "ListItem", "position": 3, "name": intent.label, "item": `https://placelabels.com/${cityInfo.slug}/${intent.slug}` },
     ],
   };
 
@@ -175,7 +175,7 @@ export default function IntentPage() {
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
         <meta property="og:type" content="website" />
-        <link rel="canonical" href={`https://hoodsignal.com/${cityInfo.slug}/${intent.slug}`} />
+        <link rel="canonical" href={`https://placelabels.com/${cityInfo.slug}/${intent.slug}`} />
         <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
       </Helmet>
 

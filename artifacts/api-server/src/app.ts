@@ -52,7 +52,7 @@ app.get("/robots.txt", (_req: Request, res: Response) => {
       "",
       "Disallow: /api/",
       "",
-      "Sitemap: https://hoodsignal.com/sitemap.xml",
+      "Sitemap: https://placelabels.com/sitemap.xml",
       "",
     ].join("\n")
   );

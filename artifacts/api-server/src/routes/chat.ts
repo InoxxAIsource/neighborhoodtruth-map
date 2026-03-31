@@ -40,7 +40,7 @@ function buildSystemPrompt(clickedLabel: LabelRow, nearbyLabels: LabelRow[]) {
   allLabels.forEach((l) => (l.vibe ?? []).forEach((v) => { vibeCounts[v] = (vibeCounts[v] || 0) + 1; }));
   const topVibes = Object.entries(vibeCounts).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([v, c]) => `${v} (×${c})`).join(", ");
 
-  return `You are a hyper-local neighborhood guide for NeighborhoodTruth — a crowd-sourced global map powered by real insights from residents and visitors worldwide.
+  return `You are a hyper-local neighborhood guide for PlaceLabels — a crowd-sourced global map powered by real insights from residents and visitors worldwide.
 
 FOCAL LABEL: "${clickedLabel.text}"
 Location: lat ${clickedLabel.lat.toFixed(4)}, lng ${clickedLabel.lng.toFixed(4)}

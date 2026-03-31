@@ -87,8 +87,8 @@ export default function CityPage() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "HoodSignal", "item": "https://hoodsignal.com" },
-      { "@type": "ListItem", "position": 2, "name": cityInfo.name, "item": `https://hoodsignal.com/${cityInfo.slug}` },
+      { "@type": "ListItem", "position": 1, "name": "PlaceLabels", "item": "https://placelabels.com" },
+      { "@type": "ListItem", "position": 2, "name": cityInfo.name, "item": `https://placelabels.com/${cityInfo.slug}` },
     ],
   };
 
@@ -139,7 +139,7 @@ export default function CityPage() {
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
         <meta property="og:type" content="website" />
-        <link rel="canonical" href={`https://hoodsignal.com/${cityInfo.slug}`} />
+        <link rel="canonical" href={`https://placelabels.com/${cityInfo.slug}`} />
         <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
         <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
       </Helmet>

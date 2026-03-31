@@ -22,7 +22,7 @@ export function SEOLayout({ children, breadcrumbs = [] }: SEOLayoutProps) {
           <div className="flex items-center gap-3 min-w-0">
             <Link href="/" className="flex items-center gap-2 text-teal-700 hover:text-teal-900 font-bold text-lg flex-shrink-0">
               <Globe className="h-5 w-5" />
-              HoodSignal
+              PlaceLabels
             </Link>
             {breadcrumbs.length > 0 && (
               <nav className="hidden sm:flex items-center gap-1 text-sm text-gray-500 min-w-0">
@@ -55,7 +55,7 @@ export function SEOLayout({ children, breadcrumbs = [] }: SEOLayoutProps) {
 
       <footer className="border-t bg-white mt-16">
         <div className="max-w-5xl mx-auto px-4 py-8 text-center text-sm text-gray-400">
-          <p>© {new Date().getFullYear()} HoodSignal — Crowd-sourced neighborhood intelligence</p>
+          <p>© {new Date().getFullYear()} PlaceLabels — Crowd-sourced neighborhood intelligence</p>
           <p className="mt-1">Data powered by real locals and visitors worldwide.</p>
         </div>
       </footer>

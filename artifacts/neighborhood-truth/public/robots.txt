@@ -3,4 +3,4 @@ Allow: /
 
 Disallow: /api/
 
-Sitemap: https://hoodsignal.com/sitemap.xml
+Sitemap: https://placelabels.com/sitemap.xml

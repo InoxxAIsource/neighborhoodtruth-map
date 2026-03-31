@@ -37,8 +37,8 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["icons/icon-192.png", "icons/icon-512.png"],
       manifest: {
-        name: "NeighborhoodTruth",
-        short_name: "NT Map",
+        name: "PlaceLabels",
+        short_name: "PlaceLabels",
         description: "Crowd-sourced global neighborhood map",
         theme_color: "#0d9488",
         background_color: "#ffffff",

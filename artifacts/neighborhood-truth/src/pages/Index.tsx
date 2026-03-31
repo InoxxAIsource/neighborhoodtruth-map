@@ -183,7 +183,7 @@ export default function Index() {
 
       <div className="absolute top-4 right-4 z-[1000]">
         <div className="bg-card/95 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border">
-          <h1 className="text-lg font-bold text-foreground">NeighborhoodTruth</h1>
+          <h1 className="text-lg font-bold text-foreground">PlaceLabels</h1>
           <p className="text-[10px] text-muted-foreground">{labels.length} insights worldwide</p>
         </div>
       </div>

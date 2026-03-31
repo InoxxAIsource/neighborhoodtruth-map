@@ -202,7 +202,7 @@ export default function ComparePage() {
   const overallWinner = aWins > bWins ? a.text : bWins > aWins ? b.text : null;
   const verdictText = generateVerdict(a, b, verdict, aWins, bWins);
 
-  const title = `${a.text} vs ${b.text} – Which is Better? | HoodSignal`;
+  const title = `${a.text} vs ${b.text} – Which is Better? | PlaceLabels`;
   const description = `${a.text} vs ${b.text}: ${a.text} scores ${a.safety}/5 safety, ${a.cost} cost. ${b.text} scores ${b.safety}/5 safety, ${b.cost} cost. ${overallWinner ? overallWinner + " wins overall." : "It's a tie."} Based on real community data.`;
 
   const faqSchema = {
@@ -242,9 +242,9 @@ export default function ComparePage() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "HoodSignal", "item": "https://hoodsignal.com" },
-      { "@type": "ListItem", "position": 2, "name": "Compare", "item": "https://hoodsignal.com/compare" },
-      { "@type": "ListItem", "position": 3, "name": `${a.text} vs ${b.text}`, "item": `https://hoodsignal.com/compare/${slug}` },
+      { "@type": "ListItem", "position": 1, "name": "PlaceLabels", "item": "https://placelabels.com" },
+      { "@type": "ListItem", "position": 2, "name": "Compare", "item": "https://placelabels.com/compare" },
+      { "@type": "ListItem", "position": 3, "name": `${a.text} vs ${b.text}`, "item": `https://placelabels.com/compare/${slug}` },
     ],
   };
 
@@ -256,7 +256,7 @@ export default function ComparePage() {
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
         <meta property="og:type" content="website" />
-        <link rel="canonical" href={`https://hoodsignal.com/compare/${slug}`} />
+        <link rel="canonical" href={`https://placelabels.com/compare/${slug}`} />
         <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
         <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
       </Helmet>

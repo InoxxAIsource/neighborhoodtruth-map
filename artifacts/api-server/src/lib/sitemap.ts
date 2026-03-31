@@ -65,7 +65,7 @@ function xmlEscape(str: string): string {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-export async function generateSitemapXml(baseUrl = "https://hoodsignal.com"): Promise<string> {
+export async function generateSitemapXml(baseUrl = "https://placelabels.com"): Promise<string> {
   const allLabels = await db.select().from(labelsTable);
   const today = toIsoDate(new Date());
 
