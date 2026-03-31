@@ -37,6 +37,8 @@ interface MapViewProps {
   selectedCategories?: string[];
   locateUser?: boolean;
   onLocated?: () => void;
+  flyToLocation?: { lat: number; lng: number } | null;
+  onFlownTo?: () => void;
 }
 
 export interface AreaSummary {
@@ -346,7 +348,7 @@ function applyFilters(labels: LabelData[], filters: Filters = DEFAULT_FILTERS): 
   });
 }
 
-export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap = false, filters = DEFAULT_FILTERS, onAreaClick, showLabels = true, selectedCategories = [], locateUser = false, onLocated }: MapViewProps) {
+export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap = false, filters = DEFAULT_FILTERS, onAreaClick, showLabels = true, selectedCategories = [], locateUser = false, onLocated, flyToLocation, onFlownTo }: MapViewProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const markerLayerRef = useRef<L.LayerGroup | null>(null);
@@ -454,6 +456,14 @@ export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap 
       { enableHighAccuracy: true, timeout: 10000 }
     );
   }, [locateUser, onLocated]);
+
+  // Fly to searched location
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !flyToLocation) return;
+    map.flyTo([flyToLocation.lat, flyToLocation.lng], 13, { duration: 1.5 });
+    onFlownTo?.();
+  }, [flyToLocation, onFlownTo]);
 
   // Render labels
   useEffect(() => {
