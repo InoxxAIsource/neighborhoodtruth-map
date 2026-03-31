@@ -121,6 +121,13 @@ export default function Index() {
     vote.mutate({ labelId, voteType });
   }, [vote]);
 
+  const handleLabelClick = useCallback((label: LabelData, nearbyLabels: LabelData[], areaName: string) => {
+    setChatLabel(label);
+    setChatNearby(nearbyLabels);
+    setChatAreaName(areaName);
+    setChatDrawerOpen(true);
+  }, []);
+
   return (
     <div className="h-screen w-screen relative overflow-hidden">
       <MapView
