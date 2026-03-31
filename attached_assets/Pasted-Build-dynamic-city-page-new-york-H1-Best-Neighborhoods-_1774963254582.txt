@@ -1,0 +1,234 @@
+Build dynamic city page (/new-york):
+
+H1:
+"Best Neighborhoods in New York (2026 Guide)"
+
+SECTIONS:
+
+1. Overview:
+- AI-generated summary using all labels
+
+2. Top Neighborhoods:
+- Top 5 areas ranked by sentiment_score
+
+3. Safest Areas:
+- Filter safety >= 4
+
+4. Affordable Areas:
+- Cost = $ or $$
+
+5. Best for Nightlife:
+- Vibe includes "Nightlife"
+
+6. Map Preview:
+- Embed map with highlighted top areas
+
+--------------------------------
+INTERNAL LINKS:
+- Link each area → /new-york/[area]
+- Link sections → intent pages
+
+--------------------------------
+SEO:
+- Title: "Best Neighborhoods in New York 2026"
+- Meta description: dynamic summary
+
+--------------------------------
+GOAL:
+Rank for:
+- best neighborhoods in new york
+- where to live in new york
+PROMPT 3 — AREA PAGE TEMPLATE
+Build dynamic area page (/new-york/[area-name]):
+
+H1:
+"Living in [Area Name] – Complete Guide"
+
+SECTIONS:
+
+1. Overview:
+- Summary from labels
+
+2. Safety:
+- Avg safety score
+- Summary text
+
+3. Cost of Living:
+- Cost level ($–$$$$)
+
+4. Vibe:
+- Top 3 tags
+
+5. Local Insights:
+- Top 5 labels
+
+6. Sentiment Score:
+- % positive vs negative
+
+--------------------------------
+INTERNAL LINKS:
+
+- Link to:
+  → /new-york
+  → Similar areas (same vibe/cost)
+  → Intent pages
+
+Example:
+"Explore similar areas: Bushwick, Lower East Side"
+
+--------------------------------
+SEO:
+
+Title:
+"Is [Area] a Good Place to Live? (2026)"
+
+Meta:
+"Explore safety, cost, and lifestyle in [Area] based on real local insights"
+
+--------------------------------
+TARGET KEYWORDS:
+
+- is [area] safe
+- living in [area]
+- cost of living [area]
+PROMPT 4 — INTENT PAGES (LONG-TAIL GOLD)
+Build intent-driven SEO pages:
+
+ROUTES:
+- /new-york/safe-neighborhoods
+- /new-york/affordable-areas
+- /new-york/nightlife-areas
+- /new-york/family-friendly
+
+--------------------------------
+PAGE STRUCTURE:
+
+H1:
+"Safest Neighborhoods in New York (2026)"
+
+SECTIONS:
+
+1. Top Areas:
+- Filtered list
+
+2. Why These Areas:
+- Data-based explanation
+
+3. Map View:
+- Highlight filtered areas
+
+4. Comparison Table:
+- Safety, cost, vibe
+
+--------------------------------
+INTERNAL LINKS:
+
+- Link each area → area pages
+- Link to city page
+- Link to other intent pages
+
+--------------------------------
+SEO TARGETS:
+
+- safest neighborhoods in NYC
+- cheap areas NYC
+- best nightlife areas NYC
+- family-friendly neighborhoods NYC
+
+--------------------------------
+GOAL:
+Capture long-tail search traffic
+PROMPT 5 — COMPARISON PAGES
+Build comparison pages:
+
+ROUTES:
+- /compare/[area1]-vs-[area2]
+
+--------------------------------
+PAGE STRUCTURE:
+
+H1:
+"[Area1] vs [Area2] – Which is Better?"
+
+SECTIONS:
+
+1. Overview:
+- Short summary comparison
+
+2. Comparison Table:
+
+| Factor | Area1 | Area2 |
+|--------|------|------|
+| Safety |      |      |
+| Cost   |      |      |
+| Vibe   |      |      |
+
+3. Verdict:
+- AI-generated conclusion
+
+--------------------------------
+INTERNAL LINKS:
+
+- Link to both area pages
+- Link to city page
+
+--------------------------------
+SEO TARGETS:
+
+- [area1] vs [area2]
+- where to live [city]
+
+--------------------------------
+GOAL:
+Capture high-intent decision traffic
+PROMPT 6 — INTERNAL LINKING ENGINE (CRITICAL)
+Implement automatic internal linking:
+
+RULES:
+
+1. City page links to:
+- All area pages
+- All intent pages
+
+2. Area pages link to:
+- City page
+- 3 similar areas (same vibe/cost)
+- 2 intent pages
+
+3. Intent pages link to:
+- Top areas
+- City page
+
+4. Comparison pages link to:
+- Both areas
+- City page
+
+--------------------------------
+ANCHOR TEXT:
+
+Use natural anchors:
+- "Best areas in NYC"
+- "Safe neighborhoods"
+- "[Area] cost of living"
+
+--------------------------------
+GOAL:
+Create strong SEO link graph
+PROMPT 7 — META + SCHEMA (BOOST RANKINGS)
+Add SEO enhancements:
+
+1. Dynamic META TAGS:
+- Title (keyword optimized)
+- Description (data-driven)
+
+2. SCHEMA MARKUP:
+- FAQ schema
+- Breadcrumb schema
+
+3. STRUCTURED CONTENT:
+- Use headings (H1, H2, H3)
+- Add bullet summaries
+
+--------------------------------
+GOAL:
+Improve CTR + rankings

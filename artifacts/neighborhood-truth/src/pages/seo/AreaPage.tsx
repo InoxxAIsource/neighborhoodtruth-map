@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams, Link } from "wouter";
 import { Helmet } from "react-helmet-async";
-import { MapPin, ArrowUpRight, ThumbsUp, ThumbsDown } from "lucide-react";
+import { MapPin, ArrowUpRight, ThumbsUp, ThumbsDown, Shield, DollarSign, Sparkles, Users } from "lucide-react";
 import { SEOLayout, API, StatBadge, AreaCard, LoadingState, ErrorState, safetyLabel, slugify } from "./SEOLayout";
 
 interface AreaData {
@@ -41,6 +41,14 @@ interface AreaData {
   } | null;
 }
 
+const COST_LABELS: Record<string, string> = { "$": "Budget", "$$": "Affordable", "$$$": "Mid-range", "$$$$": "Luxury" };
+const COST_DESC: Record<string, string> = {
+  "$": "Very affordable — one of the cheapest areas in the city",
+  "$$": "Affordable — good value for money",
+  "$$$": "Mid-range — moderately priced",
+  "$$$$": "Premium — on the expensive side",
+};
+
 export default function AreaPage() {
   const { city, area } = useParams<{ city: string; area: string }>();
 
@@ -50,27 +58,64 @@ export default function AreaPage() {
     enabled: !!city && !!area,
   });
 
-  if (isLoading) {
-    return (
-      <SEOLayout>
-        <LoadingState />
-      </SEOLayout>
-    );
-  }
-
-  if (isError || !data?.area) {
-    return (
-      <SEOLayout>
-        <ErrorState message="Area not found. Try browsing the city instead." />
-      </SEOLayout>
-    );
-  }
+  if (isLoading) return <SEOLayout><LoadingState /></SEOLayout>;
+  if (isError || !data?.area) return <SEOLayout><ErrorState message="Area not found. Try browsing the city instead." /></SEOLayout>;
 
   const { city: cityInfo, area: areaInfo, nearby, stats } = data;
   const sentimentPositive = areaInfo.sentiment > 0;
+  const totalVotes = areaInfo.upvotes + areaInfo.downvotes;
+  const positivePercent = totalVotes > 0 ? Math.round((areaInfo.upvotes / totalVotes) * 100) : 0;
+  const year = new Date().getFullYear();
 
-  const title = `${areaInfo.text} — ${cityInfo.name} Neighborhood Guide | HoodSignal`;
-  const description = `Crowd-sourced insights for "${areaInfo.text}" in ${cityInfo.name}. Safety: ${areaInfo.safety}/5 (${safetyLabel(areaInfo.safety)}). Cost: ${areaInfo.cost}. Vibes: ${areaInfo.vibe.slice(0, 3).join(", ")}. Community score: ${areaInfo.sentiment > 0 ? "+" : ""}${areaInfo.sentiment}.`;
+  const similarAreas = nearby.filter(
+    (n) => n.safety === areaInfo.safety || n.cost === areaInfo.cost || n.vibe.some((v) => areaInfo.vibe.includes(v))
+  ).slice(0, 3);
+
+  const title = `Is ${areaInfo.text} a Good Place to Live? (${year})`;
+  const metaDesc = `Explore safety, cost, and lifestyle in "${areaInfo.text}" based on real local insights. Safety: ${areaInfo.safety}/5 (${safetyLabel(areaInfo.safety)}). Cost: ${areaInfo.cost}. ${positivePercent}% positive community sentiment.`;
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "HoodSignal", "item": "https://hoodsignal.com" },
+      { "@type": "ListItem", "position": 2, "name": cityInfo.name, "item": `https://hoodsignal.com/${cityInfo.slug}` },
+      { "@type": "ListItem", "position": 3, "name": areaInfo.text, "item": `https://hoodsignal.com/${cityInfo.slug}/${areaInfo.slug}` },
+    ],
+  };
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": `Is ${areaInfo.text} safe?`,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": `${areaInfo.text} has a safety rating of ${areaInfo.safety}/5, which is considered "${safetyLabel(areaInfo.safety)}" by the community. ${positivePercent}% of community votes are positive.`,
+        },
+      },
+      {
+        "@type": "Question",
+        "name": `What is the cost of living in ${areaInfo.text}?`,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": `${areaInfo.text} is rated ${areaInfo.cost} (${COST_LABELS[areaInfo.cost] || areaInfo.cost}) — ${COST_DESC[areaInfo.cost] || "pricing data from community"}.`,
+        },
+      },
+      {
+        "@type": "Question",
+        "name": `What is ${areaInfo.text} known for?`,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": areaInfo.vibe.length > 0
+            ? `${areaInfo.text} is known for its ${areaInfo.vibe.slice(0, 3).join(", ")} vibe${areaInfo.category ? `, with notable ${areaInfo.category}` : ""}.`
+            : `${areaInfo.text} is a neighborhood in ${cityInfo.name} with a community sentiment score of ${areaInfo.sentiment > 0 ? "+" : ""}${areaInfo.sentiment}.`,
+        },
+      },
+    ],
+  };
 
   return (
     <SEOLayout
@@ -81,21 +126,23 @@ export default function AreaPage() {
     >
       <Helmet>
         <title>{title}</title>
-        <meta name="description" content={description} />
+        <meta name="description" content={metaDesc} />
         <meta property="og:title" content={title} />
-        <meta property="og:description" content={description} />
+        <meta property="og:description" content={metaDesc} />
         <meta property="og:type" content="website" />
         <link rel="canonical" href={`https://hoodsignal.com/${cityInfo.slug}/${areaInfo.slug}`} />
+        <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
+        <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
       </Helmet>
 
       {/* Hero */}
       <div className="mb-8">
         <div className="flex items-center gap-2 text-teal-600 text-sm mb-2">
           <MapPin className="h-4 w-4" />
-          <Link href={`/${cityInfo.slug}`} className="hover:underline">{cityInfo.name}</Link>
+          <Link href={`/${cityInfo.slug}`} className="hover:underline font-medium">Best neighborhoods in {cityInfo.name}</Link>
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
-          {areaInfo.text}
+          Living in {areaInfo.text} – Complete Guide
         </h1>
         {areaInfo.category && (
           <span className="inline-block bg-teal-100 text-teal-800 text-sm font-medium rounded-full px-3 py-1 mb-3">
@@ -103,11 +150,9 @@ export default function AreaPage() {
           </span>
         )}
         <p className="text-gray-600 text-lg max-w-2xl">
-          A crowd-sourced neighborhood insight in {cityInfo.name} rated{" "}
-          <strong>{safetyLabel(areaInfo.safety)}</strong> with a community score of{" "}
-          <strong className={sentimentPositive ? "text-green-700" : "text-red-700"}>
-            {areaInfo.sentiment > 0 ? "+" : ""}{areaInfo.sentiment}
-          </strong>.
+          A crowd-sourced neighborhood guide for <strong>{areaInfo.text}</strong> in {cityInfo.name}.
+          Rated <strong>{safetyLabel(areaInfo.safety)}</strong> for safety with{" "}
+          <strong className={sentimentPositive ? "text-green-700" : "text-red-700"}>{positivePercent}% positive</strong> community sentiment.
         </p>
       </div>
 
@@ -115,60 +160,137 @@ export default function AreaPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <StatBadge label="Safety" value={`${areaInfo.safety}/5`} color="bg-green-50 text-green-800" />
         <StatBadge label="Cost" value={areaInfo.cost} color="bg-blue-50 text-blue-800" />
-        <StatBadge
-          label="Score"
-          value={`${areaInfo.sentiment > 0 ? "+" : ""}${areaInfo.sentiment}`}
-          color={sentimentPositive ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}
-        />
-        <StatBadge label="Upvotes" value={areaInfo.upvotes} color="bg-purple-50 text-purple-800" />
+        <StatBadge label="Community Score" value={`${areaInfo.sentiment > 0 ? "+" : ""}${areaInfo.sentiment}`} color={sentimentPositive ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"} />
+        <StatBadge label="% Positive" value={`${positivePercent}%`} color="bg-purple-50 text-purple-800" />
       </div>
 
-      {/* Vibes */}
-      {areaInfo.vibe.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-base font-bold text-gray-800 mb-2">Vibes & Character</h2>
-          <div className="flex flex-wrap gap-2">
-            {areaInfo.vibe.map((v) => (
-              <span key={v} className="bg-purple-50 border border-purple-200 text-purple-800 rounded-full px-4 py-1.5 text-sm font-medium">{v}</span>
+      {/* Overview */}
+      <section className="bg-gradient-to-r from-teal-50 to-blue-50 rounded-2xl border border-teal-100 p-6 mb-8">
+        <h2 className="text-xl font-bold text-gray-900 mb-2">Overview</h2>
+        <p className="text-gray-700 leading-relaxed">
+          <strong>{areaInfo.text}</strong> is a neighborhood in <Link href={`/${cityInfo.slug}`} className="text-teal-700 hover:underline">{cityInfo.name}</Link>{" "}
+          with a community safety rating of <strong>{areaInfo.safety}/5</strong> ({safetyLabel(areaInfo.safety)})
+          and a typical cost level of <strong>{areaInfo.cost}</strong> ({COST_LABELS[areaInfo.cost] || areaInfo.cost}).
+          {areaInfo.vibe.length > 0 && ` Locals describe the vibe as ${areaInfo.vibe.slice(0, 3).map((v) => `"${v}"`).join(", ")}.`}
+          {areaInfo.category && ` It's particularly known for ${areaInfo.category}.`}
+          {" "}Out of {totalVotes} community votes, <strong>{positivePercent}%</strong> are positive.
+        </p>
+      </section>
+
+      {/* Safety section */}
+      <section className="bg-white rounded-2xl border border-gray-200 p-5 mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <Shield className="h-5 w-5 text-green-600" />
+          <h2 className="text-lg font-bold text-gray-900">Safety in {areaInfo.text}</h2>
+        </div>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="flex gap-0.5">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <span key={star} className={`text-xl ${star <= areaInfo.safety ? "text-amber-400" : "text-gray-200"}`}>★</span>
             ))}
           </div>
-        </section>
-      )}
-
-      {/* Community rating */}
-      <section className="bg-white rounded-2xl border border-gray-200 p-5 mb-8">
-        <h2 className="text-base font-bold text-gray-800 mb-3">Community Verdict</h2>
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 text-green-700">
-            <ThumbsUp className="h-5 w-5" />
-            <span className="text-xl font-bold">{areaInfo.upvotes}</span>
-            <span className="text-sm">found it great</span>
-          </div>
-          <div className="flex items-center gap-2 text-red-700">
-            <ThumbsDown className="h-5 w-5" />
-            <span className="text-xl font-bold">{areaInfo.downvotes}</span>
-            <span className="text-sm">had issues</span>
-          </div>
+          <span className="text-2xl font-bold text-gray-900">{areaInfo.safety}/5</span>
+          <span className={`text-sm font-semibold px-3 py-1 rounded-full ${areaInfo.safety >= 4 ? "bg-green-100 text-green-700" : areaInfo.safety >= 3 ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>
+            {safetyLabel(areaInfo.safety)}
+          </span>
         </div>
+        <p className="text-gray-600 text-sm">
+          {areaInfo.safety >= 4
+            ? `${areaInfo.text} is considered a safe area by the community. It's a great choice for families, solo travelers, and expats looking for peace of mind.`
+            : areaInfo.safety >= 3
+              ? `${areaInfo.text} has moderate safety according to the community. Exercise normal caution, especially at night.`
+              : `${areaInfo.text} has below-average safety ratings from the community. Be aware of your surroundings.`}
+          {" "}Explore all <Link href={`/${cityInfo.slug}/safe-neighborhoods`} className="text-teal-600 hover:underline">safe neighborhoods in {cityInfo.name}</Link>.
+        </p>
         {stats && (
-          <p className="text-sm text-gray-500 mt-3">
-            Including {stats.labelCount} nearby data points, the area average safety is{" "}
-            <strong>{stats.avgSafety}/5</strong> with typical cost of <strong>{stats.modeCost}</strong>.
+          <p className="text-xs text-gray-400 mt-2">
+            Including {stats.labelCount} nearby data points: avg safety {stats.avgSafety}/5.
           </p>
         )}
       </section>
 
-      {/* Nearby areas */}
+      {/* Cost of Living */}
+      <section className="bg-white rounded-2xl border border-gray-200 p-5 mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <DollarSign className="h-5 w-5 text-blue-600" />
+          <h2 className="text-lg font-bold text-gray-900">Cost of Living in {areaInfo.text}</h2>
+        </div>
+        <div className="flex items-center gap-3 mb-3">
+          <span className="text-3xl font-bold text-blue-700">{areaInfo.cost}</span>
+          <span className="text-base font-semibold text-gray-700">{COST_LABELS[areaInfo.cost] || areaInfo.cost}</span>
+        </div>
+        <p className="text-gray-600 text-sm">
+          {COST_DESC[areaInfo.cost] || `${areaInfo.text} is rated ${areaInfo.cost} by the community.`}
+          {" "}Browse <Link href={`/${cityInfo.slug}/affordable-areas`} className="text-teal-600 hover:underline">affordable areas in {cityInfo.name}</Link>.
+        </p>
+      </section>
+
+      {/* Vibe */}
+      {areaInfo.vibe.length > 0 && (
+        <section className="bg-white rounded-2xl border border-gray-200 p-5 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="h-5 w-5 text-purple-600" />
+            <h2 className="text-lg font-bold text-gray-900">Vibe & Character</h2>
+          </div>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {areaInfo.vibe.map((v) => (
+              <span key={v} className="bg-purple-50 border border-purple-200 text-purple-800 rounded-full px-4 py-1.5 text-sm font-medium">{v}</span>
+            ))}
+          </div>
+          <p className="text-gray-600 text-sm">
+            Locals describe {areaInfo.text} as {areaInfo.vibe.slice(0, 3).map((v) => `"${v}"`).join(", ")}.
+            {areaInfo.category ? ` The area is particularly known for ${areaInfo.category}.` : ""}
+          </p>
+        </section>
+      )}
+
+      {/* Sentiment Score */}
+      <section className="bg-white rounded-2xl border border-gray-200 p-5 mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <Users className="h-5 w-5 text-teal-600" />
+          <h2 className="text-lg font-bold text-gray-900">Sentiment Score</h2>
+        </div>
+        <div className="flex items-center gap-6 mb-3">
+          <div className="flex items-center gap-2 text-green-700">
+            <ThumbsUp className="h-5 w-5" />
+            <span className="text-xl font-bold">{areaInfo.upvotes}</span>
+            <span className="text-sm text-gray-600">found it great</span>
+          </div>
+          <div className="flex items-center gap-2 text-red-700">
+            <ThumbsDown className="h-5 w-5" />
+            <span className="text-xl font-bold">{areaInfo.downvotes}</span>
+            <span className="text-sm text-gray-600">had issues</span>
+          </div>
+        </div>
+        {totalVotes > 0 && (
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <div className="flex-1 bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                <div
+                  className="bg-green-500 h-2.5 rounded-full"
+                  style={{ width: `${positivePercent}%` }}
+                />
+              </div>
+              <span className={`text-sm font-bold ${positivePercent >= 70 ? "text-green-700" : positivePercent >= 50 ? "text-yellow-700" : "text-red-700"}`}>
+                {positivePercent}% positive
+              </span>
+            </div>
+            <p className="text-xs text-gray-400">Based on {totalVotes} community votes</p>
+          </div>
+        )}
+      </section>
+
+      {/* Local Insights (top nearby labels) */}
       {nearby.length > 0 && (
         <section className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">Nearby in {cityInfo.name}</h2>
+            <h2 className="text-xl font-bold text-gray-900">Local Insights Near {areaInfo.text}</h2>
             <Link href={`/${cityInfo.slug}`} className="text-sm text-teal-600 hover:underline flex items-center gap-1">
-              All areas <ArrowUpRight className="h-3 w-3" />
+              All in {cityInfo.name} <ArrowUpRight className="h-3 w-3" />
             </Link>
           </div>
           <div className="grid gap-3">
-            {nearby.map((n) => (
+            {nearby.slice(0, 5).map((n) => (
               <AreaCard
                 key={n.id}
                 text={n.text}
@@ -184,38 +306,106 @@ export default function AreaPage() {
         </section>
       )}
 
-      {/* SEO prose */}
-      <section className="bg-white rounded-2xl border border-gray-200 p-6">
-        <h2 className="text-lg font-bold text-gray-900 mb-3">
-          About "{areaInfo.text}" in {cityInfo.name}
+      {/* Similar areas */}
+      {similarAreas.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-base font-bold text-gray-800 mb-3">Explore Similar Areas</h2>
+          <div className="flex flex-wrap gap-2">
+            {similarAreas.map((n) => (
+              <Link
+                key={n.id}
+                href={`/${cityInfo.slug}/${n.slug || slugify(n.text)}`}
+                className="bg-white border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-700 hover:border-teal-300 hover:text-teal-700 transition-colors"
+              >
+                {n.text} ({n.cost}, {n.safety}/5★)
+              </Link>
+            ))}
+          </div>
+          <p className="text-xs text-gray-400 mt-2">
+            Areas with similar safety rating or cost to {areaInfo.text} —{" "}
+            <Link href={`/${cityInfo.slug}`} className="text-teal-600 hover:underline">
+              {areaInfo.cost} cost of living in {cityInfo.name}
+            </Link>
+          </p>
+        </section>
+      )}
+
+      {/* FAQ */}
+      <section className="mb-8">
+        <h2 className="text-xl font-bold text-gray-900 mb-4">
+          Is {areaInfo.text} a Good Place to Live?
         </h2>
+        <div className="space-y-3">
+          {[
+            {
+              q: `Is ${areaInfo.text} safe?`,
+              a: `${areaInfo.text} has a community safety rating of ${areaInfo.safety}/5 — considered "${safetyLabel(areaInfo.safety)}". ${positivePercent}% of community votes are positive. ${areaInfo.safety >= 4 ? "This is one of the safer areas in " + cityInfo.name + "." : "Exercise normal caution when visiting."}`,
+            },
+            {
+              q: `What is the cost of living in ${areaInfo.text}?`,
+              a: `${areaInfo.text} is rated ${areaInfo.cost} (${COST_LABELS[areaInfo.cost] || areaInfo.cost}) by the community. ${COST_DESC[areaInfo.cost] || ""}`,
+            },
+            {
+              q: `What is ${areaInfo.text} known for?`,
+              a: areaInfo.vibe.length > 0
+                ? `${areaInfo.text} is known for its ${areaInfo.vibe.join(", ")} character${areaInfo.category ? ` and ${areaInfo.category}` : ""}. It has earned a community sentiment score of ${areaInfo.sentiment > 0 ? "+" : ""}${areaInfo.sentiment}.`
+                : `${areaInfo.text} is a neighborhood in ${cityInfo.name} with a community score of ${areaInfo.sentiment > 0 ? "+" : ""}${areaInfo.sentiment} from ${totalVotes} votes.`,
+            },
+          ].map(({ q, a }) => (
+            <details key={q} className="bg-white rounded-xl border border-gray-200 group">
+              <summary className="px-5 py-4 cursor-pointer font-semibold text-gray-900 flex items-center justify-between list-none">
+                {q}
+                <span className="text-teal-600 group-open:rotate-180 transition-transform">▾</span>
+              </summary>
+              <p className="px-5 pb-4 text-gray-600 text-sm leading-relaxed">{a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      {/* SEO prose */}
+      <section className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
+        <h2 className="text-lg font-bold text-gray-900 mb-3">About {areaInfo.text} in {cityInfo.name}</h2>
         <div className="prose prose-sm text-gray-600 max-w-none space-y-3">
           <p>
-            "{areaInfo.text}" is a crowd-sourced neighborhood insight in <strong>{cityInfo.name}</strong>, rated{" "}
-            <strong>{areaInfo.safety} out of 5 stars</strong> for safety by the community.
-            The area is generally considered <strong>{safetyLabel(areaInfo.safety)}</strong> with a typical cost level of{" "}
-            <strong>{areaInfo.cost}</strong>.
+            <strong>Is {areaInfo.text} safe?</strong> According to community data, it's rated{" "}
+            <strong>{areaInfo.safety}/5</strong> for safety — {safetyLabel(areaInfo.safety).toLowerCase()}.
+            The neighborhood has received {areaInfo.upvotes} upvotes and {areaInfo.downvotes} downvotes, giving it a{" "}
+            <strong>{positivePercent}% positive sentiment</strong>.
           </p>
           {areaInfo.vibe.length > 0 && (
             <p>
-              Locals describe the vibe as {areaInfo.vibe.map((v) => `"${v}"`).join(", ")}.
-              {areaInfo.category ? ` It's particularly known for: ${areaInfo.category}.` : ""}
+              <strong>Living in {areaInfo.text}:</strong> Locals describe this area as {areaInfo.vibe.map((v) => `"${v}"`).join(", ")}.
+              {areaInfo.category ? ` It's particularly known for ${areaInfo.category}.` : ""}
+              The cost of living is <strong>{areaInfo.cost}</strong> ({COST_LABELS[areaInfo.cost] || areaInfo.cost}).
             </p>
           )}
           <p>
-            The community score of <strong>{areaInfo.sentiment > 0 ? "+" : ""}{areaInfo.sentiment}</strong> ({areaInfo.upvotes} upvotes, {areaInfo.downvotes} downvotes)
-            reflects genuine sentiment from people who have spent time in this area.
+            Compare this area with others or explore more{" "}
+            <Link href={`/${cityInfo.slug}`} className="text-teal-700 hover:underline">neighborhoods in {cityInfo.name}</Link>.
+            If safety is your priority, check out the{" "}
+            <Link href={`/${cityInfo.slug}/safe-neighborhoods`} className="text-teal-700 hover:underline">safest neighborhoods in {cityInfo.name}</Link>.
           </p>
         </div>
       </section>
 
       {/* Compare CTA */}
-      <div className="mt-6 bg-gradient-to-r from-teal-50 to-purple-50 rounded-2xl border border-teal-100 p-5">
-        <h3 className="font-bold text-gray-900 mb-1">Want to compare?</h3>
-        <p className="text-sm text-gray-600 mb-3">See how "{areaInfo.text}" stacks up against other neighborhoods.</p>
-        <Link href={`/${cityInfo.slug}`} className="inline-flex items-center gap-2 bg-teal-600 text-white text-sm font-semibold rounded-lg px-4 py-2 hover:bg-teal-700 transition-colors">
-          Explore {cityInfo.name} →
-        </Link>
+      <div className="bg-gradient-to-r from-teal-50 to-purple-50 rounded-2xl border border-teal-100 p-5">
+        <h3 className="font-bold text-gray-900 mb-1">Is {areaInfo.text} right for you?</h3>
+        <p className="text-sm text-gray-600 mb-3">
+          Explore all {cityInfo.name} neighborhoods or use our intent guides to narrow your search.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <Link href={`/${cityInfo.slug}`} className="inline-flex items-center gap-2 bg-teal-600 text-white text-sm font-semibold rounded-lg px-4 py-2 hover:bg-teal-700 transition-colors">
+            All {cityInfo.name} neighborhoods →
+          </Link>
+          <Link href={`/${cityInfo.slug}/safe-neighborhoods`} className="inline-flex items-center gap-2 bg-white text-gray-700 border border-gray-200 text-sm font-medium rounded-lg px-4 py-2 hover:border-teal-300 transition-colors">
+            🛡️ Safest areas
+          </Link>
+          <Link href={`/${cityInfo.slug}/affordable-areas`} className="inline-flex items-center gap-2 bg-white text-gray-700 border border-gray-200 text-sm font-medium rounded-lg px-4 py-2 hover:border-teal-300 transition-colors">
+            💰 Affordable areas
+          </Link>
+        </div>
       </div>
     </SEOLayout>
   );
