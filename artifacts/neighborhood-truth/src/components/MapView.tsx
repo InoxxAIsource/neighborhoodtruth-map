@@ -227,8 +227,8 @@ export function MapView({
     if (!containerRef.current || mapRef.current) return;
 
     const map = L.map(containerRef.current, {
-      center: [20, 0],
-      zoom: 3,
+      center: [40.755, -73.984],
+      zoom: 12,
       zoomControl: true,
     });
 
@@ -296,7 +296,7 @@ export function MapView({
     if (!showLabels) return;
 
     const zoom = map.getZoom();
-    const minZoom = 5;
+    const minZoom = 3;
     if (zoom < minZoom) return;
 
     const labelsToShow = selectedCategories.length > 0
@@ -323,7 +323,7 @@ export function MapView({
       markerLayer.clearLayers();
 
       const zoom = map.getZoom();
-      const minZoom = 5;
+      const minZoom = 3;
       if (zoom < minZoom || !showLabels) return;
 
       const labelsToShow = selectedCategories.length > 0

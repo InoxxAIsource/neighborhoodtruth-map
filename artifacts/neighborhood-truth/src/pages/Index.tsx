@@ -6,6 +6,7 @@ import { AddLabelDialog } from "@/components/AddLabelDialog";
 import { FilterSidebar, DEFAULT_FILTERS } from "@/components/FilterSidebar";
 import { TopToolbar } from "@/components/TopToolbar";
 import { HeroOverlay, MicroHints, useOnboarding } from "@/components/Onboarding";
+import { ZoneLegend } from "@/components/ZoneLegend";
 import { Button } from "@/components/ui/button";
 import { Plus, MapPin } from "lucide-react";
 import { useVoterId } from "@/hooks/useVoterId";
@@ -205,6 +206,8 @@ export default function Index() {
         onSubmit={(data) => addLabel.mutate(data)}
         isSubmitting={addLabel.isPending}
       />
+
+      <ZoneLegend />
     </div>
   );
 }

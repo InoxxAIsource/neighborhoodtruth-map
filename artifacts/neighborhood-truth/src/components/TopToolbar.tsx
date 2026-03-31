@@ -1,9 +1,9 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { MapPin, TagsIcon, EyeOff, LocateFixed, Search, Loader2 } from "lucide-react";
+import { MapPin, TagsIcon, EyeOff, LocateFixed, Search, Loader2, Globe } from "lucide-react";
 
 export const PLACE_CATEGORIES = {
   good: [
@@ -35,6 +35,34 @@ export const ALL_PLACE_LABELS = [
   ...PLACE_CATEGORIES.bad.map((c) => c.label),
 ];
 
+export const CITIES = [
+  { name: "New York", lat: 40.755, lng: -73.984, flag: "🇺🇸" },
+  { name: "London", lat: 51.5137, lng: -0.1337, flag: "🇬🇧" },
+  { name: "Paris", lat: 48.8566, lng: 2.3431, flag: "🇫🇷" },
+  { name: "Tokyo", lat: 35.6938, lng: 139.7005, flag: "🇯🇵" },
+  { name: "Dubai", lat: 25.1972, lng: 55.2744, flag: "🇦🇪" },
+  { name: "Singapore", lat: 1.3050, lng: 103.8320, flag: "🇸🇬" },
+  { name: "Sydney", lat: -33.8908, lng: 151.2097, flag: "🇦🇺" },
+  { name: "Berlin", lat: 52.5200, lng: 13.4050, flag: "🇩🇪" },
+  { name: "Barcelona", lat: 41.3922, lng: 2.1577, flag: "🇪🇸" },
+  { name: "Bangkok", lat: 13.7308, lng: 100.5238, flag: "🇹🇭" },
+  { name: "Seoul", lat: 37.5326, lng: 127.0246, flag: "🇰🇷" },
+  { name: "Mumbai", lat: 19.0596, lng: 72.8295, flag: "🇮🇳" },
+  { name: "Delhi", lat: 28.6315, lng: 77.2167, flag: "🇮🇳" },
+  { name: "Cairo", lat: 30.0561, lng: 31.2394, flag: "🇪🇬" },
+  { name: "Hong Kong", lat: 22.2796, lng: 114.1745, flag: "🇭🇰" },
+  { name: "Bali", lat: -8.4095, lng: 115.1889, flag: "🇮🇩" },
+  { name: "Cape Town", lat: -33.9249, lng: 18.4241, flag: "🇿🇦" },
+  { name: "Rome", lat: 41.9028, lng: 12.4964, flag: "🇮🇹" },
+  { name: "Nairobi", lat: -1.2921, lng: 36.8219, flag: "🇰🇪" },
+  { name: "Lisbon", lat: 38.7223, lng: -9.1393, flag: "🇵🇹" },
+  { name: "Kuala Lumpur", lat: 3.1390, lng: 101.6869, flag: "🇲🇾" },
+  { name: "Jakarta", lat: -6.2088, lng: 106.8456, flag: "🇮🇩" },
+  { name: "Chicago", lat: 41.8781, lng: -87.6298, flag: "🇺🇸" },
+  { name: "Miami", lat: 25.7617, lng: -80.1918, flag: "🇺🇸" },
+  { name: "Vienna", lat: 48.2082, lng: 16.3738, flag: "🇦🇹" },
+];
+
 interface TopToolbarProps {
   showLabels: boolean;
   onToggleLabels: () => void;
@@ -61,6 +89,7 @@ export function TopToolbar({
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [citiesOpen, setCitiesOpen] = useState(false);
 
   const toggleCategory = (label: string) => {
     const next = selectedCategories.includes(label)
@@ -183,6 +212,35 @@ export function TopToolbar({
                   Clear all
                 </Button>
               )}
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        <div className="w-px h-5 bg-border" />
+
+        <Popover open={citiesOpen} onOpenChange={setCitiesOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="sm" className="gap-1.5 text-xs h-8">
+              <Globe className="h-3.5 w-3.5" />
+              Cities
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-56 p-2" align="center">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 px-1">Jump to city</p>
+            <div className="max-h-64 overflow-y-auto space-y-0.5">
+              {CITIES.map((city) => (
+                <button
+                  key={city.name}
+                  className="w-full text-left text-sm px-2 py-1.5 rounded-md hover:bg-accent transition-colors flex items-center gap-2"
+                  onClick={() => {
+                    onSearchLocation({ lat: city.lat, lng: city.lng });
+                    setCitiesOpen(false);
+                  }}
+                >
+                  <span className="text-base leading-none">{city.flag}</span>
+                  <span>{city.name}</span>
+                </button>
+              ))}
             </div>
           </PopoverContent>
         </Popover>
