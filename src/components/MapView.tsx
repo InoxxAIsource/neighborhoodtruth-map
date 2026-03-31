@@ -457,6 +457,14 @@ export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap 
     );
   }, [locateUser, onLocated]);
 
+  // Fly to searched location
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !flyToLocation) return;
+    map.flyTo([flyToLocation.lat, flyToLocation.lng], 13, { duration: 1.5 });
+    onFlownTo?.();
+  }, [flyToLocation, onFlownTo]);
+
   // Render labels
   useEffect(() => {
     const layer = markerLayerRef.current;
