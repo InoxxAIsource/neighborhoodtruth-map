@@ -222,6 +222,8 @@ export default function Index() {
         allLabels={labels}
         onClose={() => setSelectedLabel(null)}
         apiBase={API}
+        onVote={handleVote}
+        myVotes={userVotes}
       />
     </div>
   );

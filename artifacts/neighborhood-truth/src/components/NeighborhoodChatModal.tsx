@@ -73,9 +73,11 @@ interface NeighborhoodChatModalProps {
   allLabels: LabelData[];
   onClose: () => void;
   apiBase: string;
+  onVote?: (labelId: string, voteType: "upvote" | "downvote") => void;
+  myVotes?: { labelId: string; voteType: string }[];
 }
 
-export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase }: NeighborhoodChatModalProps) {
+export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase, onVote, myVotes }: NeighborhoodChatModalProps) {
   const [chatOpen, setChatOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -84,9 +86,25 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase }: Ne
   const [error, setError] = useState<string | null>(null);
   const [lastFailedQuestion, setLastFailedQuestion] = useState<string | null>(null);
   const [rateLimitData, setRateLimitDataState] = useState<RateLimitData>(() => getRateLimit());
+  const [localVotes, setLocalVotes] = useState<Record<string, { upvotes: number; downvotes: number; voted?: "upvote" | "downvote" }>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  const handleVote = useCallback((targetLabel: LabelData, voteType: "upvote" | "downvote") => {
+    const existingPersisted = myVotes?.find((v) => v.labelId === targetLabel.id);
+    const existingLocal = localVotes[targetLabel.id];
+    if (existingPersisted || existingLocal?.voted) return;
+    setLocalVotes((prev) => ({
+      ...prev,
+      [targetLabel.id]: {
+        upvotes: (prev[targetLabel.id]?.upvotes ?? targetLabel.upvotes) + (voteType === "upvote" ? 1 : 0),
+        downvotes: (prev[targetLabel.id]?.downvotes ?? targetLabel.downvotes) + (voteType === "downvote" ? 1 : 0),
+        voted: voteType,
+      },
+    }));
+    onVote?.(targetLabel.id, voteType);
+  }, [localVotes, myVotes, onVote]);
 
   const nearbyLabels = label ? getNearbyLabels(allLabels, label) : [];
   const remaining = DAILY_LIMIT - rateLimitData.count;
@@ -219,8 +237,19 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase }: Ne
 
   if (!label) return null;
 
+  const getLabelVoteState = (l: LabelData) => {
+    const persisted = myVotes?.find((v) => v.labelId === l.id);
+    const local = localVotes[l.id];
+    const voted = local?.voted ?? (persisted?.voteType as "upvote" | "downvote" | undefined);
+    const upvotes = local?.upvotes ?? l.upvotes;
+    const downvotes = local?.downvotes ?? l.downvotes;
+    const hasVoted = !!voted;
+    return { voted, upvotes, downvotes, hasVoted };
+  };
+
   const score = label.upvotes - label.downvotes;
   const categoryColor = label.category ? (CATEGORY_COLORS[label.category] ?? "#6b7280") : "#6b7280";
+  const focusedVote = getLabelVoteState(label);
 
   return (
     <div
@@ -266,9 +295,9 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase }: Ne
               <span className="text-sm font-semibold text-gray-700">{label.cost}</span>
               <span
                 className="text-xs px-2 py-0.5 rounded-full font-semibold"
-                style={{ background: score > 0 ? "#dcfce7" : score < 0 ? "#fee2e2" : "#f3f4f6", color: score > 0 ? "#166534" : score < 0 ? "#991b1b" : "#374151" }}
+                style={{ background: focusedVote.upvotes - focusedVote.downvotes > 0 ? "#dcfce7" : focusedVote.upvotes - focusedVote.downvotes < 0 ? "#fee2e2" : "#f3f4f6", color: focusedVote.upvotes - focusedVote.downvotes > 0 ? "#166534" : focusedVote.upvotes - focusedVote.downvotes < 0 ? "#991b1b" : "#374151" }}
               >
-                {score > 0 ? "+" : ""}{score}
+                {focusedVote.upvotes - focusedVote.downvotes > 0 ? "+" : ""}{focusedVote.upvotes - focusedVote.downvotes}
               </span>
               {label.category && (
                 <span className="text-xs px-2 py-0.5 rounded-full text-white font-medium" style={{ background: categoryColor }}>
@@ -285,30 +314,94 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase }: Ne
               </div>
             )}
 
+            {/* Vote buttons for focused label */}
+            <div className="flex items-center gap-2 mb-3">
+              <button
+                onClick={() => handleVote(label, "upvote")}
+                disabled={focusedVote.hasVoted}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors disabled:cursor-default"
+                style={{
+                  background: focusedVote.voted === "upvote" ? "#dcfce7" : "#f9fafb",
+                  borderColor: focusedVote.voted === "upvote" ? "#86efac" : "#d1d5db",
+                  color: focusedVote.voted === "upvote" ? "#166534" : "#374151",
+                  opacity: focusedVote.hasVoted && focusedVote.voted !== "upvote" ? 0.5 : 1,
+                }}
+              >
+                👍 <span className="font-bold">{focusedVote.upvotes}</span>
+              </button>
+              <button
+                onClick={() => handleVote(label, "downvote")}
+                disabled={focusedVote.hasVoted}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors disabled:cursor-default"
+                style={{
+                  background: focusedVote.voted === "downvote" ? "#fee2e2" : "#f9fafb",
+                  borderColor: focusedVote.voted === "downvote" ? "#fca5a5" : "#d1d5db",
+                  color: focusedVote.voted === "downvote" ? "#991b1b" : "#374151",
+                  opacity: focusedVote.hasVoted && focusedVote.voted !== "downvote" ? 0.5 : 1,
+                }}
+              >
+                👎 <span className="font-bold">{focusedVote.downvotes}</span>
+              </button>
+              {focusedVote.hasVoted && (
+                <span className="text-xs text-gray-400">Voted!</span>
+              )}
+            </div>
+
             {nearbyLabels.length > 0 && (
               <div>
                 <p className="text-xs text-gray-500 font-medium mb-1.5">
                   {nearbyLabels.length} more insight{nearbyLabels.length !== 1 ? "s" : ""} nearby
                 </p>
-                <div className="flex flex-wrap gap-1">
-                  {nearbyLabels.slice(0, 8).map((l) => {
-                    const s = l.upvotes - l.downvotes;
+                <div className="flex flex-col gap-1.5">
+                  {nearbyLabels.slice(0, 6).map((l) => {
+                    const vs = getLabelVoteState(l);
+                    const ns = vs.upvotes - vs.downvotes;
                     return (
-                      <span
+                      <div
                         key={l.id}
-                        className="text-xs rounded-md px-2 py-1 font-medium border"
+                        className="flex items-center justify-between rounded-lg px-3 py-2 border"
                         style={{
-                          background: s > 2 ? "#f0fdf4" : s < -2 ? "#fef2f2" : "#f9fafb",
-                          borderColor: s > 2 ? "#86efac" : s < -2 ? "#fca5a5" : "#e5e7eb",
-                          color: s > 2 ? "#166534" : s < -2 ? "#991b1b" : "#374151",
+                          background: ns > 2 ? "#f0fdf4" : ns < -2 ? "#fef2f2" : "#f9fafb",
+                          borderColor: ns > 2 ? "#86efac" : ns < -2 ? "#fca5a5" : "#e5e7eb",
                         }}
                       >
-                        {l.text}
-                      </span>
+                        <span
+                          className="text-xs font-medium truncate mr-2 flex-1"
+                          style={{ color: ns > 2 ? "#166534" : ns < -2 ? "#991b1b" : "#374151" }}
+                        >
+                          {l.text}
+                        </span>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <button
+                            onClick={() => handleVote(l, "upvote")}
+                            disabled={vs.hasVoted}
+                            className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs border transition-colors disabled:cursor-default"
+                            style={{
+                              background: vs.voted === "upvote" ? "#dcfce7" : "white",
+                              borderColor: vs.voted === "upvote" ? "#86efac" : "#e5e7eb",
+                              opacity: vs.hasVoted && vs.voted !== "upvote" ? 0.45 : 1,
+                            }}
+                          >
+                            👍 {vs.upvotes}
+                          </button>
+                          <button
+                            onClick={() => handleVote(l, "downvote")}
+                            disabled={vs.hasVoted}
+                            className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs border transition-colors disabled:cursor-default"
+                            style={{
+                              background: vs.voted === "downvote" ? "#fee2e2" : "white",
+                              borderColor: vs.voted === "downvote" ? "#fca5a5" : "#e5e7eb",
+                              opacity: vs.hasVoted && vs.voted !== "downvote" ? 0.45 : 1,
+                            }}
+                          >
+                            👎 {vs.downvotes}
+                          </button>
+                        </div>
+                      </div>
                     );
                   })}
-                  {nearbyLabels.length > 8 && (
-                    <span className="text-xs text-gray-400 py-1">+{nearbyLabels.length - 8} more</span>
+                  {nearbyLabels.length > 6 && (
+                    <span className="text-xs text-gray-400 pl-1">+{nearbyLabels.length - 6} more nearby</span>
                   )}
                 </div>
               </div>
