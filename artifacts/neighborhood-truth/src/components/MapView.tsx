@@ -326,7 +326,7 @@ function buildPopupContent(
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ tagKey: tag.key, voterId }),
             });
-            if (res.ok) {
+            if (res.status === 201) {
               liveCounts[tag.key] = (liveCounts[tag.key] ?? 0) + 1;
             }
           } catch {

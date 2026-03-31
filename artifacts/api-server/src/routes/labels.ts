@@ -257,15 +257,15 @@ router.post("/:id/tags", async (req, res) => {
       return;
     }
 
-    try {
-      await db.insert(labelTagsTable).values({ labelId: id, tagKey, voterId });
-    } catch (insertErr: unknown) {
-      const msg = insertErr instanceof Error ? insertErr.message : String(insertErr);
-      if (msg.includes("label_tags_label_tag_voter_unique") || msg.includes("unique") || msg.includes("duplicate")) {
-        res.status(200).json({ ok: true, duplicate: true });
-        return;
-      }
-      throw insertErr;
+    const result = await db
+      .insert(labelTagsTable)
+      .values({ labelId: id, tagKey, voterId })
+      .onConflictDoNothing()
+      .returning({ id: labelTagsTable.id });
+
+    if (!result.length) {
+      res.status(200).json({ ok: true, duplicate: true });
+      return;
     }
 
     res.status(201).json({ ok: true });

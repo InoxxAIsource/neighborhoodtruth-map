@@ -215,7 +215,7 @@ router.get("/cities", async (_req, res) => {
 
 router.get("/city/:city", async (req, res) => {
   const cityDef = CITIES.find((c) => c.slug === req.params.city);
-  if (!cityDef) return res.status(404).json({ error: "City not found" });
+  if (!cityDef) { res.status(404).json({ error: "City not found" }); return; }
 
   const allLabels = await db.select().from(labelsTable);
   const cityLabels = allLabels.filter((l) => {
@@ -262,7 +262,7 @@ router.get("/city/:city", async (req, res) => {
 
 router.get("/area/:city/:areaSlug", async (req, res) => {
   const cityDef = CITIES.find((c) => c.slug === req.params.city);
-  if (!cityDef) return res.status(404).json({ error: "City not found" });
+  if (!cityDef) { res.status(404).json({ error: "City not found" }); return; }
 
   const allLabels = await db.select().from(labelsTable);
   const cityLabels = allLabels.filter((l) => {
@@ -271,7 +271,7 @@ router.get("/area/:city/:areaSlug", async (req, res) => {
   });
 
   const matchedLabel = cityLabels.find((l) => slugify(l.text) === req.params.areaSlug);
-  if (!matchedLabel) return res.status(404).json({ error: "Area not found" });
+  if (!matchedLabel) { res.status(404).json({ error: "Area not found" }); return; }
 
   const RADIUS = 0.03;
   const nearbyLabels = cityLabels.filter(
@@ -319,10 +319,10 @@ router.get("/area/:city/:areaSlug", async (req, res) => {
 
 router.get("/intent/:city/:intent", async (req, res) => {
   const cityDef = CITIES.find((c) => c.slug === req.params.city);
-  if (!cityDef) return res.status(404).json({ error: "City not found" });
+  if (!cityDef) { res.status(404).json({ error: "City not found" }); return; }
 
   const intentKey = INTENT_SLUGS[req.params.intent];
-  if (!intentKey) return res.status(404).json({ error: "Intent not found" });
+  if (!intentKey) { res.status(404).json({ error: "Intent not found" }); return; }
 
   const allLabels = await db.select().from(labelsTable);
   const cityLabels = allLabels.filter((l) => {
@@ -377,7 +377,7 @@ router.get("/intent/:city/:intent", async (req, res) => {
 
 router.get("/compare", async (req, res) => {
   const { a, b } = req.query as { a?: string; b?: string };
-  if (!a || !b) return res.status(400).json({ error: "Provide ?a=area-slug&b=area-slug" });
+  if (!a || !b) { res.status(400).json({ error: "Provide ?a=area-slug&b=area-slug" }); return; }
 
   const allLabels = await db.select().from(labelsTable);
 
@@ -392,7 +392,8 @@ router.get("/compare", async (req, res) => {
   const bData = findArea(b);
 
   if (!aData || !bData) {
-    return res.status(404).json({ error: "One or both areas not found" });
+    res.status(404).json({ error: "One or both areas not found" });
+    return;
   }
 
   const formatArea = (data: { label: LabelRow; city: CityDef | null }) => ({
