@@ -246,6 +246,17 @@ router.post("/:id/tags", async (req, res) => {
       return;
     }
 
+    const existingVoterTags = await db
+      .select({ tagKey: labelTagsTable.tagKey })
+      .from(labelTagsTable)
+      .where(and(eq(labelTagsTable.labelId, id), eq(labelTagsTable.voterId, voterId)));
+
+    const alreadyTaggedThisKey = existingVoterTags.some((t) => t.tagKey === tagKey);
+    if (!alreadyTaggedThisKey && existingVoterTags.length >= 4) {
+      res.status(400).json({ error: "Max 4 tags per label per voter" });
+      return;
+    }
+
     try {
       await db.insert(labelTagsTable).values({ labelId: id, tagKey, voterId });
     } catch (insertErr: unknown) {

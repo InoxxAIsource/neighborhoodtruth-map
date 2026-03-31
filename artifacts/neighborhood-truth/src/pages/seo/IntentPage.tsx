@@ -26,6 +26,7 @@ interface IntentData {
     sentiment: number;
     upvotes: number;
     downvotes: number;
+    topTags?: string[];
     url: string;
   }>;
   allIntents: Array<{ slug: string; label: string; url: string; active: boolean }>;
@@ -281,9 +282,38 @@ export default function IntentPage() {
                       <td className="text-center px-3 py-3 font-semibold text-gray-700">{area.cost}</td>
                       <td className="px-3 py-3 hidden sm:table-cell">
                         <div className="flex gap-1 flex-wrap">
-                          {area.vibe.slice(0, 2).map((v) => (
-                            <span key={v} className="text-xs bg-gray-100 text-gray-600 rounded px-2 py-0.5">{v}</span>
-                          ))}
+                          {area.topTags && area.topTags.length > 0
+                            ? area.topTags.slice(0, 2).map((key) => {
+                                const TAG_EMOJIS: Record<string, string> = {
+                                  "safe-at-night": "🌙",
+                                  "noisy-on-weekends": "🔊",
+                                  "family-friendly": "👨‍👩‍👧",
+                                  "expensive": "💎",
+                                  "good-nightlife": "🎉",
+                                  "quiet": "🌿",
+                                  "good-for-students": "🎓",
+                                  "well-connected": "🚇",
+                                };
+                                const TAG_LABELS: Record<string, string> = {
+                                  "safe-at-night": "Safe at night",
+                                  "noisy-on-weekends": "Noisy",
+                                  "family-friendly": "Family",
+                                  "expensive": "Expensive",
+                                  "good-nightlife": "Nightlife",
+                                  "quiet": "Quiet",
+                                  "good-for-students": "Students",
+                                  "well-connected": "Connected",
+                                };
+                                return (
+                                  <span key={key} className="text-xs bg-green-50 border border-green-200 text-green-700 rounded-full px-2 py-0.5">
+                                    {TAG_EMOJIS[key]} {TAG_LABELS[key] ?? key}
+                                  </span>
+                                );
+                              })
+                            : area.vibe.slice(0, 2).map((v) => (
+                                <span key={v} className="text-xs bg-gray-100 text-gray-600 rounded px-2 py-0.5">{v}</span>
+                              ))
+                          }
                         </div>
                       </td>
                       <td className={`text-center px-3 py-3 font-bold hidden sm:table-cell ${area.sentiment > 0 ? "text-green-700" : "text-red-700"}`}>
