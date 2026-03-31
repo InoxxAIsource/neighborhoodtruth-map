@@ -2,7 +2,7 @@ import { ZONE_CATEGORIES } from "./ZoneOverlay";
 
 export function ZoneLegend() {
   return (
-    <div className="absolute bottom-20 sm:bottom-8 left-1/2 -translate-x-1/2 z-[1000] pointer-events-none" style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 72px)' }}>
+    <div className="absolute left-1/2 -translate-x-1/2 z-[1000] pointer-events-none" style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 128px)' }}>
       <div className="bg-card/90 backdrop-blur-sm rounded-xl shadow-lg border px-3 py-2 flex items-center gap-3 flex-wrap justify-center">
         {Object.entries(ZONE_CATEGORIES).map(([key, zone]) => (
           <div key={key} className="flex items-center gap-1.5">

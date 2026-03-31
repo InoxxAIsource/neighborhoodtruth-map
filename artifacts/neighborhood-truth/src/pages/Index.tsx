@@ -205,7 +205,7 @@ export default function Index() {
         </div>
       </div>
 
-      <div className="absolute bottom-0 right-0 z-[1000] pr-4 sm:pr-6" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 24px) + 8px)' }}>
+      <div className="absolute bottom-0 right-0 z-[1000] pr-4 sm:pr-6" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 68px)' }}>
         {isPlacingPin ? (
           <div className="flex flex-col items-end gap-2">
             <div className="bg-card/95 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border animate-pulse">
