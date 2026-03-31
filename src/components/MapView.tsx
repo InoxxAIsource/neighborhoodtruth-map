@@ -37,6 +37,8 @@ interface MapViewProps {
   selectedCategories?: string[];
   locateUser?: boolean;
   onLocated?: () => void;
+  flyToLocation?: { lat: number; lng: number } | null;
+  onFlownTo?: () => void;
 }
 
 export interface AreaSummary {
