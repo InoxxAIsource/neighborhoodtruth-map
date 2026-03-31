@@ -1,9 +1,17 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { MapPin, TagsIcon, EyeOff, LocateFixed, Search, Loader2 } from "lucide-react";
+
+interface SearchResult {
+  display_name: string;
+  lat: string;
+  lon: string;
+  type: string;
+  class: string;
+}
 
 export const PLACE_CATEGORIES = {
   good: [
