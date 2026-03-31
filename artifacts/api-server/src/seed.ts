@@ -679,16 +679,16 @@ const SEED_LABELS: SeedLabel[] = [
   { lat: 31.5507, lng: 74.3436, text: "Mall Road colonial promenade", safety: 4, vibe: ["Family", "Artsy"], cost: "$$", color: "#16a34a", category: null, upvotes: 69, downvotes: 5 },
 ];
 
-async function seed() {
+export async function seedIfNeeded(): Promise<void> {
   const [{ value: existingCount }] = await db.select({ value: count() }).from(labelsTable);
-  
+
   if (existingCount >= SEED_LABELS.length) {
-    console.log(`Database already has ${existingCount} labels (${SEED_LABELS.length} defined), skipping seed.`);
-    process.exit(0);
+    console.log(`Seed check: DB has ${existingCount} labels (${SEED_LABELS.length} defined), skipping.`);
+    return;
   }
 
   console.log(`Seeding ${SEED_LABELS.length} labels...`);
-  
+
   const batchSize = 50;
   for (let i = 0; i < SEED_LABELS.length; i += batchSize) {
     const batch = SEED_LABELS.slice(i, i + batchSize);
@@ -708,12 +708,14 @@ async function seed() {
     );
     console.log(`  Inserted batch ${Math.floor(i / batchSize) + 1}: ${batch.length} labels`);
   }
-  
+
   const [{ value: finalCount }] = await db.select({ value: count() }).from(labelsTable);
   console.log(`Seed complete. Total labels in DB: ${finalCount}`);
 }
 
-seed().catch((err) => {
-  console.error("Seed failed:", err);
-  process.exit(1);
-});
+if (process.argv[1]?.endsWith("seed.ts") || process.argv[1]?.endsWith("seed.mjs")) {
+  seedIfNeeded().then(() => process.exit(0)).catch((err) => {
+    console.error("Seed failed:", err);
+    process.exit(1);
+  });
+}
