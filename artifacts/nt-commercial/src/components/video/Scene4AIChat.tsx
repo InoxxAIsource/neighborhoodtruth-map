@@ -44,9 +44,9 @@ export const Scene4AIChat = () => {
       className="absolute inset-0 flex items-center justify-center z-10"
       {...sceneTransitions.slideUp}
     >
-      <div className="w-[70vw] max-w-4xl flex flex-col gap-8">
+      <div className="w-[70vw] flex flex-col gap-8">
         <motion.div 
-          className="self-end bg-brand-teal text-white px-8 py-5 rounded-3xl rounded-tr-sm text-2xl md:text-3xl shadow-xl max-w-[80%] font-medium"
+          className="self-end bg-brand-teal text-white px-8 py-5 rounded-3xl rounded-tr-sm text-[2vw] shadow-xl max-w-[70vw] font-medium"
           initial={{ opacity: 0, scale: 0.9, x: 30 }}
           animate={{ opacity: 1, scale: 1, x: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
@@ -63,7 +63,7 @@ export const Scene4AIChat = () => {
 
         {typedQuestion.length === fullQuestion.length && (
           <motion.div 
-            className="self-start bg-brand-navy border border-brand-purple/40 text-white px-8 py-6 rounded-3xl rounded-tl-sm text-2xl md:text-3xl shadow-2xl max-w-[85%] flex gap-6 items-start relative overflow-hidden"
+            className="self-start bg-brand-navy border border-brand-purple/40 text-white px-8 py-6 rounded-3xl rounded-tl-sm text-[2vw] shadow-2xl max-w-[70vw] flex gap-6 items-start relative overflow-hidden"
             initial={{ opacity: 0, scale: 0.9, x: -30 }}
             animate={{ opacity: 1, scale: 1, x: 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}

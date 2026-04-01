@@ -20,7 +20,7 @@ export const Scene1Hook = () => {
         transition={{ duration: 4, delay: 1.5, repeat: Infinity, ease: "easeOut" }}
       />
       <motion.h1
-        className="font-display text-5xl md:text-7xl lg:text-8xl font-black tracking-tight text-white relative z-20 text-center drop-shadow-2xl"
+        className="font-display text-[5vw] font-black tracking-tight text-white relative z-20 text-center drop-shadow-2xl"
         initial={{ opacity: 0, y: 40, filter: 'blur(15px)' }}
         animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
         transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}

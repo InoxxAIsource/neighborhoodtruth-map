@@ -28,7 +28,7 @@ export const Scene6Tagline = () => {
         </motion.div>
 
         <motion.h1 
-          className="font-display text-6xl md:text-8xl lg:text-[7rem] font-black text-white tracking-tighter"
+          className="font-display text-[6vw] font-black text-white tracking-tighter"
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.6, duration: 1, ease: "easeOut" }}
@@ -37,7 +37,7 @@ export const Scene6Tagline = () => {
         </motion.h1>
         
         <motion.p 
-          className="font-display text-3xl md:text-4xl text-brand-orange mt-6 mb-16 font-bold tracking-tight"
+          className="font-display text-[2.5vw] text-brand-orange mt-6 mb-16 font-bold tracking-tight"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 1.2, duration: 1, ease: "easeOut" }}
@@ -46,7 +46,7 @@ export const Scene6Tagline = () => {
         </motion.p>
 
         <motion.div
-          className="px-8 py-4 rounded-2xl bg-white/5 border border-white/10 text-white/80 font-mono text-2xl tracking-widest"
+          className="px-8 py-4 rounded-2xl bg-white/5 border border-white/10 text-white/80 font-mono text-[1.5vw] tracking-widest"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 2, duration: 1 }}

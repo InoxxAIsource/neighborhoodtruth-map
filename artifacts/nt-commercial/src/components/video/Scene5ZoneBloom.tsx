@@ -29,7 +29,7 @@ export const Scene5ZoneBloom = () => {
         {zones.map((zone, i) => (
           <motion.div
             key={`text-${i}`}
-            className="absolute font-display font-black text-5xl md:text-6xl text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)]"
+            className="absolute font-display font-black text-[4.5vw] text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)]"
             initial={{ opacity: 0, scale: 0.5, x: zone.x, y: zone.y, left: "50%", top: "50%", transform: "translate(-50%, -50%)" }}
             animate={{ opacity: 1, scale: 1, x: zone.x, y: zone.y }}
             transition={{ duration: 1, delay: zone.delay + 0.8, type: "spring", stiffness: 200, damping: 20 }}
@@ -45,7 +45,7 @@ export const Scene5ZoneBloom = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 3, duration: 1 }}
       >
-        <h2 className="font-display text-4xl text-white/90 font-bold tracking-tight">
+        <h2 className="font-display text-[3vw] text-white/90 font-bold tracking-tight">
           Find your perfect zone.
         </h2>
       </motion.div>

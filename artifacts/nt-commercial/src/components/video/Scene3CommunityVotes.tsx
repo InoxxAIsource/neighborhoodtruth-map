@@ -17,14 +17,14 @@ export const Scene3CommunityVotes = () => {
       className="absolute inset-0 flex items-center justify-center z-10"
       {...sceneTransitions.pushLeft}
     >
-      <div className="flex flex-col items-center gap-12 w-full max-w-4xl px-8">
+      <div className="flex flex-col items-center gap-12 w-full px-8">
         <motion.div
-          className="bg-white/10 backdrop-blur-xl border border-white/20 p-12 rounded-[2.5rem] flex flex-col items-center gap-8 w-full max-w-xl shadow-[0_0_50px_rgba(34,197,94,0.15)]"
+          className="bg-white/10 backdrop-blur-xl border border-white/20 p-12 rounded-[2.5rem] flex flex-col items-center gap-8 w-[80vw] shadow-[0_0_50px_rgba(34,197,94,0.15)]"
           initial={{ scale: 0.8, opacity: 0, rotateY: 45 }}
           animate={{ scale: 1, opacity: 1, rotateY: 0 }}
           transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="bg-brand-navy border-2 border-brand-teal px-8 py-3 rounded-full text-3xl font-display font-bold text-white mb-2 shadow-lg">
+          <div className="bg-brand-navy border-2 border-brand-teal px-8 py-3 rounded-full text-[2.25vw] font-display font-bold text-white mb-2 shadow-lg">
             🌙 Safe at night
           </div>
           
@@ -40,7 +40,7 @@ export const Scene3CommunityVotes = () => {
             </div>
             
             <motion.div 
-              className="text-8xl font-display font-black text-brand-green tabular-nums w-[4ch] text-left drop-shadow-[0_0_15px_rgba(34,197,94,0.5)]"
+              className="text-[6vw] font-display font-black text-brand-green tabular-nums w-[4ch] text-left drop-shadow-[0_0_15px_rgba(34,197,94,0.5)]"
             >
               +{score}
             </motion.div>
@@ -48,7 +48,7 @@ export const Scene3CommunityVotes = () => {
         </motion.div>
 
         <motion.h2
-          className="font-display text-5xl text-white font-bold tracking-tight"
+          className="font-display text-[3.5vw] text-white font-bold tracking-tight"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 1, ease: [0.16, 1, 0.3, 1] }}

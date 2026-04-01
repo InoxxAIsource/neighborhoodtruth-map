@@ -18,7 +18,7 @@ export const Scene2LabelsDrop = () => {
       {labels.map((label, i) => (
         <motion.div
           key={i}
-          className="absolute bg-white text-brand-navy px-6 py-3 rounded-2xl font-display font-bold text-xl md:text-2xl shadow-2xl flex items-center gap-2 border border-black/10"
+          className="absolute bg-white text-brand-navy px-6 py-3 rounded-2xl font-display font-bold text-[1.5vw] shadow-2xl flex items-center gap-2 border border-black/10"
           initial={{ opacity: 0, scale: 0, x: label.x, y: `calc(${label.y} - 20vh)` }}
           animate={{ opacity: 1, scale: 1, x: label.x, y: label.y }}
           transition={{ ...springs.bouncy, delay: label.delay }}
@@ -34,7 +34,7 @@ export const Scene2LabelsDrop = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 2.5, duration: 1, ease: [0.16, 1, 0.3, 1] }}
       >
-        <h2 className="font-display text-4xl text-white/90 font-bold tracking-tight">
+        <h2 className="font-display text-[3vw] text-white/90 font-bold tracking-tight">
           Real labels from real locals.
         </h2>
       </motion.div>
