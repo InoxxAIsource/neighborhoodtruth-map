@@ -1,18 +1,19 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, lazy, Suspense } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MapView } from "@/components/MapView";
 import type { AreaSummary, LabelData } from "@/components/MapView";
-import { AddLabelDialog } from "@/components/AddLabelDialog";
 import { FilterSidebar, DEFAULT_FILTERS } from "@/components/FilterSidebar";
 import { TopToolbar } from "@/components/TopToolbar";
 import { HeroOverlay, MicroHints, useOnboarding } from "@/components/Onboarding";
 import { ZoneLegend } from "@/components/ZoneLegend";
-import { NeighborhoodChatModal } from "@/components/NeighborhoodChatModal";
 import { Button } from "@/components/ui/button";
 import { Plus, MapPin } from "lucide-react";
 import { useVoterId } from "@/hooks/useVoterId";
 import { toast } from "sonner";
 import type { Filters } from "@/components/MapView";
+
+const AddLabelDialog = lazy(() => import("@/components/AddLabelDialog").then(m => ({ default: m.AddLabelDialog })));
+const NeighborhoodChatModal = lazy(() => import("@/components/NeighborhoodChatModal").then(m => ({ default: m.NeighborhoodChatModal })));
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 const API = `${BASE}/api`;
@@ -224,24 +225,28 @@ export default function Index() {
         )}
       </div>
 
-      <AddLabelDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        position={clickedPosition}
-        onSubmit={(data) => addLabel.mutate(data)}
-        isSubmitting={addLabel.isPending}
-      />
+      <Suspense fallback={null}>
+        <AddLabelDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          position={clickedPosition}
+          onSubmit={(data) => addLabel.mutate(data)}
+          isSubmitting={addLabel.isPending}
+        />
+      </Suspense>
 
       <ZoneLegend />
 
-      <NeighborhoodChatModal
-        label={selectedLabel}
-        allLabels={labels}
-        onClose={() => setSelectedLabel(null)}
-        apiBase={API}
-        onVote={handleVote}
-        myVotes={userVotes}
-      />
+      <Suspense fallback={null}>
+        <NeighborhoodChatModal
+          label={selectedLabel}
+          allLabels={labels}
+          onClose={() => setSelectedLabel(null)}
+          apiBase={API}
+          onVote={handleVote}
+          myVotes={userVotes}
+        />
+      </Suspense>
     </div>
   );
 }
