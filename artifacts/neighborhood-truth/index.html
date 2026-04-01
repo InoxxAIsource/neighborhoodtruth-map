@@ -29,10 +29,16 @@
     <meta name="twitter:title" content="NeighborhoodTruth | Honest Neighborhood Reviews" />
     <meta name="twitter:description" content="Discover real neighborhood vibes from locals. Drop labels, vote on insights &amp; find your perfect area." />
 
-    <!-- Fonts -->
+    <!-- Fonts: async load to remove render-blocking -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"></noscript>
+
+    <!-- Preconnect to OSM tile servers so Leaflet map loads faster -->
+    <link rel="preconnect" href="https://a.tile.openstreetmap.org">
+    <link rel="preconnect" href="https://b.tile.openstreetmap.org">
+    <link rel="preconnect" href="https://c.tile.openstreetmap.org">
 
     <!-- JSON-LD: Organization -->
     <script type="application/ld+json">

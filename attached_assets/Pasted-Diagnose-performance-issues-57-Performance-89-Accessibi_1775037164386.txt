@@ -1,0 +1,260 @@
+Diagnose performance issues
+57
+Performance
+89
+Accessibility
+92
+Best Practices
+100
+SEO
+57
+FCP
++0
+LCP
++2
+TBT
++28
+CLS
++25
+SI
++2
+Performance
+Values are estimated and may vary. The performance score is calculated directly from these metrics.See calculator.
+0–49
+50–89
+90–100
+Final Screenshot
+
+Metrics
+Expand view
+First Contentful Paint
+6.1 s
+Largest Contentful Paint
+7.0 s
+Total Blocking Time
+160 ms
+Cumulative Layout Shift
+0
+Speed Index
+7.8 s
+Captured at Apr 1, 2026, 3:19 PM GMT+5:30
+Emulated Moto G Power with Lighthouse 13.0.1
+Single page session
+Initial page load
+Slow 4G throttling
+Using HeadlessChromium 146.0.7680.153 with lr
+View Treemap
+Screenshot
+Screenshot
+Screenshot
+Screenshot
+Screenshot
+Screenshot
+Screenshot
+Screenshot
+Show audits relevant to:
+
+All
+
+FCP
+
+LCP
+
+TBT
+
+CLS
+Insights
+Use efficient cache lifetimes Est savings of 822 KiB
+A long cache lifetime can speed up repeat visits to your page. Learn more about caching.LCPFCPUnscored
+Request
+Cache TTL
+Transfer Size
+placelabels.com 1st party
+818 KiB
+/assets/index-Ba7PtkGd.js(placelabels.com)
+None
+198 KiB
+/assets/react-ven….js(placelabels.com)
+None
+182 KiB
+/assets/leaflet-Cp-oG03v.js(placelabels.com)
+None
+151 KiB
+/assets/index-uMXnm3GT.css(placelabels.com)
+None
+123 KiB
+/assets/radix-DSJ1fWfr.js(placelabels.com)
+None
+84 KiB
+/assets/query-v-vggluy.js(placelabels.com)
+None
+35 KiB
+/assets/leaflet-CIGW-MKW.css(placelabels.com)
+None
+16 KiB
+/assets/Neighborh….js(placelabels.com)
+None
+12 KiB
+/assets/icons-Dbdm8-tO.js(placelabels.com)
+None
+9 KiB
+/assets/AddLabelDialog-BHmSnfDE.js(placelabels.com)
+None
+8 KiB
+/registerSW.js(placelabels.com)
+None
+1 KiB
+openstreetmap.org
+36 KiB
+…1/0.png(b.tile.openstreetmap.org)
+6d 1h 11m 59s
+8 KiB
+…1/1.png(c.tile.openstreetmap.org)
+6d 19m 8s
+7 KiB
+…2/1.png(a.tile.openstreetmap.org)
+6d 2h 52m 2s
+7 KiB
+…2/0.png(c.tile.openstreetmap.org)
+6d 1h 28m 39s
+5 KiB
+…1/2.png(a.tile.openstreetmap.org)
+6d 33m 41s
+3 KiB
+…1/3.png(b.tile.openstreetmap.org)
+6d 2h 33m 34s
+2 KiB
+…2/2.png(b.tile.openstreetmap.org)
+6d 47m 27s
+2 KiB
+…2/3.png(c.tile.openstreetmap.org)
+6d 32m 56s
+2 KiB
+Render blocking requests Est savings of 1,060 ms
+Requests are blocking the page's initial render, which may delay LCP. Deferring or inlining can move these network requests out of the critical path.LCPFCPUnscored
+URL
+Transfer Size
+Duration
+placelabels.com 1st party
+139.1 KiB	4,730 ms
+/assets/index-uMXnm3GT.css(placelabels.com)
+123.0 KiB
+4,100 ms
+/registerSW.js(placelabels.com)
+0.5 KiB
+160 ms
+/assets/leaflet-CIGW-MKW.css(placelabels.com)
+15.6 KiB
+460 ms
+Google Fonts cdn 
+1.5 KiB	750 ms
+/css2?family=Inter:wght@400;500;600;700;800;900&display=swap(fonts.googleapis.com)
+1.5 KiB
+750 ms
+Forced reflow
+A forced reflow occurs when JavaScript queries geometric properties (such as offsetWidth) after styles have been invalidated by a change to the DOM state. This can result in poor performance. Learn more about forced reflows and possible mitigations.Unscored
+Top function call
+Total reflow time
+/assets/react-ven….js:2:2370(placelabels.com)
+39 ms
+Source
+Total reflow time
+/assets/index-Ba7PtkGd.js:2:47354(placelabels.com)
+0 ms
+/assets/leaflet-Cp-oG03v.js:1:20428(placelabels.com)
+8 ms
+/assets/leaflet-Cp-oG03v.js:1:37339(placelabels.com)
+22 ms
+/assets/leaflet-Cp-oG03v.js:1:112158(placelabels.com)
+8 ms
+[unattributed]
+31 ms
+LCP breakdown
+Each subpart has specific improvement strategies. Ideally, most of the LCP time should be spent on loading the resources, not within delays.LCPUnscored
+Subpart
+Duration
+Time to first byte
+0 ms
+Resource load delay
+3,150 ms
+Resource load duration
+30 ms
+Element render delay
+260 ms
+div.leaflet-pane > div.leaflet-layer > div.leaflet-tile-container > img.leaflet-tile
+<img alt="" src="https://c.tile.openstreetmap.org/2/1/1.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-50px, 214px, 0px);">
+LCP request discovery
+Optimize LCP by making the LCP image discoverable from the HTML immediately, and avoiding lazy-loadingLCPUnscored
+lazy load not applied
+fetchpriority=high should be applied
+Request is discoverable in initial document
+div.leaflet-pane > div.leaflet-layer > div.leaflet-tile-container > img.leaflet-tile
+<img alt="" src="https://c.tile.openstreetmap.org/2/1/1.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-50px, 214px, 0px);">
+Network dependency tree
+Avoid chaining critical requests by reducing the length of chains, reducing the download size of resources, or deferring the download of unnecessary resources to improve page load.LCPUnscored
+Maximum critical path latency: 3,157 ms
+Initial Navigation
+https://placelabels.com - 2,309 ms, 7.39 KiB
+/assets/index-uMXnm3GT.css(placelabels.com) - 2,590 ms, 122.96 KiB
+/registerSW.js(placelabels.com) - 2,568 ms, 0.50 KiB
+/css2?family=Inter:wght@400;500;600;700;800;900&display=swap(fonts.googleapis.com) - 2,318 ms, 1.54 KiB
+…v20/UcC73FwrK….woff2(fonts.gstatic.com) - 3,157 ms, 48.09 KiB
+/assets/index-Ba7PtkGd.js(placelabels.com) - 2,602 ms, 197.55 KiB
+/assets/leaflet-CIGW-MKW.css(placelabels.com) - 2,551 ms, 15.63 KiB
+Preconnected origins
+preconnect hints help the browser establish a connection earlier in the page load, saving time when the first request for that origin is made. The following are the origins that the page preconnected to.
+Origin
+Source
+https://fonts.googleapis.com/
+head > link
+<link rel="preconnect" href="https://fonts.googleapis.com">
+https://fonts.gstatic.com/
+head > link
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+Preconnect candidates
+Add preconnect hints to your most important origins, but try to use no more than 4.
+No additional origins are good candidates for preconnecting
+Document request latency Est savings of 4 KiB
+Your first network request is the most important. Reduce its latency by avoiding redirects, ensuring a fast server response, and enabling text compression.LCPFCPUnscored
+Avoids redirects
+Server responds quickly (observed 1 ms)
+No compression applied
+3rd parties
+These insights are also available in the Chrome DevTools Performance Panel - record a trace to view more detailed information.
+Diagnostics
+Reduce unused JavaScript Est savings of 331 KiB
+Reduce unused JavaScript and defer loading scripts until they are required to decrease bytes consumed by network activity. Learn how to reduce unused JavaScript.LCPFCPUnscored
+URL
+Transfer Size
+Est Savings
+placelabels.com 1st party
+612.2 KiB	330.9 KiB
+/assets/index-Ba7PtkGd.js(placelabels.com)
+196.7 KiB
+114.0 KiB
+/assets/leaflet-Cp-oG03v.js(placelabels.com)
+150.9 KiB
+88.7 KiB
+/assets/radix-DSJ1fWfr.js(placelabels.com)
+83.1 KiB
+68.1 KiB
+/assets/react-ven….js(placelabels.com)
+181.4 KiB
+60.0 KiB
+Reduce unused CSS Est savings of 11 KiB
+Reduce unused rules from stylesheets and defer CSS not used for above-the-fold content to decrease bytes consumed by network activity. Learn how to reduce unused CSS.LCPFCPUnscored
+URL
+Transfer Size
+Est Savings
+placelabels.com 1st party
+15.2 KiB	10.8 KiB
+/assets/leaflet-CIGW-MKW.css(placelabels.com)
+15.2 KiB
+10.8 KiB
+Avoid long main-thread tasks 4 long tasks found
+Avoid non-composited animations 2 animated elements found
+More information about the performance of your application. These numbers don't directly affect the Performance score.
+Passed audits (15)
+Show
+89
+Accessibility
