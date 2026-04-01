@@ -115,22 +115,6 @@ export async function generateSitemapXml(baseUrl = "https://placelabels.com"): P
     }
   }
 
-  const slugs = allLabels.map((l) => ({ slug: slugify(l.text), date: l.createdAt }));
-  for (let i = 0; i < slugs.length; i++) {
-    const limit = Math.min(i + 5, slugs.length);
-    for (let j = i + 1; j < limit; j++) {
-      const a = slugs[i];
-      const b = slugs[j];
-      const maxDate = (a.date ?? new Date()) > (b.date ?? new Date()) ? a.date : b.date;
-      entries.push({
-        loc: xmlEscape(`${baseUrl}/compare/${a.slug}-vs-${b.slug}`),
-        lastmod: toIsoDate(maxDate),
-        changefreq: "monthly",
-        priority: "0.5",
-      });
-    }
-  }
-
   const urlEntries = entries
     .map(
       (e) =>
