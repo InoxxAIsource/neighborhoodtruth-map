@@ -1,0 +1,44 @@
+I need you to fix critical SEO and brand alignment issues for placelabels.com (brand name: NeighborhoodTruth) within 24 hours. 
+
+**CRITICAL TASKS:**
+
+1. **GOOGLE SEARCH CONSOLE (Priority #1)**
+   - Go to https://search.google.com/search-console
+   - Verify domain ownership via DNS TXT record method
+   - Submit XML sitemap (create at https://placelabels.com/sitemap.xml if missing)
+   - Check Index Coverage report - identify and fix any crawl errors
+   - Review Performance report - export top 10 queries we're ranking for
+
+2. **BRAND/DISPLAY NAME ALIGNMENT**
+   - Update <title> tag to: "NeighborhoodTruth | Honest Neighborhood Reviews & Local Insights"
+   - Update meta description to: "Discover real neighborhood vibes from locals. Drop labels, vote on insights & find your perfect area. 100,000+ authentic reviews across the world."
+   - Add Organization schema markup with:
+     * legalName: "NeighborhoodTruth"
+     * alternateName: "PlaceLabels"
+     * url: "https://placelabels.com"
+     * sameAs: [social media profiles]
+
+3. **SCHEMA MARKUP IMPLEMENTATION**
+   - Add WebSite schema with search box functionality
+   - Add AggregateRating schema to homepage (even if rating is 0 initially)
+   - Add BreadcrumbList schema for navigation
+   - Add FAQPage schema for any Q&A content
+
+4. **MOBILE-FIRST OPTIMIZATION**
+   - Run Google PageSpeed Insights and fix any mobile usability errors
+   - Ensure viewport meta tag is present and correct
+   - Implement responsive design breakpoints: 320px, 768px, 1024px
+   - Test touch targets are minimum 44x44px
+
+5. **DELIVERABLES (Send me within 24 hours):**
+   - Screenshot of Google Search Console verification confirmation
+   - Updated title/meta tags (show before/after)
+   - Schema markup code snippets (JSON-LD)
+   - PageSpeed Insights mobile score (should be >85)
+   - List of any crawl errors found in Search Console
+
+**ACCEPTANCE CRITERIA:**
+- Google Search Console shows "Ownership Verified" status
+- Homepage source code contains all 4 schema types
+- Mobile PageSpeed score >= 85
+- Zero mobile usability errors in Search Console

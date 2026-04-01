@@ -3,19 +3,137 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover" />
-    <title>PlaceLabels</title>
-    <meta name="description" content="Crowd-sourced global neighborhood map. See what locals really think." />
+
+    <!-- Primary SEO -->
+    <title>NeighborhoodTruth | Honest Neighborhood Reviews &amp; Local Insights</title>
+    <meta name="description" content="Discover real neighborhood vibes from locals. Drop labels, vote on insights &amp; find your perfect area. 500+ authentic reviews across the world." />
+    <meta name="keywords" content="neighborhood reviews, local insights, crowd-sourced map, neighborhood ratings, area safety, neighborhood vibes, city guide" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://placelabels.com/" />
+
+    <!-- Theme / PWA -->
     <meta name="theme-color" content="#0d9488" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="manifest" href="./manifest.json" />
     <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+
+    <!-- Open Graph -->
+    <meta property="og:site_name" content="NeighborhoodTruth" />
+    <meta property="og:title" content="NeighborhoodTruth | Honest Neighborhood Reviews &amp; Local Insights" />
+    <meta property="og:description" content="Discover real neighborhood vibes from locals. Drop labels, vote on insights &amp; find your perfect area." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://placelabels.com/" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="NeighborhoodTruth | Honest Neighborhood Reviews" />
+    <meta name="twitter:description" content="Discover real neighborhood vibes from locals. Drop labels, vote on insights &amp; find your perfect area." />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Open Graph -->
-    <meta property="og:title" content="PlaceLabels" />
-    <meta property="og:description" content="Discover real neighborhood vibes across the world" />
-    <meta property="og:type" content="website" />
+
+    <!-- JSON-LD: Organization -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "NeighborhoodTruth",
+      "legalName": "NeighborhoodTruth",
+      "alternateName": "PlaceLabels",
+      "url": "https://placelabels.com",
+      "logo": "https://placelabels.com/icons/icon-192.png",
+      "description": "Crowd-sourced global neighborhood map with honest local insights, safety ratings, and community-verified area reviews.",
+      "sameAs": []
+    }
+    </script>
+
+    <!-- JSON-LD: WebSite with SearchAction -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "NeighborhoodTruth",
+      "alternateName": "PlaceLabels",
+      "url": "https://placelabels.com",
+      "description": "Discover real neighborhood vibes from locals across the world.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://placelabels.com/?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- JSON-LD: FAQPage -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is NeighborhoodTruth?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "NeighborhoodTruth (also known as PlaceLabels) is a crowd-sourced global neighborhood map where locals drop honest labels about areas — covering safety, cost of living, vibe, and more. Anyone can vote on existing insights or add their own."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I add a neighborhood label?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Click the 'Drop Label' button, then tap anywhere on the map to place your pin. Fill in the neighborhood name, safety rating (1–5), cost level, and vibe tags, then submit. Your label appears instantly on the map for others to vote on."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How is neighborhood safety rated?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Safety is rated on a 1–5 scale by local contributors: 1 is unsafe, 5 is very safe. Each label's safety score is set by the person who drops it, and other community members can upvote or downvote to validate the insight."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is PlaceLabels free to use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, PlaceLabels (NeighborhoodTruth) is completely free. You can browse the map, read neighborhood insights, vote on labels, and add your own labels without creating an account."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which cities are covered?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "PlaceLabels has community-contributed labels for neighborhoods in major cities worldwide including New York, London, Paris, Tokyo, Dubai, Singapore, Sydney, Berlin, Barcelona, Bangkok, Seoul, Mumbai, Cairo, and many more. New labels can be added anywhere in the world."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- JSON-LD: BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://placelabels.com/"
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
