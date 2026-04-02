@@ -15,6 +15,7 @@ export interface LabelData {
   downvotes: number;
   color?: string | null;
   category?: string | null;
+  created_at?: string;
 }
 
 export interface Filters {
@@ -40,6 +41,7 @@ interface MapViewProps {
   onLocated?: () => void;
   flyToLocation?: { lat: number; lng: number } | null;
   onFlownTo?: () => void;
+  onCenterChange?: (center: { lat: number; lng: number }, zoom: number) => void;
 }
 
 export interface AreaSummary {
@@ -84,11 +86,19 @@ function getLabelOpacity(score: number) {
   return 0.65;
 }
 
+function isTrending(label: LabelData) {
+  if (!label.created_at) return false;
+  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const totalVotes = label.upvotes + label.downvotes;
+  return totalVotes >= 5 && new Date(label.created_at).getTime() > sevenDaysAgo;
+}
+
 function createTextIcon(label: LabelData) {
   const score = getScore(label);
   const color = label.color || getLabelColor(score);
   const size = getLabelSize(score);
   const opacity = getLabelOpacity(score);
+  const trending = isTrending(label);
 
   const html = `<div style="
     color: ${color};
@@ -111,7 +121,10 @@ function createTextIcon(label: LabelData) {
     user-select: none;
     pointer-events: auto;
     letter-spacing: 0.02em;
-  ">${escapeHtml(label.text)}</div>`;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  ">${trending ? '<span style="font-size:12px;">🔥</span>' : ''}${escapeHtml(label.text)}</div>`;
 
   return L.divIcon({
     html,
@@ -137,10 +150,11 @@ function buildPopupContent(label: LabelData, onVote: MapViewProps["onVote"]) {
 
   const scoreBadgeColor = score > 0 ? "#dcfce7" : score < 0 ? "#fee2e2" : "#f3f4f6";
   const scoreBadgeText = score > 0 ? "#166534" : score < 0 ? "#991b1b" : "#374151";
+  const trending = isTrending(label);
 
   wrapper.innerHTML = `
     <div style="margin-bottom:8px;">
-      <p style="font-size:14px;font-weight:700;margin:0 0 4px;line-height:1.3;">${escapeHtml(label.text)}</p>
+      <p style="font-size:14px;font-weight:700;margin:0 0 4px;line-height:1.3;">${trending ? '🔥 ' : ''}${escapeHtml(label.text)}</p>
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
         <span>${stars}</span>
         <span style="font-size:12px;color:#6b7280;">·</span>
@@ -153,10 +167,37 @@ function buildPopupContent(label: LabelData, onVote: MapViewProps["onVote"]) {
       <button data-vote="downvote" style="cursor:pointer;background:#f9fafb;border:1px solid #d1d5db;border-radius:8px;padding:5px 12px;font-size:13px;display:flex;align-items:center;gap:4px;">👎 <strong>${label.downvotes}</strong></button>
       <span style="margin-left:auto;background:${scoreBadgeColor};color:${scoreBadgeText};border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;">${score > 0 ? '+' : ''}${score}</span>
     </div>
+    <div style="border-top:1px solid #e5e7eb;padding-top:8px;margin-top:8px;">
+      <p style="font-size:11px;color:#9ca3af;margin:0 0 6px;">Is this still accurate?</p>
+      <div style="display:flex;gap:6px;">
+        <button data-feedback="yes" style="cursor:pointer;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:4px 10px;font-size:12px;color:#166534;">👍 Yes</button>
+        <button data-feedback="no" style="cursor:pointer;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:4px 10px;font-size:12px;color:#991b1b;">👎 No</button>
+      </div>
+    </div>
   `;
 
   wrapper.querySelector('button[data-vote="upvote"]')?.addEventListener("click", () => onVote(label.id, "upvote"));
   wrapper.querySelector('button[data-vote="downvote"]')?.addEventListener("click", () => onVote(label.id, "downvote"));
+
+  // Feedback buttons - insert into label_feedback via supabase
+  const feedbackHandler = async (isAccurate: boolean) => {
+    const { supabase } = await import("@/integrations/supabase/client");
+    const voterId = localStorage.getItem("neighborhood-truth-voter-id") || "anon";
+    const { error } = await (supabase.from("label_feedback" as any) as any).insert({
+      label_id: label.id, voter_id: voterId, is_accurate: isAccurate,
+    });
+    const btns = wrapper.querySelectorAll('button[data-feedback]');
+    btns.forEach((b) => { (b as HTMLButtonElement).disabled = true; (b as HTMLButtonElement).style.opacity = "0.5"; });
+    if (error && error.code === "23505") {
+      const p = wrapper.querySelector('div:last-child p');
+      if (p) p.textContent = "Already submitted!";
+    } else if (!error) {
+      const p = wrapper.querySelector('div:last-child p');
+      if (p) p.textContent = "Thanks for your feedback!";
+    }
+  };
+  wrapper.querySelector('button[data-feedback="yes"]')?.addEventListener("click", () => feedbackHandler(true));
+  wrapper.querySelector('button[data-feedback="no"]')?.addEventListener("click", () => feedbackHandler(false));
 
   return wrapper;
 }
@@ -349,7 +390,7 @@ function applyFilters(labels: LabelData[], filters: Filters = DEFAULT_FILTERS): 
   });
 }
 
-export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap = false, filters = DEFAULT_FILTERS, onAreaClick, onLabelClick, showLabels = true, selectedCategories = [], locateUser = false, onLocated, flyToLocation, onFlownTo }: MapViewProps) {
+export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap = false, filters = DEFAULT_FILTERS, onAreaClick, onLabelClick, showLabels = true, selectedCategories = [], locateUser = false, onLocated, flyToLocation, onFlownTo, onCenterChange }: MapViewProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const markerLayerRef = useRef<L.LayerGroup | null>(null);
@@ -387,7 +428,15 @@ export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap 
     markerLayerRef.current = L.layerGroup().addTo(map);
     mapRef.current = map;
 
+    const emitCenter = () => {
+      const c = map.getCenter();
+      onCenterChange?.({ lat: c.lat, lng: c.lng }, map.getZoom());
+    };
+    map.on("moveend", emitCenter);
+    emitCenter();
+
     return () => {
+      map.off("moveend", emitCenter);
       map.remove();
       mapRef.current = null;
       markerLayerRef.current = null;

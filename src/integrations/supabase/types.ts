@@ -47,6 +47,38 @@ export type Database = {
         }
         Relationships: []
       }
+      label_feedback: {
+        Row: {
+          created_at: string
+          id: string
+          is_accurate: boolean
+          label_id: string
+          voter_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_accurate: boolean
+          label_id: string
+          voter_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_accurate?: boolean
+          label_id?: string
+          voter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "label_feedback_label_id_fkey"
+            columns: ["label_id"]
+            isOneToOne: false
+            referencedRelation: "labels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       labels: {
         Row: {
           category: string | null

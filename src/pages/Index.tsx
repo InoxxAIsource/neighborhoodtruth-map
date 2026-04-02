@@ -8,6 +8,7 @@ import { FilterSidebar, DEFAULT_FILTERS } from "@/components/FilterSidebar";
 import { TopToolbar } from "@/components/TopToolbar";
 import { HeroOverlay, MicroHints, useOnboarding } from "@/components/Onboarding";
 import { NeighborhoodChatDrawer } from "@/components/NeighborhoodChatDrawer";
+import { NeighborhoodScoreCard } from "@/components/NeighborhoodScoreCard";
 import { Button } from "@/components/ui/button";
 import { Plus, MapPin } from "lucide-react";
 import { useVoterId } from "@/hooks/useVoterId";
@@ -28,6 +29,8 @@ export default function Index() {
   const [chatLabel, setChatLabel] = useState<LabelData | null>(null);
   const [chatNearby, setChatNearby] = useState<LabelData[]>([]);
   const [chatAreaName, setChatAreaName] = useState("This Area");
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({ lat: 40.7328, lng: -73.970 });
+  const [mapZoom, setMapZoom] = useState(12);
   const voterId = useVoterId();
   const queryClient = useQueryClient();
   const { showHero, hasInteracted, dismissHero, markInteracted } = useOnboarding();
@@ -147,6 +150,7 @@ export default function Index() {
           toast.info(`Exploring ${area.name} — ${area.labelCount} labels nearby`);
         }}
         onLabelClick={handleLabelClick}
+        onCenterChange={(center, zoom) => { setMapCenter(center); setMapZoom(zoom); }}
       />
 
       <TopToolbar
@@ -167,6 +171,9 @@ export default function Index() {
         showHeatmap={showHeatmap}
         onToggleHeatmap={() => setShowHeatmap((p) => !p)}
       />
+
+      {/* Neighborhood Score Card */}
+      <NeighborhoodScoreCard labels={labels} mapCenter={mapCenter} zoom={mapZoom} />
 
       {/* Onboarding */}
       {showHero && <HeroOverlay onDismiss={dismissHero} />}
