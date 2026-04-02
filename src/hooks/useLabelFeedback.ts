@@ -32,7 +32,7 @@ export function useLabelFeedback(labelId: string) {
         .eq("voter_id", voterId)
         .maybeSingle();
       if (error) throw error;
-      return data as { is_accurate: boolean } | null;
+      return data as unknown as { is_accurate: boolean } | null;
     },
   });
 
