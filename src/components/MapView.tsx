@@ -86,11 +86,19 @@ function getLabelOpacity(score: number) {
   return 0.65;
 }
 
+function isTrending(label: LabelData) {
+  if (!label.created_at) return false;
+  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const totalVotes = label.upvotes + label.downvotes;
+  return totalVotes >= 5 && new Date(label.created_at).getTime() > sevenDaysAgo;
+}
+
 function createTextIcon(label: LabelData) {
   const score = getScore(label);
   const color = label.color || getLabelColor(score);
   const size = getLabelSize(score);
   const opacity = getLabelOpacity(score);
+  const trending = isTrending(label);
 
   const html = `<div style="
     color: ${color};
@@ -113,7 +121,10 @@ function createTextIcon(label: LabelData) {
     user-select: none;
     pointer-events: auto;
     letter-spacing: 0.02em;
-  ">${escapeHtml(label.text)}</div>`;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  ">${trending ? '<span style="font-size:12px;">🔥</span>' : ''}${escapeHtml(label.text)}</div>`;
 
   return L.divIcon({
     html,
