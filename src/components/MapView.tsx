@@ -409,7 +409,7 @@ export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap 
     }
     return [...filtered]
       .sort((a, b) => Math.abs(getScore(b)) - Math.abs(getScore(a)))
-      .slice(0, 150);
+      .slice(0, 500);
   }, [labels, filters, showLabels, selectedCategories]);
 
   useEffect(() => {
@@ -418,7 +418,7 @@ export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap 
     const map = L.map(mapContainerRef.current, {
       zoomAnimation: true,
       markerZoomAnimation: true,
-    }).setView([40.7328, -73.970], 12);
+    }).setView([20.5937, 78.9629], 5);
 
     L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
