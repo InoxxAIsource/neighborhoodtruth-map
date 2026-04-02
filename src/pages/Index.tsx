@@ -172,6 +172,9 @@ export default function Index() {
         onToggleHeatmap={() => setShowHeatmap((p) => !p)}
       />
 
+      {/* Neighborhood Score Card */}
+      <NeighborhoodScoreCard labels={labels} mapCenter={mapCenter} zoom={mapZoom} />
+
       {/* Onboarding */}
       {showHero && <HeroOverlay onDismiss={dismissHero} />}
       {!showHero && <MicroHints hasInteracted={hasInteracted} />}
