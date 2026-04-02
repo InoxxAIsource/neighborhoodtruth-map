@@ -150,10 +150,11 @@ function buildPopupContent(label: LabelData, onVote: MapViewProps["onVote"]) {
 
   const scoreBadgeColor = score > 0 ? "#dcfce7" : score < 0 ? "#fee2e2" : "#f3f4f6";
   const scoreBadgeText = score > 0 ? "#166534" : score < 0 ? "#991b1b" : "#374151";
+  const trending = isTrending(label);
 
   wrapper.innerHTML = `
     <div style="margin-bottom:8px;">
-      <p style="font-size:14px;font-weight:700;margin:0 0 4px;line-height:1.3;">${escapeHtml(label.text)}</p>
+      <p style="font-size:14px;font-weight:700;margin:0 0 4px;line-height:1.3;">${trending ? '🔥 ' : ''}${escapeHtml(label.text)}</p>
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
         <span>${stars}</span>
         <span style="font-size:12px;color:#6b7280;">·</span>
@@ -166,10 +167,37 @@ function buildPopupContent(label: LabelData, onVote: MapViewProps["onVote"]) {
       <button data-vote="downvote" style="cursor:pointer;background:#f9fafb;border:1px solid #d1d5db;border-radius:8px;padding:5px 12px;font-size:13px;display:flex;align-items:center;gap:4px;">👎 <strong>${label.downvotes}</strong></button>
       <span style="margin-left:auto;background:${scoreBadgeColor};color:${scoreBadgeText};border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;">${score > 0 ? '+' : ''}${score}</span>
     </div>
+    <div style="border-top:1px solid #e5e7eb;padding-top:8px;margin-top:8px;">
+      <p style="font-size:11px;color:#9ca3af;margin:0 0 6px;">Is this still accurate?</p>
+      <div style="display:flex;gap:6px;">
+        <button data-feedback="yes" style="cursor:pointer;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:4px 10px;font-size:12px;color:#166534;">👍 Yes</button>
+        <button data-feedback="no" style="cursor:pointer;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:4px 10px;font-size:12px;color:#991b1b;">👎 No</button>
+      </div>
+    </div>
   `;
 
   wrapper.querySelector('button[data-vote="upvote"]')?.addEventListener("click", () => onVote(label.id, "upvote"));
   wrapper.querySelector('button[data-vote="downvote"]')?.addEventListener("click", () => onVote(label.id, "downvote"));
+
+  // Feedback buttons - insert into label_feedback via supabase
+  const feedbackHandler = async (isAccurate: boolean) => {
+    const { supabase } = await import("@/integrations/supabase/client");
+    const voterId = localStorage.getItem("neighborhood-truth-voter-id") || "anon";
+    const { error } = await (supabase.from("label_feedback" as any) as any).insert({
+      label_id: label.id, voter_id: voterId, is_accurate: isAccurate,
+    });
+    const btns = wrapper.querySelectorAll('button[data-feedback]');
+    btns.forEach((b) => { (b as HTMLButtonElement).disabled = true; (b as HTMLButtonElement).style.opacity = "0.5"; });
+    if (error && error.code === "23505") {
+      const p = wrapper.querySelector('div:last-child p');
+      if (p) p.textContent = "Already submitted!";
+    } else if (!error) {
+      const p = wrapper.querySelector('div:last-child p');
+      if (p) p.textContent = "Thanks for your feedback!";
+    }
+  };
+  wrapper.querySelector('button[data-feedback="yes"]')?.addEventListener("click", () => feedbackHandler(true));
+  wrapper.querySelector('button[data-feedback="no"]')?.addEventListener("click", () => feedbackHandler(false));
 
   return wrapper;
 }
