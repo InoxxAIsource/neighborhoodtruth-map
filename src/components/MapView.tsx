@@ -41,6 +41,7 @@ interface MapViewProps {
   onLocated?: () => void;
   flyToLocation?: { lat: number; lng: number } | null;
   onFlownTo?: () => void;
+  onCenterChange?: (center: { lat: number; lng: number }, zoom: number) => void;
 }
 
 export interface AreaSummary {
