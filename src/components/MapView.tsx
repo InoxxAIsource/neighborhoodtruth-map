@@ -400,7 +400,15 @@ export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap 
     markerLayerRef.current = L.layerGroup().addTo(map);
     mapRef.current = map;
 
+    const emitCenter = () => {
+      const c = map.getCenter();
+      onCenterChange?.({ lat: c.lat, lng: c.lng }, map.getZoom());
+    };
+    map.on("moveend", emitCenter);
+    emitCenter();
+
     return () => {
+      map.off("moveend", emitCenter);
       map.remove();
       mapRef.current = null;
       markerLayerRef.current = null;
