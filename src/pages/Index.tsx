@@ -150,6 +150,7 @@ export default function Index() {
           toast.info(`Exploring ${area.name} — ${area.labelCount} labels nearby`);
         }}
         onLabelClick={handleLabelClick}
+        onCenterChange={(center, zoom) => { setMapCenter(center); setMapZoom(zoom); }}
       />
 
       <TopToolbar
