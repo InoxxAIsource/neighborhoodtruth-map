@@ -409,7 +409,7 @@ export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap 
     }
     return [...filtered]
       .sort((a, b) => Math.abs(getScore(b)) - Math.abs(getScore(a)))
-      .slice(0, 150);
+      .slice(0, 500);
   }, [labels, filters, showLabels, selectedCategories]);
 
   useEffect(() => {
