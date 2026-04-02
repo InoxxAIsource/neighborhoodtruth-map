@@ -29,6 +29,8 @@ export default function Index() {
   const [chatLabel, setChatLabel] = useState<LabelData | null>(null);
   const [chatNearby, setChatNearby] = useState<LabelData[]>([]);
   const [chatAreaName, setChatAreaName] = useState("This Area");
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({ lat: 40.7328, lng: -73.970 });
+  const [mapZoom, setMapZoom] = useState(12);
   const voterId = useVoterId();
   const queryClient = useQueryClient();
   const { showHero, hasInteracted, dismissHero, markInteracted } = useOnboarding();
