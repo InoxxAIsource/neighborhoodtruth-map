@@ -15,6 +15,7 @@ export interface LabelData {
   downvotes: number;
   color?: string | null;
   category?: string | null;
+  created_at?: string;
 }
 
 export interface Filters {
