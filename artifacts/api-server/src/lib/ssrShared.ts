@@ -168,6 +168,8 @@ export function ssrHtmlShell(opts: SSRPageOptions): string {
   <meta property="og:url" content="${escapeHtml(opts.canonical)}" />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="${escapeHtml(ogImage)}" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
   <meta property="og:locale" content="en_US" />
   <meta property="og:site_name" content="PlaceLabels" />
 

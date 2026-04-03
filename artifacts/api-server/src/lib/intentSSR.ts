@@ -261,7 +261,7 @@ export async function getIntentHtml(citySlug: string, intentSlug: string): Promi
     const bodyHtml = `
       <div class="mb-8">
         <div class="text-4xl mb-3">${intent.emoji}</div>
-        <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">${intent.emoji} ${escapeHtml(intent.label)} in ${escapeHtml(city.name)}</h1>
+        <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">${escapeHtml(intent.label)} in ${escapeHtml(city.name)}</h1>
         <p class="text-gray-600 text-lg leading-relaxed max-w-2xl">We're collecting community data on ${intent.description} in ${escapeHtml(city.name)}. Be the first to label your neighborhood!</p>
       </div>
       <section class="bg-white rounded-2xl border border-gray-200 p-6 mb-8">
@@ -330,7 +330,7 @@ export async function getIntentHtml(citySlug: string, intentSlug: string): Promi
   const bodyHtml = `
     <div class="mb-8">
       <div class="text-4xl mb-3">${intent.emoji}</div>
-      <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">${intent.emoji} ${escapeHtml(intent.label)} in ${escapeHtml(city.name)}</h1>
+      <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">${escapeHtml(intent.label)} in ${escapeHtml(city.name)}</h1>
       <p class="text-gray-600 text-lg leading-relaxed max-w-2xl">Browse ${stats.labelCount} ${intent.description} based on real community data from locals and visitors in ${escapeHtml(city.name)}.</p>
     </div>
 
