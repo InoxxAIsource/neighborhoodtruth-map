@@ -153,6 +153,7 @@ function renderTopTagBadges(topTags: string[]): string {
 
 interface PendingTransport {
   fromLabel: LabelData;
+  originMarker: L.Marker | null;
   handleDestination: (toLabel: LabelData) => void;
   cancel: () => void;
 }
@@ -449,6 +450,7 @@ function buildPopupContent(
 
     pendingTransport = {
       fromLabel: label,
+      originMarker: transportOriginMarker, // captured NOW before destination click can overwrite it
       handleDestination: async (toLabel: LabelData) => {
         cancelTransportMode();
 
@@ -792,7 +794,9 @@ export function MapView({
             return;
           }
           // Destination selected: prevent destination popup, keep origin popup visible
-          const originMarker = transportOriginMarker;
+          // Capture originMarker from pendingTransport (set at transport-start time,
+          // before Leaflet's popupopen on dest can overwrite transportOriginMarker)
+          const originMarker = pendingTransport.originMarker;
           const pt = pendingTransport;
           const destLabel = label;
           setTimeout(() => {
@@ -841,7 +845,7 @@ export function MapView({
               pendingTransport.cancel();
               return;
             }
-            const originMarker = transportOriginMarker;
+            const originMarker = pendingTransport.originMarker;
             const pt = pendingTransport;
             const destLabel = label;
             setTimeout(() => {
