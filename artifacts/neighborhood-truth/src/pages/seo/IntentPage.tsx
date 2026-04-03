@@ -428,6 +428,21 @@ export default function IntentPage() {
         </p>
       </section>
 
+      {/* Related Cities & Intents - Critical for SEO crawl depth */}
+      <section className="mb-10 border-t pt-10">
+        <h2 className="text-lg font-bold text-gray-900 mb-4">Explore This Intent in Other Cities</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {["new-york", "san-francisco", "los-angeles", "london", "tokyo", "mumbai", "delhi", "bangalore"].filter((c) => c !== cityInfo.slug).slice(0, 6).map((citySlug) => (
+            <Link key={citySlug} href={`/${citySlug}/${intent.slug}`}>
+              <div className="bg-white border border-gray-200 rounded-lg p-4 text-center hover:border-teal-300 hover:shadow-md transition-all cursor-pointer">
+                <p className="font-semibold text-gray-900 capitalize">{citySlug.replace("-", " ")}</p>
+                <p className="text-xs text-gray-400 mt-1">{intent.label}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {/* Footer nav */}
       <div className="flex flex-wrap gap-3 items-center text-sm text-gray-500 justify-center border-t pt-6">
         <Link href={`/${cityInfo.slug}`} className="text-teal-600 hover:underline font-medium">

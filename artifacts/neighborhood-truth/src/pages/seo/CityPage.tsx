@@ -497,7 +497,7 @@ export default function CityPage() {
       </section>
 
       {/* SEO prose */}
-      <section className="bg-white rounded-2xl border border-gray-200 p-6">
+      <section className="bg-white rounded-2xl border border-gray-200 p-6 mb-10">
         <h2 className="text-lg font-bold text-gray-900 mb-3">
           Where to Live in {cityInfo.name} — {year} Guide
         </h2>
@@ -520,6 +520,21 @@ export default function CityPage() {
             <Link href={`/${cityInfo.slug}/best-areas-for-students`} className="text-teal-700 hover:underline">best areas for students in {cityInfo.name}</Link>, and{" "}
             <Link href={`/${cityInfo.slug}/quiet-neighborhoods`} className="text-teal-700 hover:underline">quiet neighborhoods in {cityInfo.name}</Link>.
           </p>
+        </div>
+      </section>
+
+      {/* Related Cities - Critical for SEO crawl depth */}
+      <section>
+        <h2 className="text-lg font-bold text-gray-900 mb-4">Explore Other Cities</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {["new-york", "san-francisco", "los-angeles", "london", "tokyo", "mumbai", "delhi", "bangalore"].filter((c) => c !== cityInfo.slug).slice(0, 6).map((citySlug) => (
+            <Link key={citySlug} href={`/${citySlug}`}>
+              <div className="bg-white border border-gray-200 rounded-lg p-4 text-center hover:border-teal-300 hover:shadow-md transition-all cursor-pointer">
+                <p className="font-semibold text-gray-900 capitalize">{citySlug.replace("-", " ")}</p>
+                <p className="text-xs text-gray-400 mt-1">Browse neighborhoods</p>
+              </div>
+            </Link>
+          ))}
         </div>
       </section>
     </SEOLayout>
