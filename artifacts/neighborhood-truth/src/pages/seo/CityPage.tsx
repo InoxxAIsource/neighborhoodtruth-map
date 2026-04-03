@@ -73,26 +73,30 @@ export default function CityPage() {
   if (isLoading) {
     return (
       <SEOLayout>
-        <Helmet>
-          <title>{placeholderTitle}</title>
-          <meta name="description" content={placeholderDescription} />
-          <meta property="og:title" content={placeholderTitle} />
-          <meta property="og:description" content={placeholderDescription} />
-          <link rel="canonical" href={`https://placelabels.com/${city}`} />
-        </Helmet>
-        <LoadingState />
+        <>
+          <Helmet>
+            <title>{placeholderTitle}</title>
+            <meta name="description" content={placeholderDescription} />
+            <meta property="og:title" content={placeholderTitle} />
+            <meta property="og:description" content={placeholderDescription} />
+            <link rel="canonical" href={`https://placelabels.com/${city}`} />
+          </Helmet>
+          <LoadingState />
+        </>
       </SEOLayout>
     );
   }
   if (isError || !data?.city) {
     return (
       <SEOLayout>
-        <Helmet>
-          <title>City Not Found | PlaceLabels</title>
-          <meta name="description" content="The city you're looking for doesn't have community data yet." />
-          <link rel="canonical" href={`https://placelabels.com/${city}`} />
-        </Helmet>
-        <ErrorState message="City not found. Try exploring the map instead." />
+        <>
+          <Helmet>
+            <title>City Not Found | PlaceLabels</title>
+            <meta name="description" content="The city you're looking for doesn't have community data yet." />
+            <link rel="canonical" href={`https://placelabels.com/${city}`} />
+          </Helmet>
+          <ErrorState message="City not found. Try exploring the map instead." />
+        </>
       </SEOLayout>
     );
   }
