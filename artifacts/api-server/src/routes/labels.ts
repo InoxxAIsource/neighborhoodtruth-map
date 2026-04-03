@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { db, labelsTable, votesTable, labelTagsTable } from "@workspace/db";
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import { z } from "zod";
+import { computeCostIntelligence } from "../lib/costIntelligence";
 
 const router: IRouter = Router();
 
@@ -221,6 +222,36 @@ router.get("/:id/tags", async (req, res) => {
     res.json(tags);
   } catch (err) {
     req.log.error({ err }, "Failed to fetch tags");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/:id/cost-intelligence", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [label] = await db
+      .select({ id: labelsTable.id, lat: labelsTable.lat, lng: labelsTable.lng, cost: labelsTable.cost })
+      .from(labelsTable)
+      .where(eq(labelsTable.id, id))
+      .limit(1);
+
+    if (!label) {
+      res.status(404).json({ error: "Label not found" });
+      return;
+    }
+
+    const result = computeCostIntelligence(label.lat, label.lng, label.cost);
+
+    if (!result) {
+      res.status(404).json({ error: "No cost data available for this location" });
+      return;
+    }
+
+    res.setHeader("Cache-Control", "public, max-age=3600");
+    res.json(result);
+  } catch (err) {
+    req.log.error({ err }, "Failed to compute cost intelligence");
     res.status(500).json({ error: "Internal server error" });
   }
 });

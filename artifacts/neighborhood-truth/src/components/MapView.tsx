@@ -151,6 +151,14 @@ function renderTopTagBadges(topTags: string[]): string {
   </div>`;
 }
 
+interface PendingTransport {
+  fromLabel: LabelData;
+  handleDestination: (toLabel: LabelData) => void;
+  cancel: () => void;
+}
+
+let pendingTransport: PendingTransport | null = null;
+
 function buildPopupContent(
   label: LabelData,
   onVote: (labelId: string, voteType: "upvote" | "downvote" | "accurate") => void,
@@ -213,6 +221,20 @@ function buildPopupContent(
       <div data-tag-picker style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px;"></div>
       <p data-tag-msg style="font-size:11px;color:#6b7280;margin:4px 0 0;display:none;"></p>
     </div>
+    <div data-cost-section style="margin-top:10px;border-top:1px solid #e5e7eb;padding-top:10px;">
+      <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 8px;text-transform:uppercase;letter-spacing:0.05em;">💰 Local Costs</p>
+      <div data-cost-body>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+          ${[1,2,3,4,5].map(() => `<div style="height:16px;background:#f3f4f6;border-radius:4px;animation:pulse 1.5s infinite;"></div><div style="height:16px;background:#f3f4f6;border-radius:4px;animation:pulse 1.5s infinite;"></div>`).join("")}
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:8px;">
+      <button data-action="transport" style="cursor:pointer;width:100%;background:#f9fafb;border:1px solid #d1d5db;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:600;color:#374151;display:flex;align-items:center;justify-content:center;gap:6px;">🚌 Estimate travel cost →</button>
+    </div>
+    <div data-transport-section style="display:none;margin-top:8px;padding:8px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;">
+      <div data-transport-body></div>
+    </div>
   `;
 
   const upBtn = wrapper.querySelector('button[data-vote="upvote"]') as HTMLButtonElement;
@@ -222,6 +244,11 @@ function buildPopupContent(
   const tagPicker = wrapper.querySelector('[data-tag-picker]') as HTMLElement;
   const tagMsg = wrapper.querySelector('[data-tag-msg]') as HTMLElement;
   const topTagsEl = wrapper.querySelector('[data-top-tags]') as HTMLElement;
+  const costBody = wrapper.querySelector('[data-cost-body]') as HTMLElement;
+  const costSection = wrapper.querySelector('[data-cost-section]') as HTMLElement;
+  const transportSection = wrapper.querySelector('[data-transport-section]') as HTMLElement;
+  const transportBody = wrapper.querySelector('[data-transport-body]') as HTMLElement;
+  const transportBtn = wrapper.querySelector('button[data-action="transport"]') as HTMLButtonElement;
 
   function lockVoteButtons() {
     [upBtn, downBtn, accurateBtn].forEach((btn) => {
@@ -338,7 +365,147 @@ function buildPopupContent(
     }
   }
 
-  const onOpen = () => loadAndRenderTagPicker();
+  async function loadCostIntelligence() {
+    try {
+      const res = await fetch(`${apiBase}/labels/${label.id}/cost-intelligence`);
+      if (!res.ok) {
+        costSection.style.display = "none";
+        return;
+      }
+      const data: {
+        city: string;
+        currency: string;
+        costLevel: string;
+        items: { label: string; emoji: string; range: string }[];
+      } = await res.json();
+
+      costBody.innerHTML = `
+        <p style="font-size:11px;color:#6b7280;margin:0 0 6px;">${escapeHtml(data.city)} · ${escapeHtml(data.costLevel)} area</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px 8px;">
+          ${data.items.map((item) => `
+            <span style="font-size:11px;color:#6b7280;">${escapeHtml(item.emoji)} ${escapeHtml(item.label)}</span>
+            <span style="font-size:11px;font-weight:600;color:#111827;text-align:right;">${escapeHtml(item.range)}</span>
+          `).join("")}
+        </div>
+      `;
+    } catch {
+      costSection.style.display = "none";
+    }
+  }
+
+  let transportCancelCleanup: (() => void) | null = null;
+
+  function cancelTransportMode() {
+    pendingTransport = null;
+    transportCancelCleanup?.();
+    transportCancelCleanup = null;
+    transportBtn.textContent = "🚌 Estimate travel cost →";
+    transportBtn.style.background = "#f9fafb";
+    transportBtn.style.color = "#374151";
+    window.dispatchEvent(new CustomEvent("hoodmap:transport-cancel"));
+  }
+
+  transportBtn.addEventListener("click", () => {
+    if (pendingTransport?.fromLabel.id === label.id) {
+      cancelTransportMode();
+      return;
+    }
+
+    cancelTransportMode();
+
+    transportBtn.textContent = "✕ Cancel — click another label";
+    transportBtn.style.background = "#fef3c7";
+    transportBtn.style.color = "#92400e";
+
+    transportSection.style.display = "block";
+    transportBody.innerHTML = `<p style="font-size:12px;color:#0369a1;margin:0;">Click any other label on the map to estimate travel cost from here.</p>`;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") cancelTransportMode();
+    };
+
+    const handleTransportCancel = () => {
+      if (pendingTransport?.fromLabel.id !== label.id) {
+        transportSection.style.display = "none";
+        transportBody.innerHTML = "";
+        transportBtn.textContent = "🚌 Estimate travel cost →";
+        transportBtn.style.background = "#f9fafb";
+        transportBtn.style.color = "#374151";
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("hoodmap:transport-cancel", handleTransportCancel);
+
+    transportCancelCleanup = () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("hoodmap:transport-cancel", handleTransportCancel);
+    };
+
+    pendingTransport = {
+      fromLabel: label,
+      handleDestination: async (toLabel: LabelData) => {
+        cancelTransportMode();
+
+        transportBtn.textContent = "🚌 Estimate travel cost →";
+        transportBtn.style.background = "#f9fafb";
+        transportBtn.style.color = "#374151";
+
+        transportSection.style.display = "block";
+        transportBody.innerHTML = `<p style="font-size:12px;color:#6b7280;margin:0;">Calculating route…</p>`;
+
+        try {
+          const params = new URLSearchParams({
+            from_lat: String(label.lat),
+            from_lng: String(label.lng),
+            to_lat: String(toLabel.lat),
+            to_lng: String(toLabel.lng),
+          });
+          const res = await fetch(`${apiBase}/transport/estimate?${params}`);
+          if (!res.ok) throw new Error("No data");
+
+          const data: {
+            distanceKm: number;
+            fromCity: string;
+            currency: string;
+            modes: { mode: string; emoji: string; costRange: string; timeMin: number }[];
+          } = await res.json();
+
+          transportBody.innerHTML = `
+            <p style="font-size:11px;font-weight:700;color:#0369a1;margin:0 0 5px;">
+              To: ${escapeHtml(toLabel.text)} · ${data.distanceKm} km
+            </p>
+            <table style="width:100%;border-collapse:collapse;font-size:11px;">
+              <thead>
+                <tr>
+                  <th style="text-align:left;color:#6b7280;font-weight:600;padding-bottom:3px;">Mode</th>
+                  <th style="text-align:right;color:#6b7280;font-weight:600;padding-bottom:3px;">Cost</th>
+                  <th style="text-align:right;color:#6b7280;font-weight:600;padding-bottom:3px;">~Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${data.modes.map((m) => `
+                  <tr>
+                    <td style="color:#1e293b;padding:2px 0;">${escapeHtml(m.emoji)} ${escapeHtml(m.mode)}</td>
+                    <td style="text-align:right;font-weight:600;color:#111827;">${escapeHtml(m.costRange)}</td>
+                    <td style="text-align:right;color:#6b7280;">${m.timeMin} min</td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          `;
+        } catch {
+          transportBody.innerHTML = `<p style="font-size:12px;color:#ef4444;margin:0;">Could not estimate for this route.</p>`;
+        }
+      },
+      cancel: cancelTransportMode,
+    };
+  });
+
+  const onOpen = () => {
+    loadAndRenderTagPicker();
+    loadCostIntelligence();
+  };
   return { el: wrapper, onOpen };
 }
 
@@ -530,9 +697,17 @@ export function MapView({
       const { el: popupEl, onOpen } = buildPopupContent(label, onVote, apiBase, voterId, myVotes);
       marker.bindPopup(popupEl, { maxWidth: 320, className: "hoodmap-popup" });
       marker.on("popupopen", onOpen);
-      if (onLabelClick) {
-        marker.on("click", () => onLabelClick(label));
-      }
+      marker.on("click", () => {
+        if (pendingTransport) {
+          if (pendingTransport.fromLabel.id === label.id) {
+            pendingTransport.cancel();
+          } else {
+            pendingTransport.handleDestination(label);
+          }
+          return;
+        }
+        onLabelClick?.(label);
+      });
       marker.addTo(markerLayer);
     });
   }, [filteredLabels, showLabels, selectedCategories, onVote, onLabelClick, apiBase, voterId, myVotes]);
@@ -561,9 +736,17 @@ export function MapView({
         const { el: popupEl, onOpen } = buildPopupContent(label, onVote, apiBase, voterId, myVotes);
         marker.bindPopup(popupEl, { maxWidth: 320, className: "hoodmap-popup" });
         marker.on("popupopen", onOpen);
-        if (onLabelClick) {
-          marker.on("click", () => onLabelClick(label));
-        }
+        marker.on("click", () => {
+          if (pendingTransport) {
+            if (pendingTransport.fromLabel.id === label.id) {
+              pendingTransport.cancel();
+            } else {
+              pendingTransport.handleDestination(label);
+            }
+            return;
+          }
+          onLabelClick?.(label);
+        });
         marker.addTo(markerLayer);
       });
     };
