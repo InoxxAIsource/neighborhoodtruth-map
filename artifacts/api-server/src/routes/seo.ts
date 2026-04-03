@@ -39,6 +39,19 @@ const CITIES: CityDef[] = [
   { slug: "jerusalem", name: "Jerusalem", country: "IL", latMin: 31.6, latMax: 31.9, lngMin: 35.1, lngMax: 35.4, intents: {} },
   { slug: "karachi", name: "Karachi", country: "PK", latMin: 24.7, latMax: 25.2, lngMin: 66.8, lngMax: 67.4, intents: {} },
   { slug: "lahore", name: "Lahore", country: "PK", latMin: 31.3, latMax: 31.7, lngMin: 74.1, lngMax: 74.5, intents: {} },
+  { slug: "mumbai", name: "Mumbai", country: "IN", latMin: 18.7, latMax: 19.4, lngMin: 72.4, lngMax: 73.3, intents: {} },
+  { slug: "delhi", name: "Delhi", country: "IN", latMin: 28.3, latMax: 29.1, lngMin: 76.7, lngMax: 77.5, intents: {} },
+  { slug: "bangalore", name: "Bangalore", country: "IN", latMin: 12.5, latMax: 13.4, lngMin: 77.2, lngMax: 78.0, intents: {} },
+  { slug: "hyderabad", name: "Hyderabad", country: "IN", latMin: 16.9, latMax: 17.8, lngMin: 78.0, lngMax: 78.9, intents: {} },
+  { slug: "chennai", name: "Chennai", country: "IN", latMin: 12.6, latMax: 13.5, lngMin: 79.8, lngMax: 80.8, intents: {} },
+  { slug: "kolkata", name: "Kolkata", country: "IN", latMin: 22.1, latMax: 22.9, lngMin: 88.0, lngMax: 88.8, intents: {} },
+  { slug: "pune", name: "Pune", country: "IN", latMin: 18.0, latMax: 18.9, lngMin: 73.4, lngMax: 74.3, intents: {} },
+  { slug: "ahmedabad", name: "Ahmedabad", country: "IN", latMin: 22.5, latMax: 23.3, lngMin: 72.3, lngMax: 73.2, intents: {} },
+  { slug: "jaipur", name: "Jaipur", country: "IN", latMin: 26.4, latMax: 27.2, lngMin: 75.4, lngMax: 76.2, intents: {} },
+  { slug: "lucknow", name: "Lucknow", country: "IN", latMin: 26.3, latMax: 27.1, lngMin: 80.5, lngMax: 81.3, intents: {} },
+  { slug: "chandigarh", name: "Chandigarh", country: "IN", latMin: 30.3, latMax: 31.1, lngMin: 76.3, lngMax: 77.2, intents: {} },
+  { slug: "goa", name: "Goa", country: "IN", latMin: 14.8, latMax: 15.8, lngMin: 73.3, lngMax: 74.3, intents: {} },
+  { slug: "indore", name: "Indore", country: "IN", latMin: 22.2, latMax: 23.0, lngMin: 75.4, lngMax: 76.2, intents: {} },
 ];
 
 const INTENT_TAG_MAP: Record<string, string> = {

@@ -20,6 +20,19 @@ const CITIES = [
   { slug: "jerusalem", latMin: 31.6, latMax: 31.9, lngMin: 35.1, lngMax: 35.4 },
   { slug: "karachi", latMin: 24.7, latMax: 25.2, lngMin: 66.8, lngMax: 67.4 },
   { slug: "lahore", latMin: 31.3, latMax: 31.7, lngMin: 74.1, lngMax: 74.5 },
+  { slug: "mumbai", latMin: 18.7, latMax: 19.4, lngMin: 72.4, lngMax: 73.3 },
+  { slug: "delhi", latMin: 28.3, latMax: 29.1, lngMin: 76.7, lngMax: 77.5 },
+  { slug: "bangalore", latMin: 12.5, latMax: 13.4, lngMin: 77.2, lngMax: 78.0 },
+  { slug: "hyderabad", latMin: 16.9, latMax: 17.8, lngMin: 78.0, lngMax: 78.9 },
+  { slug: "chennai", latMin: 12.6, latMax: 13.5, lngMin: 79.8, lngMax: 80.8 },
+  { slug: "kolkata", latMin: 22.1, latMax: 22.9, lngMin: 88.0, lngMax: 88.8 },
+  { slug: "pune", latMin: 18.0, latMax: 18.9, lngMin: 73.4, lngMax: 74.3 },
+  { slug: "ahmedabad", latMin: 22.5, latMax: 23.3, lngMin: 72.3, lngMax: 73.2 },
+  { slug: "jaipur", latMin: 26.4, latMax: 27.2, lngMin: 75.4, lngMax: 76.2 },
+  { slug: "lucknow", latMin: 26.3, latMax: 27.1, lngMin: 80.5, lngMax: 81.3 },
+  { slug: "chandigarh", latMin: 30.3, latMax: 31.1, lngMin: 76.3, lngMax: 77.2 },
+  { slug: "goa", latMin: 14.8, latMax: 15.8, lngMin: 73.3, lngMax: 74.3 },
+  { slug: "indore", latMin: 22.2, latMax: 23.0, lngMin: 75.4, lngMax: 76.2 },
 ];
 
 const INTENT_SLUGS = [
