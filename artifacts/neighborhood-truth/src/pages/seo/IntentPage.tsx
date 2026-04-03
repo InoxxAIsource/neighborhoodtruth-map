@@ -137,8 +137,36 @@ export default function IntentPage() {
     enabled: !!city && !!intentSlug,
   });
 
-  if (isLoading) return <SEOLayout><LoadingState /></SEOLayout>;
-  if (isError || !data?.city) return <SEOLayout><ErrorState message="Page not found. Try browsing the city instead." /></SEOLayout>;
+  // Placeholder meta tags for loading/error states
+  const placeholderTitle = `Neighborhoods in ${city} | PlaceLabels`;
+  const placeholderDescription = "Browse neighborhoods by safety, affordability, nightlife, family-friendliness, and more.";
+
+  if (isLoading) {
+    return (
+      <SEOLayout>
+        <Helmet>
+          <title>{placeholderTitle}</title>
+          <meta name="description" content={placeholderDescription} />
+          <meta property="og:title" content={placeholderTitle} />
+          <meta property="og:description" content={placeholderDescription} />
+          <link rel="canonical" href={`https://placelabels.com/${city}/${intentSlug}`} />
+        </Helmet>
+        <LoadingState />
+      </SEOLayout>
+    );
+  }
+  if (isError || !data?.city) {
+    return (
+      <SEOLayout>
+        <Helmet>
+          <title>Page Not Found | PlaceLabels</title>
+          <meta name="description" content="This page doesn't have community data yet." />
+          <link rel="canonical" href={`https://placelabels.com/${city}/${intentSlug}`} />
+        </Helmet>
+        <ErrorState message="Page not found. Try browsing the city instead." />
+      </SEOLayout>
+    );
+  }
 
   const { city: cityInfo, intent, stats, areas, allIntents } = data;
   const meta = INTENT_META[intent.key] ?? INTENT_META.safe;

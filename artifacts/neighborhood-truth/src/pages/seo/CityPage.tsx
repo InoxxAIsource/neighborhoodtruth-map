@@ -63,10 +63,39 @@ export default function CityPage() {
     queryKey: ["seo-city", city],
     queryFn: () => fetch(`${API}/seo/city/${city}`).then((r) => r.json()),
     enabled: !!city,
+    staleTime: 1000 * 60 * 60, // 1 hour cache
   });
 
-  if (isLoading) return <SEOLayout><LoadingState /></SEOLayout>;
-  if (isError || !data?.city) return <SEOLayout><ErrorState message="City not found. Try exploring the map instead." /></SEOLayout>;
+  // Placeholder meta tags for loading/error states
+  const placeholderTitle = `${city ? city.charAt(0).toUpperCase() + city.slice(1) : "City"} Neighborhoods | PlaceLabels`;
+  const placeholderDescription = "Discover real neighborhood vibes from locals. Check safety, cost, and local vibes for every neighborhood.";
+
+  if (isLoading) {
+    return (
+      <SEOLayout>
+        <Helmet>
+          <title>{placeholderTitle}</title>
+          <meta name="description" content={placeholderDescription} />
+          <meta property="og:title" content={placeholderTitle} />
+          <meta property="og:description" content={placeholderDescription} />
+          <link rel="canonical" href={`https://placelabels.com/${city}`} />
+        </Helmet>
+        <LoadingState />
+      </SEOLayout>
+    );
+  }
+  if (isError || !data?.city) {
+    return (
+      <SEOLayout>
+        <Helmet>
+          <title>City Not Found | PlaceLabels</title>
+          <meta name="description" content="The city you're looking for doesn't have community data yet." />
+          <link rel="canonical" href={`https://placelabels.com/${city}`} />
+        </Helmet>
+        <ErrorState message="City not found. Try exploring the map instead." />
+      </SEOLayout>
+    );
+  }
 
   const { city: cityInfo, stats, areas, intents } = data;
   const top5 = areas.slice(0, 5);
