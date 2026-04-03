@@ -105,6 +105,10 @@ app.get("/api/healthz", (_req: Request, res: Response) => {
   res.json({ ok: true });
 });
 
+// API router must be registered BEFORE wildcard SSR routes to prevent
+// /:citySlug/:intentSlug from catching /api/labels, /api/chat, etc.
+app.use("/api", router);
+
 // SSR routes for city and intent pages
 app.get("/:citySlug/:intentSlug", async (req: Request, res: Response) => {
   try {
@@ -139,7 +143,5 @@ app.get("/:citySlug", async (req: Request, res: Response) => {
     res.status(500).send("Page rendering failed");
   }
 });
-
-app.use("/api", router);
 
 export default app;
