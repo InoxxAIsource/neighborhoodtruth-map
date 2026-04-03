@@ -5,6 +5,8 @@ import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { generateSitemapXml } from "./lib/sitemap";
+import { getCityHtml } from "./lib/citySSR";
+import { getIntentHtml } from "./lib/intentSSR";
 
 const app: Express = express();
 
@@ -101,6 +103,41 @@ app.get("/robots.txt", (_req: Request, res: Response) => {
 
 app.get("/api/healthz", (_req: Request, res: Response) => {
   res.json({ ok: true });
+});
+
+// SSR routes for city and intent pages
+app.get("/:citySlug/:intentSlug", async (req: Request, res: Response) => {
+  try {
+    const { citySlug, intentSlug } = req.params;
+    const html = await getIntentHtml(citySlug, intentSlug);
+    if (!html) {
+      res.status(404).send("Page not found");
+      return;
+    }
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.setHeader("Cache-Control", "public, max-age=3600");
+    res.send(html);
+  } catch (err) {
+    logger.error({ err }, "Failed to render intent page");
+    res.status(500).send("Page rendering failed");
+  }
+});
+
+app.get("/:citySlug", async (req: Request, res: Response) => {
+  try {
+    const { citySlug } = req.params;
+    const html = await getCityHtml(citySlug);
+    if (!html) {
+      res.status(404).send("Page not found");
+      return;
+    }
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.setHeader("Cache-Control", "public, max-age=3600");
+    res.send(html);
+  } catch (err) {
+    logger.error({ err }, "Failed to render city page");
+    res.status(500).send("Page rendering failed");
+  }
 });
 
 app.use("/api", router);
