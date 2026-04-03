@@ -16,6 +16,33 @@ interface RateLimitData {
   date: string;
 }
 
+interface CostItem {
+  label: string;
+  emoji: string;
+  range: string;
+}
+
+interface CostData {
+  city: string;
+  currency: string;
+  costLevel: string;
+  items: CostItem[];
+}
+
+interface TransportMode {
+  mode: string;
+  emoji: string;
+  costRange: string;
+  timeMin: number;
+}
+
+interface TransportResult {
+  fromCity: string;
+  currency: string;
+  distanceKm: number;
+  modes: TransportMode[];
+}
+
 function getTodayStr() {
   return new Date().toISOString().split("T")[0];
 }
@@ -91,6 +118,15 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase, onVo
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
+  const [costData, setCostData] = useState<CostData | null>(null);
+  const [costLoading, setCostLoading] = useState(false);
+
+  const [transportOpen, setTransportOpen] = useState(false);
+  const [transportDest, setTransportDest] = useState<LabelData | null>(null);
+  const [transportResult, setTransportResult] = useState<TransportResult | null>(null);
+  const [transportLoading, setTransportLoading] = useState(false);
+  const [transportError, setTransportError] = useState<string | null>(null);
+
   const handleVote = useCallback((targetLabel: LabelData, voteType: "upvote" | "downvote") => {
     const existingPersisted = myVotes?.find((v) => v.labelId === targetLabel.id);
     const existingLocal = localVotes[targetLabel.id];
@@ -120,8 +156,20 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase, onVo
       setLastFailedQuestion(null);
       setStreamingContent("");
       setRateLimitDataState(getRateLimit());
+      setCostData(null);
+      setTransportOpen(false);
+      setTransportDest(null);
+      setTransportResult(null);
+      setTransportError(null);
+
+      setCostLoading(true);
+      fetch(`${apiBase}/labels/${label.id}/cost-intelligence`)
+        .then((r) => r.ok ? r.json() : null)
+        .then((data: CostData | null) => { setCostData(data); })
+        .catch(() => { setCostData(null); })
+        .finally(() => setCostLoading(false));
     }
-  }, [label]);
+  }, [label, apiBase]);
 
   useEffect(() => {
     return () => { abortRef.current?.abort(); };
@@ -136,6 +184,30 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase, onVo
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [chatOpen]);
+
+  const handleTransportDest = useCallback(async (dest: LabelData) => {
+    if (!label) return;
+    setTransportDest(dest);
+    setTransportResult(null);
+    setTransportError(null);
+    setTransportLoading(true);
+    try {
+      const params = new URLSearchParams({
+        from_lat: String(label.lat),
+        from_lng: String(label.lng),
+        to_lat: String(dest.lat),
+        to_lng: String(dest.lng),
+      });
+      const res = await fetch(`${apiBase}/transport/estimate?${params}`);
+      if (!res.ok) throw new Error("Failed");
+      const data: TransportResult = await res.json();
+      setTransportResult(data);
+    } catch {
+      setTransportError("Could not estimate for this route.");
+    } finally {
+      setTransportLoading(false);
+    }
+  }, [label, apiBase]);
 
   const sendMessage = useCallback(async (question: string, fromRetry = false) => {
     if (!label || !question.trim() || isStreaming || isLimited) return;
@@ -247,7 +319,6 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase, onVo
     return { voted, upvotes, downvotes, hasVoted };
   };
 
-  const score = label.upvotes - label.downvotes;
   const categoryColor = label.category ? (CATEGORY_COLORS[label.category] ?? "#6b7280") : "#6b7280";
   const focusedVote = getLabelVoteState(label);
 
@@ -344,6 +415,118 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase, onVo
               </button>
               {focusedVote.hasVoted && (
                 <span className="text-xs text-gray-400">Voted!</span>
+              )}
+            </div>
+
+            {/* 💰 Local Costs panel */}
+            <div className="rounded-xl border border-amber-100 bg-amber-50 px-3 py-2.5 mb-3">
+              <p className="text-[11px] font-bold text-amber-900 uppercase tracking-wide mb-1.5">💰 Local Costs</p>
+              {costLoading ? (
+                <div className="grid grid-cols-2 gap-1">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <>
+                      <div key={`a${i}`} className="animate-pulse h-3.5 bg-amber-200 rounded" />
+                      <div key={`b${i}`} className="animate-pulse h-3.5 bg-amber-200 rounded" />
+                    </>
+                  ))}
+                </div>
+              ) : costData ? (
+                <>
+                  <p className="text-[10px] text-amber-700 mb-1.5">{costData.city} · {costData.costLevel} area</p>
+                  <div className="flex flex-col gap-0.5">
+                    {costData.items.map((item) => (
+                      <div key={item.label} className="flex justify-between items-center">
+                        <span className="text-[11px] text-amber-800">{item.emoji} {item.label}</span>
+                        <span className="text-[11px] font-semibold text-amber-900">{item.range}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <p className="text-[11px] text-amber-700">Cost data unavailable for this area.</p>
+              )}
+            </div>
+
+            {/* 🚌 Transport estimate */}
+            <div className="rounded-xl border border-sky-100 bg-sky-50 px-3 py-2.5 mb-3">
+              <button
+                className="w-full flex items-center justify-between text-left"
+                onClick={() => {
+                  setTransportOpen((p) => !p);
+                  setTransportDest(null);
+                  setTransportResult(null);
+                  setTransportError(null);
+                }}
+              >
+                <span className="text-[11px] font-bold text-sky-900 uppercase tracking-wide">🚌 Estimate travel cost</span>
+                {transportOpen
+                  ? <ChevronUp className="h-3.5 w-3.5 text-sky-600" />
+                  : <ChevronDown className="h-3.5 w-3.5 text-sky-600" />
+                }
+              </button>
+
+              {transportOpen && (
+                <div className="mt-2">
+                  {nearbyLabels.length === 0 ? (
+                    <p className="text-[11px] text-sky-700">No nearby labels to estimate travel to.</p>
+                  ) : (
+                    <>
+                      <p className="text-[10px] text-sky-700 mb-1.5">Pick a destination:</p>
+                      <div className="flex flex-col gap-1 max-h-32 overflow-y-auto">
+                        {nearbyLabels.slice(0, 8).map((dest) => (
+                          <button
+                            key={dest.id}
+                            onClick={() => handleTransportDest(dest)}
+                            className="text-left text-[11px] px-2.5 py-1.5 rounded-lg border transition-colors truncate"
+                            style={{
+                              background: transportDest?.id === dest.id ? "#e0f2fe" : "white",
+                              borderColor: transportDest?.id === dest.id ? "#7dd3fc" : "#e0f2fe",
+                              color: "#0c4a6e",
+                              fontWeight: transportDest?.id === dest.id ? 600 : 400,
+                            }}
+                          >
+                            📍 {dest.text}
+                          </button>
+                        ))}
+                      </div>
+
+                      {transportLoading && (
+                        <p className="text-[11px] text-sky-600 mt-2 animate-pulse">Calculating route…</p>
+                      )}
+
+                      {transportError && !transportLoading && (
+                        <p className="text-[11px] text-red-500 mt-2">{transportError}</p>
+                      )}
+
+                      {transportResult && !transportLoading && (
+                        <div className="mt-2 rounded-lg border border-sky-200 bg-white overflow-hidden">
+                          <p className="text-[10px] text-sky-600 px-2.5 py-1.5 border-b border-sky-100">
+                            To: <span className="font-semibold text-sky-800">{transportDest?.text}</span>
+                            {" · "}{transportResult.distanceKm.toFixed(1)} km
+                          </p>
+                          <table className="w-full text-[11px]">
+                            <thead>
+                              <tr className="border-b border-sky-100">
+                                <th className="text-left text-sky-600 font-semibold px-2.5 py-1">Mode</th>
+                                <th className="text-right text-sky-600 font-semibold px-2.5 py-1">Cost</th>
+                                <th className="text-right text-sky-600 font-semibold px-2.5 py-1">~Time</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {transportResult.modes.map((m) => (
+                                <tr key={m.mode} className="border-b border-sky-50 last:border-0">
+                                  <td className="px-2.5 py-1 text-gray-800">{m.emoji} {m.mode}</td>
+                                  <td className="px-2.5 py-1 text-right font-semibold text-gray-900">{m.costRange}</td>
+                                  <td className="px-2.5 py-1 text-right text-gray-500">{m.timeMin} min</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
               )}
             </div>
 
