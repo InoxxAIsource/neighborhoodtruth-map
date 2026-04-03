@@ -120,6 +120,21 @@ export default defineConfig({
         target: "http://localhost:8080",
         changeOrigin: true,
       },
+      // SSR routes for city and intent pages (must come before fallback)
+      "^/[a-z-]+(?:/[a-z-]+)?/?$": {
+        target: "http://localhost:8080",
+        changeOrigin: true,
+        // Only proxy if it looks like a city or intent route (not static assets)
+        bypass: (req) => {
+          const url = req.url;
+          // Don't proxy if it has a file extension (static assets)
+          if (/\.[a-z]{2,4}$/i.test(url)) return null;
+          // Don't proxy if it's not a city/intent pattern
+          if (!url.match(/^\/[a-z-]+(?:\/[a-z-]+)?(?:\/)?$/)) return null;
+          // Allow proxy for city and intent pages
+          return undefined;
+        },
+      },
     },
   },
   preview: {
