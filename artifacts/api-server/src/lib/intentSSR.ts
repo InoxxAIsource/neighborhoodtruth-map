@@ -28,11 +28,37 @@ const CITIES: CityDef[] = [
   { slug: "new-york", name: "New York", latMin: 40.4, latMax: 41.0, lngMin: -74.3, lngMax: -73.7 },
   { slug: "san-francisco", name: "San Francisco", latMin: 37.6, latMax: 37.9, lngMin: -122.6, lngMax: -122.3 },
   { slug: "los-angeles", name: "Los Angeles", latMin: 33.7, latMax: 34.4, lngMin: -118.7, lngMax: -118.0 },
+  { slug: "toronto", name: "Toronto", latMin: 43.5, latMax: 43.9, lngMin: -79.7, lngMax: -79.1 },
+  { slug: "mexico-city", name: "Mexico City", latMin: 19.2, latMax: 19.6, lngMin: -99.4, lngMax: -98.9 },
+  { slug: "buenos-aires", name: "Buenos Aires", latMin: -34.8, latMax: -34.4, lngMin: -58.7, lngMax: -58.2 },
   { slug: "london", name: "London", latMin: 51.3, latMax: 51.7, lngMin: -0.3, lngMax: 0.1 },
+  { slug: "amsterdam", name: "Amsterdam", latMin: 52.3, latMax: 52.5, lngMin: 4.7, lngMax: 5.1 },
+  { slug: "rome", name: "Rome", latMin: 41.7, latMax: 42.1, lngMin: 12.3, lngMax: 12.7 },
+  { slug: "istanbul", name: "Istanbul", latMin: 40.8, latMax: 41.3, lngMin: 28.6, lngMax: 29.5 },
+  { slug: "tel-aviv", name: "Tel Aviv", latMin: 31.9, latMax: 32.2, lngMin: 34.7, lngMax: 35.05 },
+  { slug: "jerusalem", name: "Jerusalem", latMin: 31.6, latMax: 31.9, lngMin: 35.1, lngMax: 35.4 },
+  { slug: "tehran", name: "Tehran", latMin: 35.5, latMax: 36.0, lngMin: 51.0, lngMax: 51.7 },
+  { slug: "cairo", name: "Cairo", latMin: 29.9, latMax: 30.2, lngMin: 31.1, lngMax: 31.5 },
+  { slug: "cape-town", name: "Cape Town", latMin: -34.2, latMax: -33.7, lngMin: 18.3, lngMax: 18.7 },
   { slug: "tokyo", name: "Tokyo", latMin: 35.5, latMax: 35.8, lngMin: 139.5, lngMax: 139.9 },
+  { slug: "seoul", name: "Seoul", latMin: 37.4, latMax: 37.7, lngMin: 126.8, lngMax: 127.3 },
+  { slug: "hong-kong", name: "Hong Kong", latMin: 22.1, latMax: 22.6, lngMin: 113.9, lngMax: 114.5 },
+  { slug: "bali", name: "Bali", latMin: -8.9, latMax: -8.3, lngMin: 115.0, lngMax: 115.5 },
+  { slug: "karachi", name: "Karachi", latMin: 24.7, latMax: 25.2, lngMin: 66.8, lngMax: 67.4 },
+  { slug: "lahore", name: "Lahore", latMin: 31.3, latMax: 31.7, lngMin: 74.1, lngMax: 74.5 },
   { slug: "mumbai", name: "Mumbai", latMin: 18.7, latMax: 19.4, lngMin: 72.4, lngMax: 73.3 },
   { slug: "delhi", name: "Delhi", latMin: 28.3, latMax: 29.1, lngMin: 76.7, lngMax: 77.5 },
   { slug: "bangalore", name: "Bangalore", latMin: 12.5, latMax: 13.4, lngMin: 77.2, lngMax: 78.0 },
+  { slug: "hyderabad", name: "Hyderabad", latMin: 16.9, latMax: 17.8, lngMin: 78.0, lngMax: 78.9 },
+  { slug: "pune", name: "Pune", latMin: 18.0, latMax: 18.9, lngMin: 73.4, lngMax: 74.3 },
+  { slug: "chennai", name: "Chennai", latMin: 12.6, latMax: 13.5, lngMin: 79.8, lngMax: 80.8 },
+  { slug: "kolkata", name: "Kolkata", latMin: 22.1, latMax: 22.9, lngMin: 88.0, lngMax: 88.8 },
+  { slug: "ahmedabad", name: "Ahmedabad", latMin: 22.5, latMax: 23.3, lngMin: 72.3, lngMax: 73.2 },
+  { slug: "jaipur", name: "Jaipur", latMin: 26.4, latMax: 27.2, lngMin: 75.4, lngMax: 76.2 },
+  { slug: "lucknow", name: "Lucknow", latMin: 26.3, latMax: 27.1, lngMin: 80.5, lngMax: 81.3 },
+  { slug: "chandigarh", name: "Chandigarh", latMin: 30.3, latMax: 31.1, lngMin: 76.3, lngMax: 77.2 },
+  { slug: "goa", name: "Goa", latMin: 14.8, latMax: 15.8, lngMin: 73.3, lngMax: 74.3 },
+  { slug: "indore", name: "Indore", latMin: 22.2, latMax: 23.0, lngMin: 75.4, lngMax: 76.2 },
 ];
 
 // Related intents shown as cross-links on each intent page
@@ -127,27 +153,37 @@ const INTENT_MAP: Record<
   "transit-friendly": {
     label: "Transit-Friendly",
     emoji: "🚇",
-    description: "well-connected neighborhoods with great public transport",
-    filter: (label) => label.tags?.includes("well-connected"),
+    description: "well-connected neighborhoods with great public transport links",
+    filter: (label) =>
+      label.tags?.includes("well-connected") ||
+      label.vibe?.includes("Busy") ||
+      label.safety >= 3,
   },
   "walkable-neighborhoods": {
     label: "Walkable Neighborhoods",
     emoji: "🚶",
     description: "walkable, pedestrian-friendly neighborhoods",
-    filter: (label) => label.tags?.includes("quiet") && label.safety >= 3,
+    filter: (label) =>
+      label.tags?.includes("quiet") ||
+      label.vibe?.includes("Chill") ||
+      label.safety >= 4,
   },
   // --- Lifestyle intents ---
   "expat-neighborhoods": {
     label: "Expat-Friendly",
     emoji: "🌍",
     description: "neighborhoods popular with expats and international residents",
-    filter: (label) => label.safety >= 4 && (label.tags?.includes("well-connected") || label.cost !== "$$$$"),
+    filter: (label) =>
+      label.safety >= 3 && (label.cost === "$" || label.cost === "$$" || label.cost === "$$$"),
   },
   "best-areas-for-young-professionals": {
     label: "Best for Young Professionals",
     emoji: "💼",
     description: "neighborhoods loved by young professionals",
-    filter: (label) => label.tags?.includes("well-connected") || label.tags?.includes("good-nightlife"),
+    filter: (label) =>
+      label.tags?.includes("well-connected") ||
+      label.tags?.includes("good-nightlife") ||
+      label.safety >= 3,
   },
 };
 
@@ -216,7 +252,52 @@ async function getIntentData(
 
 export async function getIntentHtml(citySlug: string, intentSlug: string): Promise<string | null> {
   const data = await getIntentData(citySlug, intentSlug);
-  if (!data || data.areas.length === 0) return null;
+  if (!data) return null;
+
+  // If no data yet, render a graceful "coming soon" page (never 404 a sitemap URL)
+  if (data.areas.length === 0) {
+    const { city, intent } = data;
+    const related = (INTENT_RELATED[intentSlug] ?? []).filter((s) => INTENT_MAP[s]);
+    const bodyHtml = `
+      <div class="mb-8">
+        <div class="text-4xl mb-3">${intent.emoji}</div>
+        <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">${intent.emoji} ${escapeHtml(intent.label)} in ${escapeHtml(city.name)}</h1>
+        <p class="text-gray-600 text-lg leading-relaxed max-w-2xl">We're collecting community data on ${intent.description} in ${escapeHtml(city.name)}. Be the first to label your neighborhood!</p>
+      </div>
+      <section class="bg-white rounded-2xl border border-gray-200 p-6 mb-8">
+        <h2 class="text-base font-bold text-gray-900 mb-2">🗺️ Help map ${escapeHtml(city.name)}</h2>
+        <p class="text-sm text-gray-600 mb-3">PlaceLabels is crowd-sourced — every pin you drop helps others find the right neighborhood. Open the interactive map and start labeling areas in ${escapeHtml(city.name)}.</p>
+        <a href="/" class="inline-flex items-center gap-2 bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors">Add a label now →</a>
+      </section>
+      ${related.length > 0 ? `
+      <section>
+        <h2 class="text-lg font-bold text-gray-900 mb-4">Related Guides for ${escapeHtml(city.name)}</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          ${related.map((s) => {
+            const rel = INTENT_MAP[s];
+            return `<a href="/${city.slug}/${s}" class="flex items-center gap-3 bg-white border border-gray-200 rounded-xl p-4 hover:border-teal-300 hover:shadow-md transition-all group">
+              <span class="text-2xl flex-shrink-0">${rel.emoji}</span>
+              <div><p class="font-semibold text-gray-900 group-hover:text-teal-700 text-sm">${escapeHtml(rel.label)}</p>
+              <p class="text-xs text-gray-400 mt-0.5">in ${escapeHtml(city.name)}</p></div>
+            </a>`;
+          }).join("")}
+        </div>
+      </section>` : ""}
+    `;
+    return ssrHtmlShell({
+      title: `${intent.emoji} ${intent.label} in ${city.name} | PlaceLabels`,
+      description: `Discover ${intent.description} in ${city.name}. Community-powered neighborhood data — add your own label and help build the map.`,
+      canonical: `https://placelabels.com/${city.slug}/${intent.slug}`,
+      bodyHtml,
+      schemaJson: { "@context": "https://schema.org", "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "PlaceLabels", item: "https://placelabels.com" },
+          { "@type": "ListItem", position: 2, name: city.name, item: `https://placelabels.com/${city.slug}` },
+          { "@type": "ListItem", position: 3, name: intent.label, item: `https://placelabels.com/${city.slug}/${intent.slug}` },
+        ]
+      },
+    });
+  }
 
   const { city, intent, areas, stats } = data;
   const year = new Date().getFullYear();
