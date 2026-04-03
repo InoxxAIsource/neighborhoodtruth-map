@@ -25,7 +25,7 @@ const GLOBAL_SCHEMA = JSON.stringify({
       "@id": "https://placelabels.com/#organization",
       "name": "PlaceLabels",
       "url": "https://placelabels.com",
-      "logo": { "@type": "ImageObject", "url": "https://placelabels.com/og-default.jpg" },
+      "logo": { "@type": "ImageObject", "url": "https://placelabels.com/og-image.png" },
       "sameAs": []
     }
   ]
@@ -144,7 +144,7 @@ function footerHtml(): string {
 }
 
 export function ssrHtmlShell(opts: SSRPageOptions): string {
-  const ogImage = opts.ogImage || "https://placelabels.com/og-default.jpg";
+  const ogImage = opts.ogImage || "https://placelabels.com/og-image.png";
 
   const allSchemas: object[] = [JSON.parse(GLOBAL_SCHEMA)];
   if (opts.schemaJson) allSchemas.push(opts.schemaJson);
