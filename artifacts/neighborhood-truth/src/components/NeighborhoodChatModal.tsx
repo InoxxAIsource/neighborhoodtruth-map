@@ -1,6 +1,75 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import type { ReactNode } from "react";
 import { X, Send, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import type { LabelData } from "./MapView";
+
+// --- Simple markdown renderer (no external deps) ---
+function renderInline(text: string): ReactNode[] {
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/);
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**"))
+      return <strong key={i}>{part.slice(2, -2)}</strong>;
+    if (part.startsWith("*") && part.endsWith("*"))
+      return <em key={i}>{part.slice(1, -1)}</em>;
+    if (part.startsWith("`") && part.endsWith("`"))
+      return <code key={i} className="bg-gray-100 text-gray-800 rounded px-1 text-[11px]">{part.slice(1, -1)}</code>;
+    return part;
+  });
+}
+
+function MarkdownMessage({ text }: { text: string }) {
+  const blocks = text.split(/\n{2,}/);
+  return (
+    <div className="space-y-1.5 text-sm leading-relaxed">
+      {blocks.map((block, bi) => {
+        const lines = block.split("\n").filter(Boolean);
+        if (!lines.length) return null;
+
+        // Heading
+        const hMatch = lines[0].match(/^#{1,3}\s+(.+)/);
+        if (hMatch)
+          return <p key={bi} className="font-bold text-gray-900 mt-0.5">{renderInline(hMatch[1])}</p>;
+
+        // Bullet list
+        const isList = lines.every((l) => /^[-•*]\s/.test(l));
+        if (isList)
+          return (
+            <ul key={bi} className="space-y-0.5 pl-0">
+              {lines.map((l, li) => (
+                <li key={li} className="flex gap-1.5">
+                  <span className="text-gray-400 flex-shrink-0 mt-0.5">•</span>
+                  <span>{renderInline(l.replace(/^[-•*]\s+/, ""))}</span>
+                </li>
+              ))}
+            </ul>
+          );
+
+        // Numbered list
+        const isNumbered = lines.every((l) => /^\d+[.)]\s/.test(l));
+        if (isNumbered)
+          return (
+            <ol key={bi} className="space-y-0.5 pl-0">
+              {lines.map((l, li) => (
+                <li key={li} className="flex gap-1.5">
+                  <span className="text-gray-400 flex-shrink-0 font-semibold">{li + 1}.</span>
+                  <span>{renderInline(l.replace(/^\d+[.)]\s+/, ""))}</span>
+                </li>
+              ))}
+            </ol>
+          );
+
+        // Paragraph (may have inline line breaks)
+        return (
+          <p key={bi}>
+            {lines.map((l, li) => (
+              <span key={li}>{li > 0 && <br />}{renderInline(l)}</span>
+            ))}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
 
 const RATE_LIMIT_KEY = "nt_chat_limit";
 const DAILY_LIMIT = 5;
@@ -77,12 +146,12 @@ function getNearbyLabels(allLabels: LabelData[], clickedLabel: LabelData): Label
 const SUGGESTED_QUESTIONS = [
   "What's the vibe here?",
   "Is it safe at night?",
-  "What's the lifestyle like?",
-  "What's the religious & cultural makeup?",
-  "Good for families?",
-  "Nightlife scene?",
-  "How's the cost of living?",
-  "What's the local population like?",
+  "How much is rent here?",
+  "Good for expats?",
+  "What's it like for families?",
+  "How's the nightlife?",
+  "Best cafes & restaurants nearby?",
+  "How well-connected is the transit?",
 ];
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -231,6 +300,12 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase, onVo
 
     abortRef.current = new AbortController();
 
+    // Build cost context string to inject into system prompt
+    const costContext = costData
+      ? `City: ${costData.city} | Cost level: ${costData.costLevel}\n` +
+        costData.items.map((it) => `${it.emoji} ${it.label}: ${it.range}`).join(" | ")
+      : undefined;
+
     let accumulated = "";
     let sseBuffer = "";
 
@@ -242,6 +317,7 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase, onVo
           labelId: label.id,
           question: trimmed,
           conversationHistory: historyBeforeQuestion,
+          costContext,
         }),
         signal: abortRef.current.signal,
       });
@@ -305,7 +381,7 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase, onVo
       setIsStreaming(false);
       setStreamingContent("");
     }
-  }, [label, messages, isStreaming, isLimited, apiBase, rateLimitData.count]);
+  }, [label, messages, isStreaming, isLimited, apiBase, rateLimitData.count, costData]);
 
   if (!label) return null;
 
@@ -607,15 +683,27 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase, onVo
             {chatOpen && (
               <div className="mt-2">
                 {isLimited ? (
-                  <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-center mb-3">
-                    <p className="text-sm font-semibold text-amber-800">Daily limit reached</p>
-                    <p className="text-xs text-amber-600 mt-1">
-                      You've used all {DAILY_LIMIT} AI questions for today. Come back tomorrow!
+                  <div className="rounded-2xl border border-purple-100 bg-gradient-to-br from-purple-50 to-indigo-50 px-4 py-4 mb-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-lg">✨</span>
+                      <p className="text-sm font-bold text-purple-900">Daily AI questions used up</p>
+                    </div>
+                    <p className="text-xs text-purple-700 leading-relaxed mb-3">
+                      You've asked {DAILY_LIMIT} questions today — your limit resets at midnight. The <span className="font-semibold">cost estimates</span> and <span className="font-semibold">transport calculator</span> above are still fully available.
                     </p>
+                    <div className="flex flex-col gap-1.5">
+                      <p className="text-[10px] font-semibold text-purple-500 uppercase tracking-wide">While you wait, explore:</p>
+                      <a href="/" className="flex items-center gap-2 text-xs text-purple-800 bg-white border border-purple-100 rounded-lg px-3 py-2 hover:border-purple-300 transition-colors">
+                        🗺️ <span>Discover more neighborhoods on the map</span>
+                      </a>
+                      <a href="/new-york/cheap-rent" className="flex items-center gap-2 text-xs text-purple-800 bg-white border border-purple-100 rounded-lg px-3 py-2 hover:border-purple-300 transition-colors">
+                        🏠 <span>Compare rent costs across cities</span>
+                      </a>
+                    </div>
                   </div>
                 ) : (
                   <p className="text-xs text-gray-400 mb-2">
-                    {remaining} of {DAILY_LIMIT} questions remaining today
+                    {remaining} of {DAILY_LIMIT} AI questions left today
                   </p>
                 )}
 
@@ -639,28 +727,34 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase, onVo
                     {messages.map((msg, i) => (
                       <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                         <div
-                          className="rounded-2xl px-4 py-2.5 text-sm max-w-[85%] leading-relaxed"
+                          className="rounded-2xl px-4 py-2.5 max-w-[90%]"
                           style={
                             msg.role === "user"
                               ? { background: "linear-gradient(135deg,#6366f1,#8b5cf6)", color: "white", borderBottomRightRadius: 4 }
                               : { background: "#f3f4f6", color: "#111827", borderBottomLeftRadius: 4 }
                           }
                         >
-                          {msg.content}
+                          {msg.role === "user"
+                            ? <span className="text-sm leading-relaxed">{msg.content}</span>
+                            : <MarkdownMessage text={msg.content} />
+                          }
                         </div>
                       </div>
                     ))}
 
                     {isStreaming && (
                       <div className="flex justify-start">
-                        <div className="rounded-2xl px-4 py-2.5 text-sm max-w-[85%] leading-relaxed bg-gray-100 text-gray-900" style={{ borderBottomLeftRadius: 4 }}>
-                          {streamingContent || (
-                            <span className="flex items-center gap-1">
-                              <span className="animate-bounce inline-block w-1.5 h-1.5 bg-gray-400 rounded-full" style={{ animationDelay: "0ms" }} />
-                              <span className="animate-bounce inline-block w-1.5 h-1.5 bg-gray-400 rounded-full" style={{ animationDelay: "150ms" }} />
-                              <span className="animate-bounce inline-block w-1.5 h-1.5 bg-gray-400 rounded-full" style={{ animationDelay: "300ms" }} />
-                            </span>
-                          )}
+                        <div className="rounded-2xl px-4 py-2.5 max-w-[90%] bg-gray-100 text-gray-900" style={{ borderBottomLeftRadius: 4 }}>
+                          {streamingContent
+                            ? <MarkdownMessage text={streamingContent} />
+                            : (
+                              <span className="flex items-center gap-1 py-0.5">
+                                <span className="animate-bounce inline-block w-1.5 h-1.5 bg-gray-400 rounded-full" style={{ animationDelay: "0ms" }} />
+                                <span className="animate-bounce inline-block w-1.5 h-1.5 bg-gray-400 rounded-full" style={{ animationDelay: "150ms" }} />
+                                <span className="animate-bounce inline-block w-1.5 h-1.5 bg-gray-400 rounded-full" style={{ animationDelay: "300ms" }} />
+                              </span>
+                            )
+                          }
                         </div>
                       </div>
                     )}

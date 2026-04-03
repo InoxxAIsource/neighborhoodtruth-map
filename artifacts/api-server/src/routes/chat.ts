@@ -15,18 +15,19 @@ const chatAskSchema = z.object({
   labelId: z.string().uuid(),
   question: z.string().min(1).max(500),
   conversationHistory: z.array(chatMessageSchema).max(20),
+  costContext: z.string().max(600).optional(),
 });
 
 const RADIUS = 0.03;
 
 type LabelRow = typeof labelsTable.$inferSelect;
 
-function buildSystemPrompt(clickedLabel: LabelRow, nearbyLabels: LabelRow[]) {
+function buildSystemPrompt(clickedLabel: LabelRow, nearbyLabels: LabelRow[], costContext?: string) {
   const formatLabel = (l: LabelRow) => {
     const score = l.upvotes - l.downvotes;
     const vibes = l.vibe?.length ? l.vibe.join(", ") : "none";
     const cat = l.category ? ` | Category: ${l.category}` : "";
-    return `• "${l.text}" — Safety: ${l.safety}/5 | Cost: ${l.cost} | Vibes: ${vibes}${cat} | Community score: ${score > 0 ? "+" : ""}${score} (${l.upvotes} up, ${l.downvotes} down)`;
+    return `• "${l.text}" — Safety: ${l.safety}/5 | Cost: ${l.cost} | Vibes: ${vibes}${cat} | Score: ${score > 0 ? "+" : ""}${score}`;
   };
 
   const allLabels = [clickedLabel, ...nearbyLabels];
@@ -40,35 +41,36 @@ function buildSystemPrompt(clickedLabel: LabelRow, nearbyLabels: LabelRow[]) {
   allLabels.forEach((l) => (l.vibe ?? []).forEach((v) => { vibeCounts[v] = (vibeCounts[v] || 0) + 1; }));
   const topVibes = Object.entries(vibeCounts).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([v, c]) => `${v} (×${c})`).join(", ");
 
-  return `You are a hyper-local neighborhood guide for PlaceLabels — a crowd-sourced global map powered by real insights from residents and visitors worldwide.
+  const costSection = costContext
+    ? `\nLIVE COST INTELLIGENCE (use these EXACT numbers when answering price questions):\n${costContext}`
+    : "";
 
-FOCAL LABEL: "${clickedLabel.text}"
-Location: lat ${clickedLabel.lat.toFixed(4)}, lng ${clickedLabel.lng.toFixed(4)}
-Area summary (${allLabels.length} crowd-sourced data points): avg safety ${avgSafety}/5 | typical cost ${costLabel} | top vibes: ${topVibes || "varied"}
+  return `You are a sharp, knowledgeable local guide for PlaceLabels — a crowd-sourced global neighborhood map. Users click pins on the map and ask you real questions about living, visiting, or relocating to this area.
 
-ALL NEARBY CROWD-SOURCED LABELS:
+FOCAL NEIGHBORHOOD: "${clickedLabel.text}"
+Coordinates: ${clickedLabel.lat.toFixed(4)}, ${clickedLabel.lng.toFixed(4)}
+Area snapshot (${allLabels.length} crowd labels): avg safety ${avgSafety}/5 | typical cost ${costLabel} | top vibes: ${topVibes || "varied"}
+${costSection}
+NEARBY CROWD LABELS:
 ${labelLines}
 
-YOUR ROLE — answer questions drawing on:
-1. CROWD DATA FIRST: The labels above are your primary evidence. Quote specific labels and scores.
-2. GENERAL WORLD KNOWLEDGE (secondary): When the data is thin, you may supplement with well-established facts about the real-world location this lat/lng corresponds to — but always flag it ("Based on what I know about this area generally...").
+ANSWERING RULES:
+1. **Be specific and local** — give real numbers, real place names, real comparisons. Never give vague answers.
+2. **Use crowd data first** — quote label names, safety scores, vibes. Then supplement with city knowledge.
+3. **Flag general knowledge** — if going beyond crowd data, say "Based on this area generally..." once, briefly.
+4. **Format clearly** — use **bold** for key points, short bullet lists (- item) for comparisons or breakdowns. No walls of text.
+5. **Length** — 80–140 words max unless user asks for detail. One focused section, not a generic essay.
+6. **Prices** — ALWAYS use the Live Cost Intelligence numbers when they exist. Quote them directly: "A coffee runs ${costContext ? "the actual range from the data" : "~$X–$Y"}."
+7. **Never invent** crowd votes, labels, or fake price ranges.
 
-TOPIC GUIDANCE:
-• SAFETY & CRIME: Use safety ratings (1=very unsafe, 5=very safe) and community sentiment. A safety of 3+ is generally acceptable; 1-2 suggests caution. Mention if labels specifically note crime or safety issues.
-• POPULATION & DENSITY: Infer from vibe tags (Loud=dense/busy, Chill=quieter), label count in area, and your general knowledge of the city/district.
-• RELIGION & CULTURAL DEMOGRAPHICS: These rarely appear in label text, so use your general knowledge of the real-world city/district — mention the dominant religions, cultural communities, and religious sites if relevant. Be respectful and factual.
-• LIFESTYLE: Draw on vibe tags (Artsy, Nightlife, Family, Bougie, Chill, Loud) and category data (Bars, Parks, Cafes, etc.) to describe the day-to-day feel of living or visiting here.
-• NIGHTLIFE: Labels tagged "Nightlife" + category "Bars" indicate a scene; low safety + nightlife = rowdier area. Describe the nightlife character honestly.
-• FAMILY-FRIENDLINESS: High safety + Family vibe + Parks/Playgrounds category = family-friendly. Low safety or Nightlife-dominant = less ideal for families.
-• COST OF LIVING: $ = budget to moderate, $$$-$$$$ = expensive/affluent. Triangulate with city-level knowledge.
-• TRANSIT & COMMUTE: If labels mention transit/metro, use that. Otherwise draw on your general knowledge of the city's transit network in that district.
-
-RESPONSE RULES:
-- Stay concise: under 180 words unless the user explicitly asks for more detail.
-- Cite the crowd data when relevant: e.g., "The community gives this area a safety of 4/5 and calls it 'Chill'."
-- Be honest when data is sparse — say so and supplement with general knowledge.
-- Use a friendly, direct tone like a knowledgeable local friend.
-- Never invent crowd data points. Invented votes or fake labels are not acceptable.`;
+TOPIC CHEAT SHEET:
+- SAFETY: safety 4–5 = safe, 3 = moderate, 1–2 = take care. Mention specific label signals.
+- COST/RENT: Use the Live Cost Intelligence data. If absent, use cost tier ($→$$$$) + city-level knowledge.
+- TRANSPORT: Use "well-connected" tag or your knowledge of city transit in this district.
+- NIGHTLIFE: "good-nightlife" tag + Bars category = active scene.
+- FAMILY: high safety + "family-friendly" tag + Parks = good for families.
+- EXPATS/NOMADS: safety + connectivity + cost — synthesise all three.
+- RELIGION/CULTURE: use your real-world knowledge of this district; be respectful and factual.`;
 }
 
 router.post("/ask", async (req, res) => {
@@ -78,7 +80,7 @@ router.post("/ask", async (req, res) => {
     return;
   }
 
-  const { labelId, question, conversationHistory } = parsed.data;
+  const { labelId, question, conversationHistory, costContext } = parsed.data;
 
   let clickedLabel: LabelRow | undefined;
   try {
@@ -133,8 +135,8 @@ router.post("/ask", async (req, res) => {
   try {
     const stream = anthropic.messages.stream({
       model: "claude-sonnet-4-6",
-      max_tokens: 8192,
-      system: buildSystemPrompt(clickedLabel, sortedNearby),
+      max_tokens: 1024,
+      system: buildSystemPrompt(clickedLabel, sortedNearby, costContext),
       messages,
     });
 
