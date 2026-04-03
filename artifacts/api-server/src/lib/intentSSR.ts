@@ -35,6 +35,24 @@ const CITIES: CityDef[] = [
   { slug: "bangalore", name: "Bangalore", latMin: 12.5, latMax: 13.4, lngMin: 77.2, lngMax: 78.0 },
 ];
 
+// Related intents shown as cross-links on each intent page
+const INTENT_RELATED: Record<string, string[]> = {
+  "safe-neighborhoods":          ["family-friendly", "quiet-neighborhoods", "walkable-neighborhoods"],
+  "affordable-areas":            ["cheap-rent", "cost-of-living", "best-areas-for-students"],
+  "nightlife-areas":             ["best-areas-for-students", "best-areas-for-young-professionals"],
+  "family-friendly":             ["safe-neighborhoods", "quiet-neighborhoods", "walkable-neighborhoods"],
+  "best-areas-for-students":     ["affordable-areas", "cheap-rent", "best-areas-for-young-professionals"],
+  "quiet-neighborhoods":         ["family-friendly", "walkable-neighborhoods", "safe-neighborhoods"],
+  "cheap-rent":                  ["affordable-areas", "cost-of-living", "best-areas-for-students"],
+  "luxury-real-estate":          ["expensive-neighborhoods", "safe-neighborhoods"],
+  "transit-friendly":            ["best-areas-for-young-professionals", "walkable-neighborhoods", "expat-neighborhoods"],
+  "walkable-neighborhoods":      ["quiet-neighborhoods", "family-friendly", "transit-friendly"],
+  "cost-of-living":              ["affordable-areas", "cheap-rent", "expat-neighborhoods"],
+  "expat-neighborhoods":         ["safe-neighborhoods", "transit-friendly", "cost-of-living"],
+  "expensive-neighborhoods":     ["luxury-real-estate", "safe-neighborhoods"],
+  "best-areas-for-young-professionals": ["transit-friendly", "best-areas-for-students", "nightlife-areas"],
+};
+
 const INTENT_MAP: Record<
   string,
   {
@@ -79,6 +97,57 @@ const INTENT_MAP: Record<
     emoji: "🌿",
     description: "peaceful, quiet neighborhoods",
     filter: (label) => label.tags?.includes("quiet"),
+  },
+  // --- Cost & Real Estate intents ---
+  "cheap-rent": {
+    label: "Cheap Rent",
+    emoji: "🏠",
+    description: "neighborhoods with low rent and budget housing options",
+    filter: (label) => label.cost === "$",
+  },
+  "luxury-real-estate": {
+    label: "Luxury Real Estate",
+    emoji: "🏙️",
+    description: "upscale, high-end neighborhoods with luxury housing",
+    filter: (label) => label.cost === "$$$$",
+  },
+  "expensive-neighborhoods": {
+    label: "Expensive Neighborhoods",
+    emoji: "💎",
+    description: "premium, high-cost neighborhoods",
+    filter: (label) => label.cost === "$$$" || label.cost === "$$$$",
+  },
+  "cost-of-living": {
+    label: "Low Cost of Living",
+    emoji: "📊",
+    description: "neighborhoods with a low overall cost of living",
+    filter: (label) => label.cost === "$" || label.cost === "$$",
+  },
+  // --- Transport & Connectivity intents ---
+  "transit-friendly": {
+    label: "Transit-Friendly",
+    emoji: "🚇",
+    description: "well-connected neighborhoods with great public transport",
+    filter: (label) => label.tags?.includes("well-connected"),
+  },
+  "walkable-neighborhoods": {
+    label: "Walkable Neighborhoods",
+    emoji: "🚶",
+    description: "walkable, pedestrian-friendly neighborhoods",
+    filter: (label) => label.tags?.includes("quiet") && label.safety >= 3,
+  },
+  // --- Lifestyle intents ---
+  "expat-neighborhoods": {
+    label: "Expat-Friendly",
+    emoji: "🌍",
+    description: "neighborhoods popular with expats and international residents",
+    filter: (label) => label.safety >= 4 && (label.tags?.includes("well-connected") || label.cost !== "$$$$"),
+  },
+  "best-areas-for-young-professionals": {
+    label: "Best for Young Professionals",
+    emoji: "💼",
+    description: "neighborhoods loved by young professionals",
+    filter: (label) => label.tags?.includes("well-connected") || label.tags?.includes("good-nightlife"),
   },
 };
 
@@ -247,21 +316,49 @@ export async function getIntentHtml(citySlug: string, intentSlug: string): Promi
       </p>
     </section>
 
-    <section>
-      <h2 class="text-lg font-bold text-gray-900 mb-4">Explore This Intent in Other Cities</h2>
+    <section class="mb-10">
+      <h2 class="text-lg font-bold text-gray-900 mb-4">Explore "${intent.label}" in Other Cities</h2>
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         ${CITIES.filter((c) => c.slug !== city.slug)
-          .slice(0, 6)
+          .slice(0, 8)
           .map(
             (c) => `
           <a href="/${c.slug}/${intent.slug}" class="bg-white border border-gray-200 rounded-lg p-4 text-center hover:border-teal-300 hover:shadow-md transition-all">
             <p class="font-semibold text-gray-900">${escapeHtml(c.name)}</p>
-            <p class="text-xs text-gray-400 mt-1">${intent.label}</p>
+            <p class="text-xs text-gray-400 mt-1">${intent.emoji} ${intent.label}</p>
           </a>
         `
           )
           .join("")}
       </div>
+    </section>
+
+    ${(() => {
+      const related = (INTENT_RELATED[intentSlug] ?? []).filter((s) => INTENT_MAP[s]);
+      if (related.length === 0) return "";
+      return `
+    <section class="mb-10">
+      <h2 class="text-lg font-bold text-gray-900 mb-4">Related Guides for ${escapeHtml(city.name)}</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        ${related.map((s) => {
+          const rel = INTENT_MAP[s];
+          return `
+          <a href="/${city.slug}/${s}" class="flex items-center gap-3 bg-white border border-gray-200 rounded-xl p-4 hover:border-teal-300 hover:shadow-md transition-all group">
+            <span class="text-2xl flex-shrink-0">${rel.emoji}</span>
+            <div>
+              <p class="font-semibold text-gray-900 group-hover:text-teal-700 text-sm">${escapeHtml(rel.label)}</p>
+              <p class="text-xs text-gray-400 mt-0.5">in ${escapeHtml(city.name)}</p>
+            </div>
+          </a>
+        `}).join("")}
+      </div>
+    </section>`;
+    })()}
+
+    <section class="bg-gradient-to-r from-teal-50 to-blue-50 border border-teal-100 rounded-2xl p-6">
+      <h2 class="text-base font-bold text-gray-900 mb-2">📍 See live cost data on the map</h2>
+      <p class="text-sm text-gray-600 mb-3">Every label on PlaceLabels shows real-time local cost estimates — coffee, lunch, dinner, groceries, and 1BR rent — plus travel time and transport cost between any two neighborhoods.</p>
+      <a href="/" class="inline-flex items-center gap-2 bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors">Explore the interactive map →</a>
     </section>
   `;
 

@@ -36,14 +36,24 @@ const CITIES = [
 ];
 
 const INTENT_SLUGS = [
+  // Safety
   "safe-neighborhoods",
+  "quiet-neighborhoods",
+  "walkable-neighborhoods",
+  // Cost & Real Estate
   "affordable-areas",
+  "cheap-rent",
+  "cost-of-living",
+  "expensive-neighborhoods",
+  "luxury-real-estate",
+  // Transport
+  "transit-friendly",
+  // Lifestyle
   "nightlife-areas",
   "family-friendly",
   "best-areas-for-students",
   "best-areas-for-young-professionals",
-  "quiet-neighborhoods",
-  "expensive-neighborhoods",
+  "expat-neighborhoods",
 ];
 
 function slugify(text: string): string {

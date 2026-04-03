@@ -112,7 +112,8 @@ app.use("/api", router);
 // SSR routes for city and intent pages
 app.get("/:citySlug/:intentSlug", async (req: Request, res: Response) => {
   try {
-    const { citySlug, intentSlug } = req.params;
+    const citySlug = req.params.citySlug as string;
+    const intentSlug = req.params.intentSlug as string;
     const html = await getIntentHtml(citySlug, intentSlug);
     if (!html) {
       res.status(404).send("Page not found");
@@ -129,7 +130,7 @@ app.get("/:citySlug/:intentSlug", async (req: Request, res: Response) => {
 
 app.get("/:citySlug", async (req: Request, res: Response) => {
   try {
-    const { citySlug } = req.params;
+    const citySlug = req.params.citySlug as string;
     const html = await getCityHtml(citySlug);
     if (!html) {
       res.status(404).send("Page not found");

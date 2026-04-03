@@ -183,11 +183,39 @@ export async function getCityHtml(citySlug: string): Promise<string | null> {
       </div>
     </section>
 
-    <section class="bg-white rounded-2xl border border-gray-200 p-6">
+    <section class="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
       <h2 class="text-lg font-bold text-gray-900 mb-3">Where to Live in ${escapeHtml(city.name)} — ${year} Guide</h2>
       <div class="text-gray-600 space-y-3">
         <p>Looking for the <strong>best neighborhoods in ${escapeHtml(city.name)}</strong>? Our crowd-sourced guide covers ${stats.labelCount} areas based on real local signals. The city earns an overall safety rating of <strong>${stats.avgSafety}/5</strong>, with a typical cost of <strong>${escapeHtml(stats.modeCost)}</strong>.</p>
-        <p>The highest-rated neighborhood is <strong>"${escapeHtml(stats.topLabel)}"</strong>. Browse specific guides: <a href="/${city.slug}/safe-neighborhoods" class="text-teal-700 hover:underline">safest neighborhoods</a>, <a href="/${city.slug}/affordable-areas" class="text-teal-700 hover:underline">affordable areas</a>, <a href="/${city.slug}/nightlife-areas" class="text-teal-700 hover:underline">best nightlife</a>, and more.</p>
+        <p>The top-rated neighborhood is <strong>"${escapeHtml(stats.topLabel)}"</strong>. Every neighborhood page shows live cost estimates (coffee, lunch, rent) and transit costs to other areas.</p>
+      </div>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-lg font-bold text-gray-900 mb-4">Explore ${escapeHtml(city.name)} by Category</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        ${[
+          { slug: "safe-neighborhoods",          emoji: "🛡️", label: "Safe Neighborhoods",         sub: "High safety ratings" },
+          { slug: "affordable-areas",             emoji: "💰", label: "Affordable Areas",            sub: "Budget-friendly living" },
+          { slug: "cheap-rent",                   emoji: "🏠", label: "Cheap Rent",                  sub: "Low-cost housing options" },
+          { slug: "cost-of-living",               emoji: "📊", label: "Low Cost of Living",          sub: "Best value neighborhoods" },
+          { slug: "expensive-neighborhoods",      emoji: "💎", label: "Expensive Areas",             sub: "Premium & high-end zones" },
+          { slug: "luxury-real-estate",           emoji: "🏙️", label: "Luxury Real Estate",         sub: "Upscale neighborhood guide" },
+          { slug: "transit-friendly",             emoji: "🚇", label: "Transit-Friendly",            sub: "Best public transport links" },
+          { slug: "walkable-neighborhoods",       emoji: "🚶", label: "Walkable Neighborhoods",      sub: "Pedestrian-friendly areas" },
+          { slug: "expat-neighborhoods",          emoji: "🌍", label: "Expat-Friendly",              sub: "Popular with internationals" },
+          { slug: "family-friendly",              emoji: "👨‍👩‍👧‍👦", label: "Family-Friendly",       sub: "Great for raising kids" },
+          { slug: "nightlife-areas",              emoji: "🎉", label: "Best Nightlife",              sub: "Top entertainment zones" },
+          { slug: "best-areas-for-young-professionals", emoji: "💼", label: "Young Professionals",   sub: "Work-life balance hubs" },
+        ].map(({ slug, emoji, label, sub }) => `
+          <a href="/${city.slug}/${slug}" class="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-xl p-3 hover:border-teal-300 hover:bg-white hover:shadow-sm transition-all group">
+            <span class="text-xl flex-shrink-0">${emoji}</span>
+            <div>
+              <p class="text-sm font-semibold text-gray-900 group-hover:text-teal-700">${label} in ${escapeHtml(city.name)}</p>
+              <p class="text-xs text-gray-400 mt-0.5">${sub}</p>
+            </div>
+          </a>
+        `).join("")}
       </div>
     </section>
 
