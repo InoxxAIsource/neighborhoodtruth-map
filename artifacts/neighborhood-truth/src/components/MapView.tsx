@@ -158,6 +158,7 @@ interface PendingTransport {
 }
 
 let pendingTransport: PendingTransport | null = null;
+let transportOriginMarker: L.Marker | null = null;
 
 function buildPopupContent(
   label: LabelData,
@@ -780,14 +781,25 @@ export function MapView({
       const marker = L.marker([label.lat, label.lng], { icon });
       const { el: popupEl, onOpen } = buildPopupContent(label, onVote, apiBase, voterId, myVotes);
       marker.bindPopup(popupEl, { maxWidth: 320, className: "hoodmap-popup" });
-      marker.on("popupopen", onOpen);
+      marker.on("popupopen", () => {
+        transportOriginMarker = marker;
+        onOpen();
+      });
       marker.on("click", () => {
         if (pendingTransport) {
           if (pendingTransport.fromLabel.id === label.id) {
             pendingTransport.cancel();
-          } else {
-            pendingTransport.handleDestination(label);
+            return;
           }
+          // Destination selected: prevent destination popup, keep origin popup visible
+          const originMarker = transportOriginMarker;
+          const pt = pendingTransport;
+          const destLabel = label;
+          setTimeout(() => {
+            marker.closePopup();
+            originMarker?.openPopup();
+            pt.handleDestination(destLabel);
+          }, 0);
           return;
         }
         onLabelClick?.(label);
@@ -819,14 +831,24 @@ export function MapView({
         const marker = L.marker([label.lat, label.lng], { icon });
         const { el: popupEl, onOpen } = buildPopupContent(label, onVote, apiBase, voterId, myVotes);
         marker.bindPopup(popupEl, { maxWidth: 320, className: "hoodmap-popup" });
-        marker.on("popupopen", onOpen);
+        marker.on("popupopen", () => {
+          transportOriginMarker = marker;
+          onOpen();
+        });
         marker.on("click", () => {
           if (pendingTransport) {
             if (pendingTransport.fromLabel.id === label.id) {
               pendingTransport.cancel();
-            } else {
-              pendingTransport.handleDestination(label);
+              return;
             }
+            const originMarker = transportOriginMarker;
+            const pt = pendingTransport;
+            const destLabel = label;
+            setTimeout(() => {
+              marker.closePopup();
+              originMarker?.openPopup();
+              pt.handleDestination(destLabel);
+            }, 0);
             return;
           }
           onLabelClick?.(label);
