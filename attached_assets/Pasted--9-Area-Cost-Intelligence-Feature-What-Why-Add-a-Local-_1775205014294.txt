@@ -1,0 +1,31 @@
+#9 - Area Cost Intelligence Feature
+What & Why
+Add a "Local Costs" panel to every label popup on the map, showing estimated coffee, dining, transport, and rent prices for that area. Also add a label-to-label transport cost calculator so users can estimate commute costs between two points.
+
+This turns PlaceLabels from a review platform into a practical relocation and investment tool — users get real cost context right where they need it (the map), powered by existing crowd-sourced data (cost level, city, vibes) with no paid APIs required.
+
+Done looks like
+Clicking any label on the map shows a "💰 Local Costs" section below the existing popup content, with estimated prices for: coffee, casual dining, a nice dinner, weekly groceries, and 1BR rent — all in the local currency for that city
+A "🚌 Cost to travel from here" button in each popup lets the user click a second label to get: distance, travel time, and estimated cost per transport mode (metro, auto/bus, taxi/rideshare) in local currency
+All prices and currencies are city-aware (Mumbai shows ₹, New York shows $, London shows £, etc.)
+The cost panel loads asynchronously with a small skeleton loader — popup opens instantly, costs appear within ~1 second
+The feature works on all 31 cities in the app
+Out of scope
+Real-time price data from external APIs (Numbeo, Google, etc.) — estimates are derived from existing cost level + city baseline tables
+Multi-stop transport routing
+Any changes to existing popup voting, tagging, or AI chat buttons
+Tasks
+Backend: Cost Intelligence API — Create GET /api/labels/:id/cost-intelligence that detects the city from the label's lat/lng coordinates, then returns estimated local prices (coffee, dining, groceries, rent) keyed to the label's existing cost level ($–$$$$) using city-specific baseline lookup tables with local currency. Include currency symbol and city name in the response.
+
+Backend: Transport Estimate API — Create GET /api/transport/estimate?from_lat=&from_lng=&to_lat=&to_lng= that calls the free OSRM routing API (no API key needed) to get distance and travel time, then returns estimated cost per transport mode (metro/subway, bus/auto, taxi/rideshare) using city-specific per-km rate tables for the origin city. Return all values in local currency.
+
+Frontend: Cost Intelligence Popup Panel — Extend buildPopupContent in MapView.tsx to add a "💰 Local Costs" section below existing popup content. On popup open, fetch from the cost-intelligence endpoint and render a compact 2-column grid of price estimates (coffee, lunch, dinner, groceries, 1BR rent). Show a skeleton loader while fetching. Style must match the existing popup's dark-card aesthetic.
+
+Frontend: Transport Calculator UI — Add a "🚌 Estimate travel cost →" button to the popup. When clicked, enter a "select destination" mode (cursor changes, instruction banner appears) where the next label click triggers a fetch to the transport estimate endpoint and shows results inline in the original popup: transport modes, estimated cost, and travel time in a compact table. Escape key or a cancel button exits selection mode.
+
+Relevant files
+artifacts/neighborhood-truth/src/components/MapView.tsx
+artifacts/api-server/src/routes/labels.ts
+artifacts/api-server/src/routes/index.ts
+artifacts/api-server/src/lib/sitemap.ts
+artifacts/api-server/src/app.ts

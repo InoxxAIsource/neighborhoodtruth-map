@@ -110,6 +110,14 @@
   box-shadow: 0 10px 40px rgba(0,0,0,0.15);
 }
 
+.hoodmap-popup .leaflet-popup-content {
+  max-height: min(72vh, 480px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+
 .zone-label-icon {
   background: transparent !important;
   border: none !important;
