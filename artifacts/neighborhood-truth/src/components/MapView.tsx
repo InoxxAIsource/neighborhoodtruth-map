@@ -227,7 +227,7 @@ function buildPopupContent(
       <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 8px;text-transform:uppercase;letter-spacing:0.05em;">💰 Local Costs</p>
       <div data-cost-body>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
-          ${[1,2,3,4,5].map(() => `<div style="height:16px;background:#f3f4f6;border-radius:4px;animation:pulse 1.5s infinite;"></div><div style="height:16px;background:#f3f4f6;border-radius:4px;animation:pulse 1.5s infinite;"></div>`).join("")}
+          ${[1,2,3,4,5].map(() => `<div class="animate-pulse" style="height:16px;background:#f3f4f6;border-radius:4px;"></div><div class="animate-pulse" style="height:16px;background:#f3f4f6;border-radius:4px;"></div>`).join("")}
         </div>
       </div>
     </div>
@@ -413,7 +413,8 @@ function buildPopupContent(
       return;
     }
 
-    cancelTransportMode();
+    // Cancel any OTHER popup's pending transport mode first (cleans up its listeners)
+    pendingTransport?.cancel();
 
     transportBtn.textContent = "✕ Cancel — click another label";
     transportBtn.style.background = "#fef3c7";
