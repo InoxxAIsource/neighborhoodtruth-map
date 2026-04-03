@@ -477,14 +477,34 @@ export function computeTransportEstimate(
   fromLat: number,
   fromLng: number,
   distanceKm: number,
+  routeDurationSec: number | null = null,
 ): TransportEstimateResult | null {
   const city = detectCity(fromLat, fromLng);
   if (!city) return null;
 
+  // Base travel time from OSRM route duration (driving baseline) or fallback from speed
+  const drivingBaseMin = routeDurationSec != null
+    ? Math.ceil(routeDurationSec / 60)
+    : Math.ceil((distanceKm / 22) * 60);
+
   const modes = city.transportModes.map((m) => {
     const costMin = Math.round(m.baseCostFixed + distanceKm * m.baseCostPerKm * 0.9);
     const costMax = Math.round(m.baseCostFixed * 1.2 + distanceKm * m.baseCostPerKm * 1.3);
-    const timeMin = Math.ceil((distanceKm / m.speedKmh) * 60);
+
+    // Adjust transit travel time relative to driving baseline
+    // Metro/rail typically faster, bus slower in traffic, ride-share ≈ driving
+    let timeMin: number;
+    if (m.speedKmh >= 35) {
+      // Rail/metro: faster than driving (fewer stops, no traffic)
+      timeMin = Math.ceil(drivingBaseMin * 0.85 + 5);
+    } else if (m.speedKmh >= 25) {
+      // Ride-share/taxi: approx same as driving route
+      timeMin = drivingBaseMin;
+    } else {
+      // Bus/local: slower due to stops and shared roads
+      timeMin = Math.ceil(drivingBaseMin * 1.5 + 5);
+    }
+
     return {
       mode: m.mode,
       emoji: m.emoji,

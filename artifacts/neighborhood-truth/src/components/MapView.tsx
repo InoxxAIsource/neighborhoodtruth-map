@@ -420,6 +420,10 @@ function buildPopupContent(
     transportSection.style.display = "block";
     transportBody.innerHTML = `<p style="font-size:12px;color:#0369a1;margin:0;">Click any other label on the map to estimate travel cost from here.</p>`;
 
+    window.dispatchEvent(new CustomEvent("hoodmap:transport-start", {
+      detail: { fromText: label.text },
+    }));
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") cancelTransportMode();
     };
@@ -575,6 +579,86 @@ export function MapView({
   const heatLayerRef = useRef<L.Layer | null>(null);
   const zoneLayerRef = useRef<L.LayerGroup | null>(null);
   const userLocationMarkerRef = useRef<L.Marker | null>(null);
+  const transportBannerRef = useRef<HTMLDivElement | null>(null);
+
+  // Transport mode: cursor + map-level instruction banner
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    function showBanner(fromText: string) {
+      if (!container) return;
+
+      const existing = transportBannerRef.current;
+      if (existing) existing.remove();
+
+      const banner = document.createElement("div");
+      banner.style.cssText = [
+        "position:absolute",
+        "top:12px",
+        "left:50%",
+        "transform:translateX(-50%)",
+        "z-index:1000",
+        "background:#1e40af",
+        "color:#fff",
+        "padding:8px 16px",
+        "border-radius:24px",
+        "font-size:13px",
+        "font-weight:600",
+        "font-family:system-ui,sans-serif",
+        "box-shadow:0 4px 12px rgba(0,0,0,0.25)",
+        "white-space:nowrap",
+        "pointer-events:auto",
+        "display:flex",
+        "align-items:center",
+        "gap:10px",
+      ].join(";");
+
+      const msg = document.createElement("span");
+      msg.textContent = `🚌 Click a destination label to estimate travel from "${fromText}"`;
+      banner.appendChild(msg);
+
+      const cancelBtn = document.createElement("button");
+      cancelBtn.textContent = "✕";
+      cancelBtn.style.cssText = "background:rgba(255,255,255,0.25);border:none;color:#fff;border-radius:12px;padding:1px 7px;font-size:12px;cursor:pointer;font-weight:700;";
+      cancelBtn.addEventListener("click", () => {
+        pendingTransport?.cancel();
+      });
+      banner.appendChild(cancelBtn);
+
+      container.style.position = "relative";
+      container.appendChild(banner);
+      transportBannerRef.current = banner;
+
+      const map = mapRef.current;
+      if (map) map.getContainer().style.cursor = "crosshair";
+    }
+
+    function hideBanner() {
+      if (transportBannerRef.current) {
+        transportBannerRef.current.remove();
+        transportBannerRef.current = null;
+      }
+      const map = mapRef.current;
+      if (map) map.getContainer().style.cursor = "";
+    }
+
+    const onStart = (e: Event) => {
+      const detail = (e as CustomEvent<{ fromText: string }>).detail;
+      showBanner(detail.fromText);
+    };
+
+    const onCancel = () => hideBanner();
+
+    window.addEventListener("hoodmap:transport-start", onStart);
+    window.addEventListener("hoodmap:transport-cancel", onCancel);
+
+    return () => {
+      window.removeEventListener("hoodmap:transport-start", onStart);
+      window.removeEventListener("hoodmap:transport-cancel", onCancel);
+      hideBanner();
+    };
+  }, []);
 
   // Initialize map
   useEffect(() => {
