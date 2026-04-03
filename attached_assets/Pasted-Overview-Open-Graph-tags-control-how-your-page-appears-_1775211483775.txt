@@ -1,0 +1,36 @@
+Overview
+Open Graph tags control how your page appears when shared on social media platforms like Facebook, LinkedIn, and messaging apps. A missing og:image means shared links display as blank or broken previews, drastically reducing click-through rates and social-driven traffic that can fuel backlink acquisition.
+
+Steps
+Step 1: Create a high-quality OG image. Design a 1200×630px image (PNG or JPG) that visually represents PlaceLabels — for example, a map graphic with neighborhood labels and your brand name. Save it to your public assets folder:
+
+/public/og-image.png
+Step 2: Add the complete Open Graph meta tag block to your <head>.
+
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://placelabels.com/" />
+<meta property="og:title" content="PlaceLabels | Honest Neighborhood Reviews from Real Locals" />
+<meta property="og:description" content="Discover real neighborhood vibes from locals. Drop labels, vote on insights & find your perfect area. 500+ authentic reviews across the world." />
+<meta property="og:image" content="https://placelabels.com/og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+Step 3: Add Twitter Card tags simultaneously.
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="PlaceLabels | Honest Neighborhood Reviews" />
+<meta name="twitter:description" content="Real neighborhood insights from locals. Find your perfect area." />
+<meta name="twitter:image" content="https://placelabels.com/og-image.png" />
+Step 4: If using Next.js, add via the Metadata API.
+
+export const metadata = {
+  openGraph: {
+    title: 'PlaceLabels | Honest Neighborhood Reviews',
+    description: 'Real neighborhood insights from locals.',
+    url: 'https://placelabels.com',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
+};
+Step 5: Validate using the Facebook Sharing Debugger at developers.facebook.com/tools/debug/ and LinkedIn Post Inspector.
+
+Expected Impact
+Complete OG tags improve social sharing appearance, increasing click-through rates by an estimated 20–40% on shared links. Better social engagement drives referral traffic and signals to AI platforms that the content is worth citing.
