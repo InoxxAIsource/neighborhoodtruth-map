@@ -677,6 +677,80 @@ const SEED_LABELS: SeedLabel[] = [
   { lat: 31.4949, lng: 74.3120, text: "Model Town colonial garden city", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: "Parks", upvotes: 55, downvotes: 5 },
   { lat: 31.4697, lng: 74.2681, text: "Johar Town dense and affordable", safety: 3, vibe: ["Family", "Loud"], cost: "$", color: "#9e9e9e", category: null, upvotes: 41, downvotes: 12 },
   { lat: 31.5507, lng: 74.3436, text: "Mall Road colonial promenade", safety: 4, vibe: ["Family", "Artsy"], cost: "$$", color: "#16a34a", category: null, upvotes: 69, downvotes: 5 },
+
+  // ===== BANGALORE =====
+  { lat: 12.9352, lng: 77.6245, text: "Koramangala startup culture everywhere", safety: 4, vibe: ["Bougie", "Artsy"], cost: "$$$", color: "#64b5f6", category: "Coworking", upvotes: 94, downvotes: 5 },
+  { lat: 12.9716, lng: 77.6412, text: "Indiranagar 100 Feet Road pub crawl", safety: 4, vibe: ["Nightlife", "Bougie"], cost: "$$$", color: "#7c3aed", category: "Bars", upvotes: 87, downvotes: 6 },
+  { lat: 12.9758, lng: 77.6012, text: "Cubbon Park morning jogs peaceful", safety: 5, vibe: ["Family", "Chill"], cost: "$", color: "#16a34a", category: "Parks", upvotes: 103, downvotes: 2 },
+  { lat: 12.9698, lng: 77.5985, text: "MG Road malls and cafes buzzing", safety: 4, vibe: ["Loud", "Family"], cost: "$$", color: "#ea580c", category: null, upvotes: 61, downvotes: 9 },
+  { lat: 12.8445, lng: 77.6791, text: "Electronic City IT campus ghost town on weekends", safety: 4, vibe: ["Chill"], cost: "$$", color: "#9e9e9e", category: "Coworking", upvotes: 33, downvotes: 18 },
+  { lat: 12.9279, lng: 77.6271, text: "HSR Layout best biryani in Bangalore", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#ea580c", category: "Restaurants", upvotes: 82, downvotes: 3 },
+  { lat: 13.0071, lng: 77.5686, text: "Malleswaram old Bangalore charm", safety: 4, vibe: ["Family", "Chill"], cost: "$", color: "#16a34a", category: null, upvotes: 69, downvotes: 4 },
+  { lat: 12.9165, lng: 77.6101, text: "Jayanagar South Bangalore quiet and green", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: "Parks", upvotes: 74, downvotes: 3 },
+  { lat: 12.9698, lng: 77.7499, text: "Whitefield tech park sprawl long commute", safety: 3, vibe: ["Chill"], cost: "$$", color: "#9e9e9e", category: "Coworking", upvotes: 29, downvotes: 22 },
+  { lat: 12.9141, lng: 77.6411, text: "BTM Layout affordable student area", safety: 3, vibe: ["Chill", "Family"], cost: "$", color: "#0d9488", category: null, upvotes: 55, downvotes: 7 },
+  { lat: 12.9352, lng: 77.6122, text: "Lalbagh Botanical Garden stunning roses", safety: 5, vibe: ["Family", "Chill"], cost: "$", color: "#16a34a", category: "Parks", upvotes: 91, downvotes: 1 },
+  { lat: 13.0453, lng: 77.6269, text: "Hebbal lake views excellent", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#2563eb", category: "Parks", upvotes: 63, downvotes: 4 },
+
+  // ===== HYDERABAD =====
+  { lat: 17.4123, lng: 78.4485, text: "Banjara Hills upscale restaurants row", safety: 4, vibe: ["Bougie", "Family"], cost: "$$$", color: "#4caf50", category: "Restaurants", upvotes: 88, downvotes: 5 },
+  { lat: 17.4316, lng: 78.4065, text: "Jubilee Hills celebrity neighbourhood", safety: 4, vibe: ["Bougie", "Chill"], cost: "$$$$", color: "#4caf50", category: null, upvotes: 71, downvotes: 6 },
+  { lat: 17.4474, lng: 78.3762, text: "Hitech City CYBERABAD IT hub", safety: 4, vibe: ["Bougie"], cost: "$$$", color: "#64b5f6", category: "Coworking", upvotes: 79, downvotes: 7 },
+  { lat: 17.4400, lng: 78.3489, text: "Gachibowli stadium area modern flats", safety: 4, vibe: ["Chill", "Family"], cost: "$$", color: "#16a34a", category: null, upvotes: 58, downvotes: 6 },
+  { lat: 17.3616, lng: 78.4747, text: "Charminar Hyderabadi biryani origin", safety: 3, vibe: ["Family", "Loud"], cost: "$", color: "#ea580c", category: "Restaurants", upvotes: 127, downvotes: 3 },
+  { lat: 17.4399, lng: 78.4983, text: "Secunderabad twin city calm pace", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: null, upvotes: 47, downvotes: 5 },
+  { lat: 17.4239, lng: 78.4738, text: "Begumpet good for expats and families", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: null, upvotes: 52, downvotes: 4 },
+  { lat: 17.3850, lng: 78.4867, text: "Old City walled bazaars and mosques", safety: 3, vibe: ["Family", "Artsy"], cost: "$", color: "#7c3aed", category: null, upvotes: 83, downvotes: 7 },
+  { lat: 17.4948, lng: 78.3996, text: "Madhapur cafes and tech bro coffee", safety: 4, vibe: ["Chill", "Artsy"], cost: "$$", color: "#0d9488", category: "Cafes to work", upvotes: 66, downvotes: 5 },
+  { lat: 17.3614, lng: 78.3998, text: "Golconda Fort ancient wonder nearby", safety: 4, vibe: ["Family", "Chill"], cost: "$", color: "#16a34a", category: null, upvotes: 95, downvotes: 2 },
+
+  // ===== PUNE =====
+  { lat: 18.5362, lng: 73.8929, text: "Koregaon Park brunch scene incredible", safety: 4, vibe: ["Bougie", "Artsy"], cost: "$$$", color: "#7c3aed", category: "Restaurants", upvotes: 91, downvotes: 4 },
+  { lat: 18.5524, lng: 73.9012, text: "Kalyani Nagar young professionals area", safety: 4, vibe: ["Bougie", "Chill"], cost: "$$", color: "#0d9488", category: "Coworking", upvotes: 73, downvotes: 5 },
+  { lat: 18.5679, lng: 73.9143, text: "Viman Nagar airport proximity good", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: null, upvotes: 54, downvotes: 6 },
+  { lat: 18.4907, lng: 73.8140, text: "Kothrud residential and very affordable", safety: 4, vibe: ["Family", "Chill"], cost: "$", color: "#16a34a", category: null, upvotes: 49, downvotes: 5 },
+  { lat: 18.5195, lng: 73.8553, text: "Camp area colonial charm Pune", safety: 4, vibe: ["Family", "Artsy"], cost: "$$", color: "#7c3aed", category: null, upvotes: 67, downvotes: 5 },
+  { lat: 18.5966, lng: 73.7340, text: "Hinjewadi tech park Pune's Electronic City", safety: 3, vibe: ["Chill"], cost: "$$", color: "#9e9e9e", category: "Coworking", upvotes: 34, downvotes: 19 },
+  { lat: 18.5116, lng: 73.9283, text: "Magarpatta self-contained smart city", safety: 5, vibe: ["Family", "Chill"], cost: "$$$", color: "#4caf50", category: null, upvotes: 61, downvotes: 4 },
+  { lat: 18.5236, lng: 73.8478, text: "Shivaji Nagar heart of Pune city", safety: 3, vibe: ["Loud", "Family"], cost: "$", color: "#9e9e9e", category: null, upvotes: 38, downvotes: 11 },
+  { lat: 18.6186, lng: 73.8037, text: "Aundh peaceful suburb great malls", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: null, upvotes: 58, downvotes: 4 },
+  { lat: 18.5271, lng: 73.8778, text: "FC Road student hangout zone", safety: 4, vibe: ["Chill", "Nightlife"], cost: "$", color: "#0d9488", category: "Cafes to work", upvotes: 77, downvotes: 5 },
+
+  // ===== CHENNAI =====
+  { lat: 13.0418, lng: 80.2341, text: "T Nagar shopping mecca for sarees", safety: 3, vibe: ["Family", "Loud"], cost: "$", color: "#ea580c", category: null, upvotes: 88, downvotes: 7 },
+  { lat: 13.0827, lng: 80.2707, text: "Anna Nagar planned suburb very liveable", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: null, upvotes: 73, downvotes: 4 },
+  { lat: 13.0012, lng: 80.2565, text: "Adyar quiet and green expat favourite", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: null, upvotes: 81, downvotes: 3 },
+  { lat: 13.0002, lng: 80.2707, text: "Besant Nagar beach walks evening bliss", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#2563eb", category: "Parks", upvotes: 97, downvotes: 2 },
+  { lat: 13.0569, lng: 80.2466, text: "Nungambakkam upscale dining and embassies", safety: 4, vibe: ["Bougie", "Chill"], cost: "$$$", color: "#4caf50", category: "Restaurants", upvotes: 64, downvotes: 5 },
+  { lat: 12.8996, lng: 80.2209, text: "OMR IT corridor long drive but good pay", safety: 4, vibe: ["Chill"], cost: "$$", color: "#9e9e9e", category: "Coworking", upvotes: 45, downvotes: 13 },
+  { lat: 13.0337, lng: 80.2697, text: "Mylapore ancient temple neighbourhood", safety: 4, vibe: ["Family", "Artsy"], cost: "$", color: "#7c3aed", category: null, upvotes: 89, downvotes: 3 },
+  { lat: 13.0770, lng: 80.2604, text: "Egmore budget hotels near railway", safety: 3, vibe: ["Loud", "Family"], cost: "$", color: "#9e9e9e", category: "Hotels", upvotes: 29, downvotes: 16 },
+  { lat: 12.9591, lng: 80.2175, text: "Velachery south Chennai well connected", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: null, upvotes: 55, downvotes: 5 },
+  { lat: 13.1018, lng: 80.2122, text: "Ambattur industrial area affordable flats", safety: 3, vibe: ["Family"], cost: "$", color: "#9e9e9e", category: null, upvotes: 31, downvotes: 9 },
+
+  // ===== KOLKATA =====
+  { lat: 22.5526, lng: 88.3529, text: "Park Street Kolkata's nightlife heart", safety: 4, vibe: ["Nightlife", "Bougie"], cost: "$$$", color: "#7c3aed", category: "Bars", upvotes: 86, downvotes: 5 },
+  { lat: 22.5732, lng: 88.4324, text: "Salt Lake City Sector V IT hub modern", safety: 4, vibe: ["Chill", "Family"], cost: "$$", color: "#64b5f6", category: "Coworking", upvotes: 61, downvotes: 6 },
+  { lat: 22.5152, lng: 88.3690, text: "Ballygunge educated affluent area", safety: 4, vibe: ["Family", "Chill"], cost: "$$$", color: "#4caf50", category: null, upvotes: 67, downvotes: 4 },
+  { lat: 22.5896, lng: 88.4735, text: "New Town Rajarhat tech and new apartments", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: null, upvotes: 53, downvotes: 6 },
+  { lat: 22.5851, lng: 88.3468, text: "North Kolkata heritage homes and chaos", safety: 3, vibe: ["Family", "Artsy"], cost: "$", color: "#7c3aed", category: null, upvotes: 74, downvotes: 8 },
+  { lat: 22.5726, lng: 88.3639, text: "College Street bookstores everywhere", safety: 4, vibe: ["Artsy", "Chill"], cost: "$", color: "#7c3aed", category: "Bookstores", upvotes: 98, downvotes: 2 },
+  { lat: 22.5448, lng: 88.3298, text: "Maidan huge green lung of Kolkata", safety: 4, vibe: ["Family", "Chill"], cost: "$", color: "#16a34a", category: "Parks", upvotes: 81, downvotes: 3 },
+  { lat: 22.5869, lng: 88.3278, text: "Howrah Bridge iconic walk early morning", safety: 3, vibe: ["Family", "Artsy"], cost: "$", color: "#2563eb", category: null, upvotes: 107, downvotes: 3 },
+  { lat: 22.5243, lng: 88.3618, text: "Kalighat temple morning pilgrimage", safety: 3, vibe: ["Family"], cost: "$", color: "#ea580c", category: null, upvotes: 66, downvotes: 5 },
+  { lat: 22.5646, lng: 88.3444, text: "New Market best street food Kolkata", safety: 3, vibe: ["Family", "Loud"], cost: "$", color: "#ea580c", category: "Restaurants", upvotes: 93, downvotes: 4 },
+
+  // ===== JAIPUR =====
+  { lat: 26.9260, lng: 75.8235, text: "Pink City old walled city breathtaking", safety: 3, vibe: ["Family", "Artsy"], cost: "$", color: "#db2777", category: null, upvotes: 112, downvotes: 5 },
+  { lat: 26.8927, lng: 75.8069, text: "Malviya Nagar best restaurants in Jaipur", safety: 4, vibe: ["Family", "Bougie"], cost: "$$", color: "#ea580c", category: "Restaurants", upvotes: 79, downvotes: 4 },
+  { lat: 26.9124, lng: 75.7390, text: "Vaishali Nagar western Jaipur modern living", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: null, upvotes: 58, downvotes: 5 },
+  { lat: 26.9000, lng: 75.8235, text: "C-scheme upscale consulates area", safety: 4, vibe: ["Bougie", "Chill"], cost: "$$$", color: "#4caf50", category: null, upvotes: 62, downvotes: 4 },
+  { lat: 26.9197, lng: 75.8032, text: "Bani Park quiet heritage haveli area", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: null, upvotes: 54, downvotes: 3 },
+  { lat: 26.9124, lng: 75.7877, text: "Mansarovar huge planned township", safety: 3, vibe: ["Family"], cost: "$", color: "#9e9e9e", category: null, upvotes: 38, downvotes: 8 },
+  { lat: 26.9197, lng: 75.8255, text: "MI Road main drag shopping and chaos", safety: 3, vibe: ["Loud", "Family"], cost: "$", color: "#ea580c", category: null, upvotes: 44, downvotes: 12 },
+  { lat: 26.9855, lng: 75.8513, text: "Amber Fort area tourist town excellent", safety: 4, vibe: ["Family", "Artsy"], cost: "$$", color: "#7c3aed", category: null, upvotes: 103, downvotes: 3 },
+  { lat: 26.9315, lng: 75.8467, text: "Raja Park local Jaipur feel authentic", safety: 4, vibe: ["Family", "Chill"], cost: "$", color: "#16a34a", category: null, upvotes: 49, downvotes: 5 },
+  { lat: 26.9260, lng: 75.8195, text: "Johari Bazaar gems and jewellery street", safety: 3, vibe: ["Family", "Loud"], cost: "$$", color: "#db2777", category: null, upvotes: 84, downvotes: 6 },
 ];
 
 export async function seedIfNeeded(): Promise<void> {
