@@ -85,6 +85,12 @@ export function TopToolbar({
   isLocating,
   onLocate,
   onSearchLocation,
+  showTraffic,
+  onToggleTraffic,
+  showTilt,
+  onToggleTilt,
+  alertCount,
+  onOpenAlerts,
 }: TopToolbarProps) {
   const [placesOpen, setPlacesOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
