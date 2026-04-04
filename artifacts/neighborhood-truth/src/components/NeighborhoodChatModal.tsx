@@ -245,7 +245,7 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase, onVo
   useEffect(() => {
     if (label) {
       abortRef.current?.abort();
-      setChatOpen(false);
+      setChatOpen(true);
       setMessages([]);
       setInput("");
       setError(null);
