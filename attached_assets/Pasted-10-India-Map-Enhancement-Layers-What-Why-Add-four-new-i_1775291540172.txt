@@ -1,0 +1,44 @@
+10 - India Map Enhancement Layers
+What & Why
+Add four new information layers to the PlaceLabels map, all accessible through a single non-intrusive Layer Control Panel. Targeting India cities primarily, though the infrastructure works globally. All layers are off by default and only load data when the user enables them — so the map stays clean for users who don't want the extra information.
+
+Done looks like
+A small floating Layer icon button (bottom-right of map, above zoom controls) opens a compact slide-out panel listing available layers
+Each layer has a toggle switch; all are off by default
+3D Buildings: toggling on switches to a 3D building extrusion view using OSMBuildings.js (works at zoom 14+, grays out gracefully at lower zoom with a hint tooltip); toggling off returns to standard flat map
+POI Layers — Six sub-toggles with emoji icons, each independently toggleable:
+🛕 Temples / 🕌 Mosques / ⛪ Churches — colored map markers, clustered when zoomed out
+🏥 Hospitals
+🏫 Schools
+⛽ Petrol Stations / ⚡ EV Chargers
+POI markers only fetch when the layer is toggled on (lazy), and only for the visible map bounding box — no full-page data dump
+Indian Festivals & Events: toggling on shows a subtle banner/badge above the map when a major Indian festival is happening or within 7 days (e.g., "Diwali in 3 days 🪔"). The list covers ~20 annual festivals (Diwali, Holi, Eid al-Fitr, Eid al-Adha, Navratri, Pongal, Onam, Ganesh Chaturthi, Durga Puja, etc.) with correct recurring dates per year
+Live Traffic: shows a HERE Maps traffic tile layer overlay. If HERE_MAPS_API_KEY is not set, the toggle shows as disabled with a tooltip explaining it needs a free API key; when configured, it shows color-coded traffic congestion on roads
+Out of scope
+Real-time crime data (no public India crime API exists — community safety labels already serve this purpose)
+Live news feeds or external events APIs (festival calendar is seeded, not scraped)
+Overpass API direct from the browser (all Overpass calls go through the backend to allow caching)
+POI layers outside India at this stage (can be extended later — the infrastructure is general-purpose)
+Technical notes
+Use OSMBuildings osmbuildings.js (MIT licensed, works as a Leaflet layer)
+Overpass API via backend endpoint /api/poi?category=temple&bbox=... with 5-min in-memory cache to avoid hammering the public Overpass instance
+Festival calendar stored as a small seeded array in the API server (date-fns for date math)
+HERE Maps API key stored as Replit secret HERE_MAPS_API_KEY — use the environment-secrets skill workflow; if absent, traffic toggle is disabled with a clear label
+Layer panel state persisted in localStorage so user's layer preferences survive page reload
+Tasks
+Layer Control Panel UI — Build a floating LayerControlPanel React component with toggle button and slide-out drawer. Each layer entry has an icon, name, description tooltip, and toggle switch. Mount it inside Index.tsx overlaid on the map. Store enabled layers in a useLayerState hook that persists to localStorage.
+
+3D Buildings layer — Install osmbuildings and wire it to the Layer Control Panel toggle. At zoom < 14 show a "zoom in to see 3D buildings" tooltip and keep the toggle disabled. At zoom 14+ the layer renders automatically when enabled.
+
+POI backend endpoint — Add GET /api/poi?category=<type>&south=&west=&north=&east= to the API server. Query the Overpass API for the requested category and bounding box, cache results in-memory for 5 minutes, return GeoJSON. Categories to support: temple, mosque, church, hospital, school, fuel, ev_charger.
+
+POI map layers — In MapView, add six toggleable Leaflet layer groups (one per POI category) with custom colored circle markers and click popups showing the place name. Markers cluster when zoomed out. Each layer fetches from /api/poi only when toggled on, and refetches on significant map pan/zoom (debounced).
+
+Indian Festivals overlay — Add GET /api/festivals?city=<slug> endpoint returning upcoming festivals within 30 days for that city slug, using a seeded annual calendar. On the frontend, when this layer is enabled, show a slim banner above the map listing any current or upcoming festivals. Update daily.
+
+Live Traffic layer — Add a HERE Maps traffic tile layer to MapView, toggled by the Layer Control Panel. Check for HERE_MAPS_API_KEY env var; disable the toggle gracefully if absent. Add the secret configuration to the environment-secrets system.
+
+Relevant files
+artifacts/neighborhood-truth/src/components/MapView.tsx
+artifacts/neighborhood-truth/src/pages/Index.tsx
+artifacts/api-server/src/routes/in

@@ -1,8 +1,12 @@
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo, useCallback } from "react";
 import L, { Map as LeafletMap } from "leaflet";
 import "leaflet/dist/leaflet.css";
+import "leaflet.markercluster";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { renderZoneLayer, ZONE_CATEGORIES } from "./ZoneOverlay";
 import { useLanguage } from "@/contexts/LanguageContext";
+import type { LayerState } from "@/hooks/useLayerState";
 
 export interface LabelData {
   id: string;
@@ -46,6 +50,9 @@ interface MapViewProps {
   voterId: string;
   myVotes?: { labelId: string; voteType: string }[];
   onMapViewChange?: (lat: number, lng: number, zoom: number) => void;
+  layers?: LayerState;
+  hereApiKey?: string;
+  onZoomChange?: (zoom: number) => void;
 }
 
 export interface AreaSummary {
@@ -579,6 +586,16 @@ function applyFilters(labels: LabelData[], filters: Filters = DEFAULT_FILTERS): 
   });
 }
 
+const POI_COLORS: Record<string, string> = {
+  temple:     "#f97316",
+  mosque:     "#10b981",
+  church:     "#6366f1",
+  hospital:   "#ef4444",
+  school:     "#3b82f6",
+  fuel:       "#f59e0b",
+  ev_charger: "#22d3ee",
+};
+
 export function MapView({
   labels,
   isPlacingPin,
@@ -598,6 +615,9 @@ export function MapView({
   voterId,
   myVotes,
   onMapViewChange,
+  layers,
+  hereApiKey,
+  onZoomChange,
 }: MapViewProps) {
   const { t } = useLanguage();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -607,6 +627,11 @@ export function MapView({
   const zoneLayerRef = useRef<L.LayerGroup | null>(null);
   const userLocationMarkerRef = useRef<L.Marker | null>(null);
   const transportBannerRef = useRef<HTMLDivElement | null>(null);
+  // Layer refs
+  const poiLayersRef = useRef<Map<string, L.MarkerClusterGroup>>(new Map());
+  const trafficLayerRef = useRef<L.TileLayer | null>(null);
+  const buildings3dRef = useRef<unknown>(null);
+  const poiFetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Transport mode: cursor + map-level instruction banner
   useEffect(() => {
@@ -941,6 +966,163 @@ export function MapView({
       });
     }
   }, [showHeatmap, filteredLabels]);
+
+  // Emit zoom changes to parent
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !onZoomChange) return;
+    const handler = () => onZoomChange(map.getZoom());
+    map.on("zoomend", handler);
+    return () => { map.off("zoomend", handler); };
+  }, [onZoomChange]);
+
+  // ─── POI fetching helper ───────────────────────────────────────────────────
+  const fetchPoi = useCallback(async (category: string) => {
+    const map = mapRef.current;
+    if (!map) return;
+    const b = map.getBounds();
+    const url = `${apiBase}/poi?category=${category}&south=${b.getSouth().toFixed(4)}&west=${b.getWest().toFixed(4)}&north=${b.getNorth().toFixed(4)}&east=${b.getEast().toFixed(4)}`;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) return;
+      const geojson = await res.json() as { features: { geometry: { coordinates: [number,number] }; properties: { name: string; category: string } }[] };
+
+      let clusterGroup = poiLayersRef.current.get(category);
+      if (!clusterGroup) {
+        clusterGroup = L.markerClusterGroup({ maxClusterRadius: 40 });
+        poiLayersRef.current.set(category, clusterGroup);
+      } else {
+        clusterGroup.clearLayers();
+      }
+
+      const color = POI_COLORS[category] ?? "#888";
+      geojson.features.forEach((feat) => {
+        const [lng, lat] = feat.geometry.coordinates;
+        const marker = L.circleMarker([lat, lng], {
+          radius: 7,
+          color,
+          fillColor: color,
+          fillOpacity: 0.85,
+          weight: 1.5,
+        });
+        marker.bindPopup(`<b>${feat.properties.name}</b><br/><small>${category.replace("_", " ")}</small>`);
+        clusterGroup!.addLayer(marker);
+      });
+
+      if (!map.hasLayer(clusterGroup)) {
+        clusterGroup.addTo(map);
+      }
+    } catch {}
+  }, [apiBase]);
+
+  // ─── POI layers — toggle on/off, refetch on map move ──────────────────────
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layers) return;
+
+    const activePois = Object.entries(layers.poi)
+      .filter(([, on]) => on)
+      .map(([k]) => k);
+
+    // Remove disabled layers
+    poiLayersRef.current.forEach((group, cat) => {
+      if (!layers.poi[cat as keyof typeof layers.poi]) {
+        map.removeLayer(group);
+        poiLayersRef.current.delete(cat);
+      }
+    });
+
+    // Fetch enabled layers
+    activePois.forEach((cat) => fetchPoi(cat));
+
+    // Debounced refetch on move
+    const onMove = () => {
+      if (poiFetchTimeoutRef.current) clearTimeout(poiFetchTimeoutRef.current);
+      poiFetchTimeoutRef.current = setTimeout(() => {
+        activePois.forEach((cat) => fetchPoi(cat));
+      }, 600);
+    };
+
+    if (activePois.length > 0) {
+      map.on("moveend", onMove);
+      map.on("zoomend", onMove);
+    }
+
+    return () => {
+      if (poiFetchTimeoutRef.current) clearTimeout(poiFetchTimeoutRef.current);
+      map.off("moveend", onMove);
+      map.off("zoomend", onMove);
+    };
+  }, [layers?.poi, fetchPoi]);
+
+  // ─── 3D Buildings ──────────────────────────────────────────────────────────
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layers) return;
+
+    if (!layers.buildings3d) {
+      if (buildings3dRef.current) {
+        try {
+          // @ts-expect-error osmbuildings
+          buildings3dRef.current.remove?.();
+        } catch {}
+        buildings3dRef.current = null;
+      }
+      return;
+    }
+
+    // Load OSMBuildings dynamically from CDN
+    if (!(window as unknown as Record<string, unknown>)["OSMBuildings"]) {
+      const script = document.createElement("script");
+      script.src = "https://cdn.osmbuildings.org/OSMBuildings-Leaflet.js";
+      script.onload = () => {
+        // @ts-expect-error osmbuildings
+        const osmb = new OSMBuildings(map);
+        osmb.date(new Date());
+        osmb.load("https://data.osmbuildings.org/0.2/anonymous/tile/{z}/{x}/{y}.json");
+        buildings3dRef.current = osmb;
+      };
+      document.head.appendChild(script);
+    } else {
+      // @ts-expect-error osmbuildings
+      const osmb = new OSMBuildings(map);
+      osmb.date(new Date());
+      osmb.load("https://data.osmbuildings.org/0.2/anonymous/tile/{z}/{x}/{y}.json");
+      buildings3dRef.current = osmb;
+    }
+
+    return () => {
+      if (buildings3dRef.current) {
+        try {
+          // @ts-expect-error osmbuildings
+          buildings3dRef.current.remove?.();
+        } catch {}
+        buildings3dRef.current = null;
+      }
+    };
+  }, [layers?.buildings3d]);
+
+  // ─── HERE Maps traffic layer ───────────────────────────────────────────────
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layers || !hereApiKey) return;
+
+    if (layers.traffic) {
+      if (!trafficLayerRef.current) {
+        trafficLayerRef.current = L.tileLayer(
+          `https://{s}.traffic.maps.ls.hereapi.com/maptile/2.1/traffictile/newest/normal.day/{z}/{x}/{y}/256/png8?apiKey=${hereApiKey}`,
+          { subdomains: ["1", "2", "3", "4"], opacity: 0.7, attribution: "© HERE Maps" }
+        );
+      }
+      if (!map.hasLayer(trafficLayerRef.current)) {
+        trafficLayerRef.current.addTo(map);
+      }
+    } else {
+      if (trafficLayerRef.current && map.hasLayer(trafficLayerRef.current)) {
+        map.removeLayer(trafficLayerRef.current);
+      }
+    }
+  }, [layers?.traffic, hereApiKey]);
 
   return (
     <div

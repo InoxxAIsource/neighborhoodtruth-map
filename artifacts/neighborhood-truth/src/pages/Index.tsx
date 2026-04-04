@@ -14,6 +14,11 @@ import type { Filters } from "@/components/MapView";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { MigrationModal } from "@/components/MigrationModal";
 import { ShareSheet } from "@/components/ShareSheet";
+import { LayerControlPanel } from "@/components/LayerControlPanel";
+import { FestivalBanner } from "@/components/FestivalBanner";
+import { useLayerState } from "@/hooks/useLayerState";
+
+const HERE_API_KEY = (import.meta.env.VITE_HERE_API_KEY as string | undefined) ?? "";
 
 const AddLabelDialog = lazy(() => import("@/components/AddLabelDialog").then(m => ({ default: m.AddLabelDialog })));
 const NeighborhoodChatModal = lazy(() => import("@/components/NeighborhoodChatModal").then(m => ({ default: m.NeighborhoodChatModal })));
@@ -114,6 +119,10 @@ export default function Index() {
   const queryClient = useQueryClient();
   const { showHero, hasInteracted, dismissHero, markInteracted } = useOnboarding();
   const { t } = useLanguage();
+
+  // Layer state and map zoom
+  const { layers, toggleLayer, togglePoi } = useLayerState();
+  const [mapZoom, setMapZoom] = useState(2);
 
   // Share sheet state
   const [shareLabel, setShareLabel] = useState<LabelData | null>(null);
@@ -255,6 +264,9 @@ export default function Index() {
         voterId={voterId}
         myVotes={userVotes}
         onMapViewChange={handleMapViewChange}
+        layers={layers}
+        hereApiKey={HERE_API_KEY || undefined}
+        onZoomChange={setMapZoom}
       />
 
       <TopToolbar
@@ -318,6 +330,22 @@ export default function Index() {
       </Suspense>
 
       <ZoneLegend />
+
+      {/* Festival banner — rendered inside the relative map wrapper */}
+      <FestivalBanner apiBase={API} enabled={layers.festivals} />
+
+      {/* Layer control panel — floating above zoom controls */}
+      <div className="absolute inset-0 pointer-events-none z-[1100]">
+        <div className="pointer-events-auto">
+          <LayerControlPanel
+            layers={layers}
+            mapZoom={mapZoom}
+            hasTrafficKey={!!HERE_API_KEY}
+            onToggleLayer={toggleLayer}
+            onTogglePoi={togglePoi}
+          />
+        </div>
+      </div>
 
       {/* Migration Mode banner */}
       {showMigrationBanner && detectedCity && (
