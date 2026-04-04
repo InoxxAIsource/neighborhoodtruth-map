@@ -169,6 +169,7 @@ interface PopupStrings {
   tagThisArea: string;
   localCosts: string;
   estimateTravel: string;
+  costLabels: Record<string, string>;
 }
 
 function buildPopupContent(
@@ -218,7 +219,7 @@ function buildPopupContent(
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
         <span>${stars}</span>
         <span style="font-size:12px;color:#6b7280;">·</span>
-        <span style="font-size:13px;font-weight:600;color:#374151;">${escapeHtml(label.cost)}</span>
+        <span style="font-size:13px;font-weight:600;color:#374151;">${escapeHtml(label.cost)}${strings?.costLabels?.[label.cost] && strings.costLabels[label.cost] !== label.cost ? ` · ${escapeHtml(strings.costLabels[label.cost])}` : ""}</span>
       </div>
       ${vibes ? `<div style="margin-top:4px;">${vibes}</div>` : ""}
       ${topTagsHtml ? `<div style="margin-top:6px;" data-top-tags>${topTagsHtml}</div>` : `<div style="margin-top:6px;" data-top-tags></div>`}

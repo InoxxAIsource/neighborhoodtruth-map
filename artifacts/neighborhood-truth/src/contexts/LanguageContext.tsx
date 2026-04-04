@@ -33,6 +33,12 @@ const T = {
     tagThisArea: "Tag this area",
     localCosts: "💰 Local Costs",
     estimateTravel: "Estimate travel cost →",
+    costLabels: {
+      "$": "Budget",
+      "$$": "Mid-range",
+      "$$$": "Expensive",
+      "$$$$": "Luxury",
+    } as Record<string, string>,
     vibeOptions: {
       Chill: "Chill",
       Loud: "Loud",
@@ -82,6 +88,12 @@ const T = {
     tagThisArea: "इस क्षेत्र को टैग करें",
     localCosts: "💰 स्थानीय कीमतें",
     estimateTravel: "यात्रा खर्च अनुमान →",
+    costLabels: {
+      "$": "सस्ता",
+      "$$": "मध्यम",
+      "$$$": "महंगा",
+      "$$$$": "लग्जरी",
+    } as Record<string, string>,
     vibeOptions: {
       Chill: "शांत",
       Loud: "शोरगुल",
@@ -133,6 +145,7 @@ interface Translations {
   tagThisArea: string;
   localCosts: string;
   estimateTravel: string;
+  costLabels: Record<string, string>;
   vibeOptions: Record<string, string>;
   jumpToCity: string;
 }

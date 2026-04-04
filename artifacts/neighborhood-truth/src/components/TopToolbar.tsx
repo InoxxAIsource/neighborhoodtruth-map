@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -115,7 +114,6 @@ export function TopToolbar({
   const [citiesOpen, setCitiesOpen] = useState(false);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const { lang, setLang, t } = useLanguage();
-  const [, navigate] = useLocation();
 
   const toggleCategory = (label: string) => {
     const next = selectedCategories.includes(label)
@@ -126,9 +124,10 @@ export function TopToolbar({
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
-    const slug = CITY_SLUGS[searchQuery.trim().toLowerCase()];
-    if (slug) {
-      navigate(`/${slug}`);
+    const q = searchQuery.trim().toLowerCase();
+    const knownCity = CITIES.find((c) => c.name.toLowerCase() === q || CITY_SLUGS[q] === c.name.toLowerCase().replace(/\s+/g, "-") || c.name.toLowerCase().replace(/\s+/g, "-") === q);
+    if (knownCity) {
+      onSearchLocation({ lat: knownCity.lat, lng: knownCity.lng, zoom: 12 });
       setSearchOpen(false);
       setSearchQuery("");
       return;

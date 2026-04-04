@@ -148,7 +148,7 @@ export function FilterSidebar({ filters, onFiltersChange, showHeatmap, onToggleH
                 className="cursor-pointer text-xs select-none"
                 onClick={() => toggleCost(c)}
               >
-                {c}
+                {c}{t.costLabels[c] && t.costLabels[c] !== c ? ` · ${t.costLabels[c]}` : ""}
               </Badge>
             ))}
           </div>

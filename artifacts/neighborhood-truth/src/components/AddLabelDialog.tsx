@@ -203,7 +203,7 @@ export function AddLabelDialog({ open, onOpenChange, position, onSubmit, isSubmi
                   variant={cost === c ? "default" : "outline"}
                   onClick={() => setCost(c)}
                 >
-                  {c}
+                  {c}{t.costLabels[c] && t.costLabels[c] !== c ? ` · ${t.costLabels[c]}` : ""}
                 </Button>
               ))}
             </div>
