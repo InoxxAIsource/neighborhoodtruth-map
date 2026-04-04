@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, Fragment } from "react";
 import type { ReactNode } from "react";
 import { X, Send, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import type { LabelData } from "./MapView";
@@ -532,10 +532,10 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase, onVo
               {costLoading ? (
                 <div className="grid grid-cols-2 gap-1">
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <>
-                      <div key={`a${i}`} className="animate-pulse h-3.5 bg-amber-200 rounded" />
-                      <div key={`b${i}`} className="animate-pulse h-3.5 bg-amber-200 rounded" />
-                    </>
+                    <Fragment key={i}>
+                      <div className="animate-pulse h-3.5 bg-amber-200 rounded" />
+                      <div className="animate-pulse h-3.5 bg-amber-200 rounded" />
+                    </Fragment>
                   ))}
                 </div>
               ) : costData ? (

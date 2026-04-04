@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { MapPin, Compass, ArrowRight, ThumbsUp, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const STORAGE_KEY = "nt-onboarded";
+const STORAGE_KEY = "nt-onboarded-v2";
 
 export function HeroOverlay({ onDismiss }: { onDismiss: () => void }) {
   return (
