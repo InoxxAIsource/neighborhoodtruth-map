@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { anthropic } from "@workspace/integrations-anthropic-ai";
-import { db, labelsTable } from "@workspace/db";
-import { eq, and, gte, lte, ne, sql } from "drizzle-orm";
+import { db, labelsTable, votesTable } from "@workspace/db";
+import { eq, and, gte, lte, ne, sql, count } from "drizzle-orm";
 import { z } from "zod";
 import { CITIES } from "../lib/citySSR";
 
@@ -22,6 +22,85 @@ const chatAskSchema = z.object({
 const RADIUS = 0.03;
 
 type LabelRow = typeof labelsTable.$inferSelect;
+
+async function buildContextExtras(lat: number, lng: number): Promise<string> {
+  const extras: string[] = [];
+
+  try {
+    // Time-of-day context for transit questions
+    const hour = new Date().getUTCHours();
+    const istHour = (hour + 5) % 24;
+    let timeCtx = "";
+    if (istHour >= 8 && istHour <= 10) timeCtx = "It is currently morning rush hour (8–10 AM IST) — transit will be congested.";
+    else if (istHour >= 17 && istHour <= 20) timeCtx = "It is currently evening rush hour (5–8 PM IST) — expect heavy traffic.";
+    else if (istHour >= 22 || istHour <= 5) timeCtx = "It is currently late night/early morning — reduced transit, quieter streets.";
+    else timeCtx = `Current time in India: ${istHour}:00 IST — off-peak hours, traffic should be normal.`;
+    extras.push(timeCtx);
+
+    // 30-day vote accuracy signal: count "accurate" votes in last 30 days for labels within RADIUS
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const accurateRows = await db
+      .select({ total: count() })
+      .from(votesTable)
+      .innerJoin(labelsTable, eq(votesTable.labelId, labelsTable.id))
+      .where(
+        and(
+          sql`${labelsTable.lat} >= ${lat - RADIUS} AND ${labelsTable.lat} <= ${lat + RADIUS}`,
+          sql`${labelsTable.lng} >= ${lng - RADIUS} AND ${labelsTable.lng} <= ${lng + RADIUS}`,
+          eq(votesTable.voteType, "accurate"),
+          gte(votesTable.createdAt, thirtyDaysAgo),
+        )
+      );
+
+    const totalVotesRows = await db
+      .select({ total: count() })
+      .from(votesTable)
+      .innerJoin(labelsTable, eq(votesTable.labelId, labelsTable.id))
+      .where(
+        and(
+          sql`${labelsTable.lat} >= ${lat - RADIUS} AND ${labelsTable.lat} <= ${lat + RADIUS}`,
+          sql`${labelsTable.lng} >= ${lng - RADIUS} AND ${labelsTable.lng} <= ${lng + RADIUS}`,
+          gte(votesTable.createdAt, thirtyDaysAgo),
+        )
+      );
+
+    const accurateCount = accurateRows[0]?.total ?? 0;
+    const totalCount = totalVotesRows[0]?.total ?? 0;
+
+    if (totalCount > 0) {
+      const pct = Math.round((Number(accurateCount) / Number(totalCount)) * 100);
+      extras.push(`In the last 30 days, ${pct}% of community votes (${accurateCount}/${totalCount}) marked this area as still accurate.`);
+    } else {
+      extras.push("No recent vote accuracy data for this area in the last 30 days.");
+    }
+
+    // Median rental cost from label distribution in the area
+    const areaLabels = await db
+      .select({ cost: labelsTable.cost })
+      .from(labelsTable)
+      .where(
+        and(
+          sql`lat >= ${lat - RADIUS} AND lat <= ${lat + RADIUS}`,
+          sql`lng >= ${lng - RADIUS} AND lng <= ${lng + RADIUS}`,
+        )
+      )
+      .limit(50);
+
+    if (areaLabels.length > 0) {
+      const costMap: Record<string, number> = { "$": 1, "$$": 2, "$$$": 3, "$$$$": 4 };
+      const costNums = areaLabels.map((l) => costMap[l.cost] ?? 2).sort((a, b) => a - b);
+      const mid = Math.floor(costNums.length / 2);
+      const medianNum = costNums.length % 2 === 0 ? Math.round((costNums[mid - 1] + costNums[mid]) / 2) : costNums[mid];
+      const costLabel = ["$", "$$", "$$$", "$$$$"][medianNum - 1] ?? "$$";
+      const costHuman = { "$": "Budget (₹5k–₹15k/mo)", "$$": "Mid-range (₹15k–₹40k/mo)", "$$$": "Expensive (₹40k–₹80k/mo)", "$$$$": "Luxury (₹80k+/mo)" }[costLabel] ?? "Mid-range";
+      extras.push(`Community rental cost median for this area: ${costLabel} — ${costHuman} (based on ${areaLabels.length} crowd labels).`);
+    }
+  } catch {
+    // Non-critical; continue without extras
+  }
+
+  return extras.length > 0 ? `\nLIVE SIGNALS (use these for context when answering):\n${extras.map((e) => `• ${e}`).join("\n")}` : "";
+}
 
 function buildSystemPrompt(clickedLabel: LabelRow, nearbyLabels: LabelRow[], costContext?: string) {
   const formatLabel = (l: LabelRow) => {
@@ -120,6 +199,8 @@ router.post("/ask", async (req, res) => {
   const sortedNearby = nearbyLabels
     .sort((a, b) => (b.upvotes - b.downvotes) - (a.upvotes - a.downvotes));
 
+  const liveExtras = await buildContextExtras(clickedLabel.lat, clickedLabel.lng);
+
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
@@ -137,7 +218,7 @@ router.post("/ask", async (req, res) => {
     const stream = anthropic.messages.stream({
       model: "claude-sonnet-4-6",
       max_tokens: 1024,
-      system: buildSystemPrompt(clickedLabel, sortedNearby, costContext),
+      system: buildSystemPrompt(clickedLabel, sortedNearby, costContext) + liveExtras,
       messages,
     });
 

@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import type { Filters } from "@/components/MapView";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { MigrationModal } from "@/components/MigrationModal";
+import { ShareSheet } from "@/components/ShareSheet";
 
 const AddLabelDialog = lazy(() => import("@/components/AddLabelDialog").then(m => ({ default: m.AddLabelDialog })));
 const NeighborhoodChatModal = lazy(() => import("@/components/NeighborhoodChatModal").then(m => ({ default: m.NeighborhoodChatModal })));
@@ -113,6 +114,9 @@ export default function Index() {
   const queryClient = useQueryClient();
   const { showHero, hasInteracted, dismissHero, markInteracted } = useOnboarding();
   const { t } = useLanguage();
+
+  // Share sheet state
+  const [shareLabel, setShareLabel] = useState<LabelData | null>(null);
 
   // Migration Mode state
   const [detectedCity, setDetectedCity] = useState<{ slug: string; name: string } | null>(null);
@@ -217,6 +221,15 @@ export default function Index() {
     };
     window.addEventListener("hoodmap:askai", handler);
     return () => window.removeEventListener("hoodmap:askai", handler);
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const label = (e as CustomEvent<LabelData>).detail;
+      if (label) setShareLabel(label);
+    };
+    window.addEventListener("hoodmap:share", handler);
+    return () => window.removeEventListener("hoodmap:share", handler);
   }, []);
 
   return (
@@ -366,6 +379,33 @@ export default function Index() {
           }}
         />
       )}
+
+      {shareLabel && (() => {
+        const cityEntry = CITIES_MAP.find((c) =>
+          shareLabel.lat >= c.latMin && shareLabel.lat <= c.latMax &&
+          shareLabel.lng >= c.lngMin && shareLabel.lng <= c.lngMax
+        );
+        const citySlug = cityEntry?.slug ?? "map";
+        const cityName = cityEntry?.name;
+        const areaSlug = shareLabel.text.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+        const shareUrl = `https://placelabels.com/${citySlug}/${areaSlug}`;
+        const whatsappText = `Check out ${shareLabel.text}${cityName ? ` in ${cityName}` : ""} on PlaceLabels!\nSafety: ${"⭐".repeat(shareLabel.safety)} | Cost: ${shareLabel.cost}\n${shareUrl}`;
+        return (
+          <ShareSheet
+            cardData={{
+              areaName: shareLabel.text,
+              cityName,
+              vibes: shareLabel.vibe ?? [],
+              safety: shareLabel.safety,
+              cost: shareLabel.cost,
+              quote: shareLabel.text,
+            }}
+            shareUrl={shareUrl}
+            whatsappText={whatsappText}
+            onClose={() => setShareLabel(null)}
+          />
+        );
+      })()}
     </div>
   );
 }

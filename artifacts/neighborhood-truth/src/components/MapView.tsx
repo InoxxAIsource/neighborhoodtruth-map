@@ -231,8 +231,9 @@ function buildPopupContent(
       <button data-vote="accurate" title="${voteTitle}" style="cursor:${voteCursor};${accurateStyle};border-radius:8px;padding:4px 10px;font-size:12px;display:flex;align-items:center;gap:3px;">🔁 ${escapeHtml(strings?.stillAccurate ?? "Still accurate")}</button>
       <span data-score-badge style="margin-left:auto;background:${scoreBadgeColor};color:${scoreBadgeText};border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;">${score > 0 ? '+' : ''}${score}</span>
     </div>
-    <div style="margin-top:8px;">
-      <button data-action="ask-ai" style="cursor:pointer;width:100%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;">✨ ${escapeHtml(strings?.askAI ?? "Ask AI about this area")}</button>
+    <div style="margin-top:8px;display:flex;gap:8px;">
+      <button data-action="ask-ai" style="cursor:pointer;flex:1;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;">✨ ${escapeHtml(strings?.askAI ?? "Ask AI about this area")}</button>
+      <button data-action="share" title="Share vibe card" style="cursor:pointer;background:#f9fafb;border:1px solid #d1d5db;border-radius:8px;padding:7px 12px;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">📤</button>
     </div>
     <div style="margin-top:10px;border-top:1px solid #e5e7eb;padding-top:10px;">
       <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 6px;text-transform:uppercase;letter-spacing:0.05em;">${escapeHtml(strings?.tagThisArea ?? "Tag this area")} <span style="font-weight:400;color:#9ca3af;">(pick up to 4)</span></p>
@@ -322,6 +323,10 @@ function buildPopupContent(
 
   wrapper.querySelector('button[data-action="ask-ai"]')?.addEventListener("click", () => {
     window.dispatchEvent(new CustomEvent("hoodmap:askai", { detail: label }));
+  });
+
+  wrapper.querySelector('button[data-action="share"]')?.addEventListener("click", () => {
+    window.dispatchEvent(new CustomEvent("hoodmap:share", { detail: label }));
   });
 
   const userSelectedTags = new Set<string>();

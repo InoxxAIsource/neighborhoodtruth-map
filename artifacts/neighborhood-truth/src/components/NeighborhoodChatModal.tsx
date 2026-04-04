@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import type { ReactNode } from "react";
 import { X, Send, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import type { LabelData } from "./MapView";
+import { ProUpsellModal } from "./ProUpsellModal";
 
 // --- Simple markdown renderer (no external deps) ---
 function renderInline(text: string): ReactNode[] {
@@ -183,6 +184,7 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase, onVo
   const [lastFailedQuestion, setLastFailedQuestion] = useState<string | null>(null);
   const [rateLimitData, setRateLimitDataState] = useState<RateLimitData>(() => getRateLimit());
   const [localVotes, setLocalVotes] = useState<Record<string, { upvotes: number; downvotes: number; voted?: "upvote" | "downvote" }>>({});
+  const [showProModal, setShowProModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -399,6 +401,7 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase, onVo
   const focusedVote = getLabelVoteState(label);
 
   return (
+    <>
     <div
       className="fixed inset-0 z-[2000] flex items-end sm:items-center justify-center"
       style={{ backdropFilter: "blur(2px)", backgroundColor: "rgba(0,0,0,0.45)" }}
@@ -688,18 +691,15 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase, onVo
                       <span className="text-lg">✨</span>
                       <p className="text-sm font-bold text-purple-900">Daily AI questions used up</p>
                     </div>
-                    <p className="text-xs text-purple-700 leading-relaxed mb-3">
-                      You've asked {DAILY_LIMIT} questions today — your limit resets at midnight. The <span className="font-semibold">cost estimates</span> and <span className="font-semibold">transport calculator</span> above are still fully available.
+                    <p className="text-xs text-purple-700 leading-relaxed mb-2">
+                      Resets at midnight. Cost estimates and transport calculator are still available.
                     </p>
-                    <div className="flex flex-col gap-1.5">
-                      <p className="text-[10px] font-semibold text-purple-500 uppercase tracking-wide">While you wait, explore:</p>
-                      <a href="/" className="flex items-center gap-2 text-xs text-purple-800 bg-white border border-purple-100 rounded-lg px-3 py-2 hover:border-purple-300 transition-colors">
-                        🗺️ <span>Discover more neighborhoods on the map</span>
-                      </a>
-                      <a href="/new-york/cheap-rent" className="flex items-center gap-2 text-xs text-purple-800 bg-white border border-purple-100 rounded-lg px-3 py-2 hover:border-purple-300 transition-colors">
-                        🏠 <span>Compare rent costs across cities</span>
-                      </a>
-                    </div>
+                    <button
+                      onClick={() => setShowProModal(true)}
+                      className="w-full bg-gradient-to-r from-teal-600 to-teal-500 text-white text-xs font-bold rounded-xl px-4 py-2.5 hover:opacity-90 transition-opacity"
+                    >
+                      🚀 Go Pro — Join Waitlist →
+                    </button>
                   </div>
                 ) : (
                   <p className="text-xs text-gray-400 mb-2">
@@ -818,5 +818,14 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase, onVo
         </div>
       </div>
     </div>
+
+    {showProModal && (
+      <ProUpsellModal
+        reason="chat_limit"
+        apiBase={apiBase}
+        onClose={() => setShowProModal(false)}
+      />
+    )}
+    </>
   );
 }

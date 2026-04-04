@@ -1,4 +1,4 @@
-import { pgTable, uuid, doublePrecision, varchar, smallint, text, integer, timestamp, unique } from "drizzle-orm/pg-core";
+import { pgTable, uuid, doublePrecision, varchar, smallint, text, integer, timestamp, unique, serial } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -45,6 +45,13 @@ export const labelTagsTable = pgTable("label_tags", {
   unique("label_tags_label_tag_voter_unique").on(t.labelId, t.tagKey, t.voterId),
 ]);
 
+export const waitlistTable = pgTable("waitlist", {
+  id: serial("id").primaryKey(),
+  email: text("email").unique().notNull(),
+  cityInterest: text("city_interest"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
 export const insertLabelSchema = createInsertSchema(labelsTable).omit({ id: true, createdAt: true });
 export const insertVoteSchema = createInsertSchema(votesTable).omit({ id: true, createdAt: true });
 export const insertCommentSchema = createInsertSchema(commentsTable).omit({ id: true, createdAt: true });
@@ -58,3 +65,5 @@ export type InsertComment = z.infer<typeof insertCommentSchema>;
 export type Comment = typeof commentsTable.$inferSelect;
 export type InsertLabelTag = z.infer<typeof insertLabelTagSchema>;
 export type LabelTag = typeof labelTagsTable.$inferSelect;
+
+export type Waitlist = typeof waitlistTable.$inferSelect;
