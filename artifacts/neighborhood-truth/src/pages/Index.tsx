@@ -7,14 +7,45 @@ import { TopToolbar } from "@/components/TopToolbar";
 import { HeroOverlay, MicroHints, useOnboarding } from "@/components/Onboarding";
 import { ZoneLegend } from "@/components/ZoneLegend";
 import { Button } from "@/components/ui/button";
-import { Plus, MapPin } from "lucide-react";
+import { Plus, MapPin, Sparkles, X } from "lucide-react";
 import { useVoterId } from "@/hooks/useVoterId";
 import { toast } from "sonner";
 import type { Filters } from "@/components/MapView";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { MigrationModal } from "@/components/MigrationModal";
 
 const AddLabelDialog = lazy(() => import("@/components/AddLabelDialog").then(m => ({ default: m.AddLabelDialog })));
 const NeighborhoodChatModal = lazy(() => import("@/components/NeighborhoodChatModal").then(m => ({ default: m.NeighborhoodChatModal })));
+
+const CITIES_MAP: { slug: string; name: string; latMin: number; latMax: number; lngMin: number; lngMax: number }[] = [
+  { slug: "mumbai", name: "Mumbai", latMin: 18.7, latMax: 19.4, lngMin: 72.4, lngMax: 73.3 },
+  { slug: "delhi", name: "Delhi", latMin: 28.3, latMax: 29.1, lngMin: 76.7, lngMax: 77.5 },
+  { slug: "bangalore", name: "Bangalore", latMin: 12.5, latMax: 13.4, lngMin: 77.2, lngMax: 78.0 },
+  { slug: "hyderabad", name: "Hyderabad", latMin: 16.9, latMax: 17.8, lngMin: 78.0, lngMax: 78.9 },
+  { slug: "pune", name: "Pune", latMin: 18.0, latMax: 18.9, lngMin: 73.4, lngMax: 74.3 },
+  { slug: "chennai", name: "Chennai", latMin: 12.6, latMax: 13.5, lngMin: 79.8, lngMax: 80.8 },
+  { slug: "kolkata", name: "Kolkata", latMin: 22.1, latMax: 22.9, lngMin: 88.0, lngMax: 88.8 },
+  { slug: "ahmedabad", name: "Ahmedabad", latMin: 22.5, latMax: 23.3, lngMin: 72.3, lngMax: 73.2 },
+  { slug: "jaipur", name: "Jaipur", latMin: 26.4, latMax: 27.2, lngMin: 75.4, lngMax: 76.2 },
+  { slug: "lucknow", name: "Lucknow", latMin: 26.3, latMax: 27.1, lngMin: 80.5, lngMax: 81.3 },
+  { slug: "chandigarh", name: "Chandigarh", latMin: 30.3, latMax: 31.1, lngMin: 76.3, lngMax: 77.2 },
+  { slug: "goa", name: "Goa", latMin: 14.8, latMax: 15.8, lngMin: 73.3, lngMax: 74.3 },
+  { slug: "indore", name: "Indore", latMin: 22.2, latMax: 23.0, lngMin: 75.4, lngMax: 76.2 },
+  { slug: "coimbatore", name: "Coimbatore", latMin: 10.8, latMax: 11.2, lngMin: 76.8, lngMax: 77.2 },
+  { slug: "new-york", name: "New York", latMin: 40.4, latMax: 41.0, lngMin: -74.3, lngMax: -73.7 },
+  { slug: "san-francisco", name: "San Francisco", latMin: 37.6, latMax: 37.9, lngMin: -122.6, lngMax: -122.3 },
+  { slug: "los-angeles", name: "Los Angeles", latMin: 33.7, latMax: 34.4, lngMin: -118.7, lngMax: -118.0 },
+  { slug: "london", name: "London", latMin: 51.3, latMax: 51.7, lngMin: -0.3, lngMax: 0.1 },
+  { slug: "toronto", name: "Toronto", latMin: 43.5, latMax: 43.9, lngMin: -79.7, lngMax: -79.1 },
+  { slug: "tokyo", name: "Tokyo", latMin: 35.5, latMax: 35.8, lngMin: 139.5, lngMax: 139.9 },
+];
+
+function detectCity(lat: number, lng: number, zoom: number) {
+  if (zoom < 10) return null;
+  return CITIES_MAP.find(
+    (c) => lat >= c.latMin && lat <= c.latMax && lng >= c.lngMin && lng <= c.lngMax
+  ) ?? null;
+}
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 const API = `${BASE}/api`;
@@ -67,6 +98,24 @@ export default function Index() {
   const queryClient = useQueryClient();
   const { showHero, hasInteracted, dismissHero, markInteracted } = useOnboarding();
   const { t } = useLanguage();
+
+  // Migration Mode state
+  const [detectedCity, setDetectedCity] = useState<{ slug: string; name: string } | null>(null);
+  const [migrationBannerDismissed, setMigrationBannerDismissed] = useState(() => {
+    try { return sessionStorage.getItem("pl_migration_banner_dismissed") === "1"; } catch { return false; }
+  });
+  const [migrationModalOpen, setMigrationModalOpen] = useState(false);
+
+  const handleMapViewChange = useCallback((lat: number, lng: number, zoom: number) => {
+    const city = detectCity(lat, lng, zoom);
+    if (city) {
+      setDetectedCity({ slug: city.slug, name: city.name });
+    } else {
+      setDetectedCity(null);
+    }
+  }, []);
+
+  const showMigrationBanner = detectedCity !== null && !migrationBannerDismissed && !migrationModalOpen;
 
   const { data: labels = [] } = useQuery<LabelDTO[]>({
     queryKey: ["labels"],
@@ -177,6 +226,7 @@ export default function Index() {
         apiBase={API}
         voterId={voterId}
         myVotes={userVotes}
+        onMapViewChange={handleMapViewChange}
       />
 
       <TopToolbar
@@ -241,6 +291,38 @@ export default function Index() {
 
       <ZoneLegend />
 
+      {/* Migration Mode banner */}
+      {showMigrationBanner && detectedCity && (
+        <div
+          className="fixed bottom-20 left-1/2 z-[1500] flex items-center gap-2 rounded-2xl shadow-xl border border-teal-200 px-4 py-3"
+          style={{
+            transform: "translateX(-50%)",
+            background: "linear-gradient(135deg, #f0fdfa 0%, #ecfdf5 100%)",
+            maxWidth: "calc(100vw - 32px)",
+          }}
+        >
+          <Sparkles className="h-4 w-4 text-teal-600 flex-shrink-0" />
+          <p className="text-sm font-medium text-teal-900 whitespace-nowrap">
+            New to {detectedCity.name}? Find your neighbourhood →
+          </p>
+          <button
+            onClick={() => setMigrationModalOpen(true)}
+            className="ml-1 text-xs font-bold bg-teal-600 text-white rounded-full px-3 py-1 hover:bg-teal-700 transition-colors whitespace-nowrap flex-shrink-0"
+          >
+            Start quiz
+          </button>
+          <button
+            onClick={() => {
+              setMigrationBannerDismissed(true);
+              try { sessionStorage.setItem("pl_migration_banner_dismissed", "1"); } catch {}
+            }}
+            className="text-teal-400 hover:text-teal-700 transition-colors flex-shrink-0 ml-1"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       <Suspense fallback={null}>
         <NeighborhoodChatModal
           label={selectedLabel}
@@ -251,6 +333,24 @@ export default function Index() {
           myVotes={userVotes}
         />
       </Suspense>
+
+      {migrationModalOpen && detectedCity && (
+        <MigrationModal
+          citySlug={detectedCity.slug}
+          cityName={detectedCity.name}
+          cityLabels={labels.filter((l) => {
+            const city = CITIES_MAP.find((c) => c.slug === detectedCity.slug);
+            if (!city) return false;
+            return l.lat >= city.latMin && l.lat <= city.latMax && l.lng >= city.lngMin && l.lng <= city.lngMax;
+          }).map((l) => ({ text: l.text, lat: l.lat, lng: l.lng }))}
+          apiBase={API}
+          onClose={() => setMigrationModalOpen(false)}
+          onFlyTo={(lat, lng) => {
+            setFlyToLocation({ lat, lng, zoom: 14 });
+            setMigrationModalOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }

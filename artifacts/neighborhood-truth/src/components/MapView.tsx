@@ -45,6 +45,7 @@ interface MapViewProps {
   apiBase: string;
   voterId: string;
   myVotes?: { labelId: string; voteType: string }[];
+  onMapViewChange?: (lat: number, lng: number, zoom: number) => void;
 }
 
 export interface AreaSummary {
@@ -591,6 +592,7 @@ export function MapView({
   apiBase,
   voterId,
   myVotes,
+  onMapViewChange,
 }: MapViewProps) {
   const { t } = useLanguage();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -703,6 +705,25 @@ export function MapView({
       mapRef.current = null;
     };
   }, []);
+
+  // Map view change — notify parent of center+zoom for city detection
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !onMapViewChange) return;
+
+    const handler = () => {
+      const c = map.getCenter();
+      onMapViewChange(c.lat, c.lng, map.getZoom());
+    };
+
+    map.on("moveend", handler);
+    map.on("zoomend", handler);
+
+    return () => {
+      map.off("moveend", handler);
+      map.off("zoomend", handler);
+    };
+  }, [onMapViewChange]);
 
   // Map click handler
   useEffect(() => {

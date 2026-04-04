@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { anthropic } from "@workspace/integrations-anthropic-ai";
 import { db, labelsTable } from "@workspace/db";
-import { eq, and, gte, lte, ne } from "drizzle-orm";
+import { eq, and, gte, lte, ne, sql } from "drizzle-orm";
 import { z } from "zod";
 
 const router: IRouter = Router();
@@ -153,6 +153,164 @@ router.post("/ask", async (req, res) => {
     res.end();
   } catch (err) {
     req.log.error({ err }, "AI chat error");
+    res.write(`data: ${JSON.stringify({ error: "AI request failed, please try again" })}\n\n`);
+    res.end();
+  }
+});
+
+// ---- Migration Mode: /api/chat/relocate ----
+
+const relocateSchema = z.object({
+  citySlug: z.string().min(1).max(80),
+  budget: z.enum(["5k-10k", "10k-20k", "20k-35k", "35k+"]),
+  jobType: z.enum(["IT/Tech", "Student", "Government/PSU", "Business/Self-employed", "Healthcare", "Other"]),
+  lifestyle: z.array(z.string()).max(10),
+});
+
+const CITIES_BBOX: Record<string, { name: string; latMin: number; latMax: number; lngMin: number; lngMax: number }> = {
+  "mumbai": { name: "Mumbai", latMin: 18.7, latMax: 19.4, lngMin: 72.4, lngMax: 73.3 },
+  "delhi": { name: "Delhi", latMin: 28.3, latMax: 29.1, lngMin: 76.7, lngMax: 77.5 },
+  "bangalore": { name: "Bangalore", latMin: 12.5, latMax: 13.4, lngMin: 77.2, lngMax: 78.0 },
+  "hyderabad": { name: "Hyderabad", latMin: 16.9, latMax: 17.8, lngMin: 78.0, lngMax: 78.9 },
+  "pune": { name: "Pune", latMin: 18.0, latMax: 18.9, lngMin: 73.4, lngMax: 74.3 },
+  "chennai": { name: "Chennai", latMin: 12.6, latMax: 13.5, lngMin: 79.8, lngMax: 80.8 },
+  "kolkata": { name: "Kolkata", latMin: 22.1, latMax: 22.9, lngMin: 88.0, lngMax: 88.8 },
+  "ahmedabad": { name: "Ahmedabad", latMin: 22.5, latMax: 23.3, lngMin: 72.3, lngMax: 73.2 },
+  "jaipur": { name: "Jaipur", latMin: 26.4, latMax: 27.2, lngMin: 75.4, lngMax: 76.2 },
+  "lucknow": { name: "Lucknow", latMin: 26.3, latMax: 27.1, lngMin: 80.5, lngMax: 81.3 },
+  "chandigarh": { name: "Chandigarh", latMin: 30.3, latMax: 31.1, lngMin: 76.3, lngMax: 77.2 },
+  "goa": { name: "Goa", latMin: 14.8, latMax: 15.8, lngMin: 73.3, lngMax: 74.3 },
+  "indore": { name: "Indore", latMin: 22.2, latMax: 23.0, lngMin: 75.4, lngMax: 76.2 },
+  "coimbatore": { name: "Coimbatore", latMin: 10.8, latMax: 11.2, lngMin: 76.8, lngMax: 77.2 },
+  "new-york": { name: "New York", latMin: 40.4, latMax: 41.0, lngMin: -74.3, lngMax: -73.7 },
+  "san-francisco": { name: "San Francisco", latMin: 37.6, latMax: 37.9, lngMin: -122.6, lngMax: -122.3 },
+  "los-angeles": { name: "Los Angeles", latMin: 33.7, latMax: 34.4, lngMin: -118.7, lngMax: -118.0 },
+  "london": { name: "London", latMin: 51.3, latMax: 51.7, lngMin: -0.3, lngMax: 0.1 },
+  "toronto": { name: "Toronto", latMin: 43.5, latMax: 43.9, lngMin: -79.7, lngMax: -79.1 },
+  "sydney": { name: "Sydney", latMin: -34.2, latMax: -33.6, lngMin: 150.9, lngMax: 151.4 },
+  "tokyo": { name: "Tokyo", latMin: 35.5, latMax: 35.8, lngMin: 139.5, lngMax: 139.9 },
+  "singapore": { name: "Singapore", latMin: 1.1, latMax: 1.5, lngMin: 103.6, lngMax: 104.1 },
+};
+
+function buildRelocateSystemPrompt(
+  cityName: string,
+  cityLabels: LabelRow[],
+  budget: string,
+  jobType: string,
+  lifestyle: string[]
+) {
+  const budgetInr: Record<string, string> = {
+    "5k-10k": "₹5,000–₹10,000/mo",
+    "10k-20k": "₹10,000–₹20,000/mo",
+    "20k-35k": "₹20,000–₹35,000/mo",
+    "35k+": "₹35,000+/mo",
+  };
+
+  // Group labels by area (text), pick the 30 highest-scored
+  const areaScores: Map<string, { safety: number; cost: string; vibes: Set<string>; score: number; lat: number; lng: number }> = new Map();
+  for (const l of cityLabels) {
+    const key = l.text;
+    if (!areaScores.has(key)) {
+      areaScores.set(key, { safety: l.safety, cost: l.cost, vibes: new Set(l.vibe ?? []), score: 0, lat: l.lat, lng: l.lng });
+    }
+    const area = areaScores.get(key)!;
+    area.score += l.upvotes - l.downvotes;
+    (l.vibe ?? []).forEach((v) => area.vibes.add(v));
+  }
+
+  const topAreas = Array.from(areaScores.entries())
+    .sort((a, b) => b[1].score - a[1].score)
+    .slice(0, 30)
+    .map(([name, data]) => {
+      const vibeList = Array.from(data.vibes).join(", ") || "—";
+      return `• ${name} | Safety ${data.safety}/5 | Cost ${data.cost} | Vibes: ${vibeList} | Score: ${data.score > 0 ? "+" : ""}${data.score}`;
+    })
+    .join("\n");
+
+  const lifestyleStr = lifestyle.length > 0 ? lifestyle.join(", ") : "No specific preferences";
+
+  return `You are a relocation advisor for PlaceLabels — a crowd-sourced global neighborhood map. A user wants to move to ${cityName} and needs your help finding the right neighborhood.
+
+USER PROFILE:
+- Monthly rent budget: ${budgetInr[budget] ?? budget}
+- Job type: ${jobType}
+- Lifestyle priorities: ${lifestyleStr}
+
+COMMUNITY DATA FOR ${cityName.toUpperCase()} (top ${Math.min(30, areaScores.size)} areas by community score):
+${topAreas || "No data yet for this city — use your general knowledge."}
+
+TASK: Recommend exactly 3 neighborhoods that best match the user's profile. For each area:
+1. Give the neighborhood name as a bold heading.
+2. Write a 2-line vibe summary (what it feels like to live there, referencing community data where available).
+3. List 2–3 key trade-offs as short bullets.
+4. End with "📍 View on map" — do NOT add any coordinates or links here, the frontend will handle that.
+
+RULES:
+- Prioritise areas from the community data above. Supplement with city knowledge only if data is thin.
+- Match cost tier to budget: $ = Budget, $$ = Mid-range, $$$ = Expensive, $$$$ = Luxury.
+- Match vibes to lifestyle: Women Safe → safety-priority users; IT Hub / Metro Access King → IT/Tech workers; Student Zone → students; Family Zone → families.
+- Be direct and specific. No generic travel-guide filler. Max 220 words total.
+- If the city data is sparse, give your best recommendations using city knowledge and note it briefly.`;
+}
+
+router.post("/relocate", async (req, res) => {
+  const parsed = relocateSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid input", details: parsed.error.issues });
+    return;
+  }
+
+  const { citySlug, budget, jobType, lifestyle } = parsed.data;
+  const city = CITIES_BBOX[citySlug];
+  if (!city) {
+    res.status(404).json({ error: "City not found" });
+    return;
+  }
+
+  let cityLabels: LabelRow[] = [];
+  try {
+    cityLabels = await db
+      .select()
+      .from(labelsTable)
+      .where(
+        sql`lat >= ${city.latMin} AND lat <= ${city.latMax} AND lng >= ${city.lngMin} AND lng <= ${city.lngMax}`
+      )
+      .limit(200);
+  } catch (err) {
+    req.log.error({ err }, "Failed to fetch city labels for relocation");
+  }
+
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("X-Accel-Buffering", "no");
+
+  try {
+    const stream = anthropic.messages.stream({
+      model: "claude-sonnet-4-6",
+      max_tokens: 800,
+      system: buildRelocateSystemPrompt(city.name, cityLabels, budget, jobType, lifestyle),
+      messages: [
+        {
+          role: "user",
+          content: `Please recommend the 3 best neighborhoods in ${city.name} for me based on my profile above.`,
+        },
+      ],
+    });
+
+    for await (const event of stream) {
+      if (
+        event.type === "content_block_delta" &&
+        event.delta.type === "text_delta"
+      ) {
+        res.write(`data: ${JSON.stringify({ content: event.delta.text })}\n\n`);
+      }
+    }
+
+    res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+    res.end();
+  } catch (err) {
+    req.log.error({ err }, "Relocate AI error");
     res.write(`data: ${JSON.stringify({ error: "AI request failed, please try again" })}\n\n`);
     res.end();
   }
