@@ -1,5 +1,5 @@
 import { db, labelsTable, votesTable } from "@workspace/db";
-import { count, sql } from "drizzle-orm";
+import { count, inArray, sql } from "drizzle-orm";
 
 const COSTS = ["$", "$$", "$$$", "$$$$"] as const;
 
@@ -753,51 +753,51 @@ const SEED_LABELS: SeedLabel[] = [
   { lat: 26.9260, lng: 75.8195, text: "Johari Bazaar gems and jewellery street", safety: 3, vibe: ["Family", "Loud"], cost: "$$", color: "#db2777", category: null, upvotes: 84, downvotes: 6 },
 
   // ===== LUCKNOW =====
-  { lat: 26.8535, lng: 80.9420, text: "Hazratganj heart of Lucknow historical charm", safety: 4, vibe: ["Family", "Old City Charm"], cost: "$$", color: "#7c3aed", category: null, upvotes: 98, downvotes: 4 },
-  { lat: 26.8544, lng: 81.0074, text: "Gomti Nagar modern Lucknow IT and malls", safety: 4, vibe: ["IT Hub", "Family"], cost: "$$", color: "#64b5f6", category: "Coworking", upvotes: 82, downvotes: 5 },
-  { lat: 26.8785, lng: 80.9985, text: "Indiranagar best restaurants in Lucknow", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#ea580c", category: "Restaurants", upvotes: 74, downvotes: 5 },
-  { lat: 26.8268, lng: 80.9573, text: "Ashiyana Colony affordable family suburb", safety: 4, vibe: ["Family", "Chill"], cost: "$", color: "#16a34a", category: null, upvotes: 53, downvotes: 4 },
-  { lat: 26.8875, lng: 80.9756, text: "Aliganj educated middle class area", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: null, upvotes: 61, downvotes: 3 },
-  { lat: 26.8715, lng: 80.9120, text: "Chowk old city Lucknow nawabi architecture", safety: 3, vibe: ["Old City Charm", "Family"], cost: "$", color: "#ea580c", category: null, upvotes: 91, downvotes: 7 },
-  { lat: 26.8676, lng: 80.9205, text: "Aminabad bustling bazaar and street food", safety: 3, vibe: ["Loud", "Family"], cost: "$", color: "#ea580c", category: "Restaurants", upvotes: 77, downvotes: 9 },
-  { lat: 26.8430, lng: 80.8973, text: "Vikas Nagar DDA housing affordable", safety: 3, vibe: ["Family"], cost: "$", color: "#9e9e9e", category: null, upvotes: 34, downvotes: 8 },
-  { lat: 26.8562, lng: 80.9302, text: "Nishatganj Gomti river view relaxed", safety: 4, vibe: ["Family", "Chill"], cost: "$", color: "#2563eb", category: "Parks", upvotes: 67, downvotes: 4 },
-  { lat: 26.8890, lng: 81.0130, text: "Indira Nagar new Lucknow premium", safety: 4, vibe: ["Family", "Bougie"], cost: "$$$", color: "#4caf50", category: null, upvotes: 73, downvotes: 6 },
-  { lat: 26.8654, lng: 80.9523, text: "Mahanagar peaceful tree-lined avenues", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: null, upvotes: 58, downvotes: 3 },
-  { lat: 26.8011, lng: 80.9867, text: "Sushant Golf City luxury gated township", safety: 5, vibe: ["Bougie", "Family"], cost: "$$$", color: "#4caf50", category: null, upvotes: 71, downvotes: 5 },
+  { lat: 26.8535, lng: 80.9420, text: "Hazratganj heart of Lucknow historical charm", safety: 4, vibe: ["Old City Charm", "Metro Access King"], cost: "$$", color: "#7c3aed", category: null, upvotes: 98, downvotes: 4 },
+  { lat: 26.8544, lng: 81.0074, text: "Gomti Nagar modern Lucknow IT and malls", safety: 4, vibe: ["IT Hub", "Metro Access King"], cost: "$$", color: "#64b5f6", category: "Coworking", upvotes: 82, downvotes: 5 },
+  { lat: 26.8785, lng: 80.9985, text: "Indiranagar best restaurants in Lucknow", safety: 4, vibe: ["Family", "Women Safe"], cost: "$$", color: "#ea580c", category: "Restaurants", upvotes: 74, downvotes: 5 },
+  { lat: 26.8268, lng: 80.9573, text: "Ashiyana Colony affordable family suburb", safety: 4, vibe: ["Family", "High Traffic / Affordable"], cost: "$", color: "#16a34a", category: null, upvotes: 53, downvotes: 4 },
+  { lat: 26.8875, lng: 80.9756, text: "Aliganj educated middle class area", safety: 4, vibe: ["Family", "Student Zone"], cost: "$$", color: "#16a34a", category: null, upvotes: 61, downvotes: 3 },
+  { lat: 26.8715, lng: 80.9120, text: "Chowk old city Lucknow nawabi architecture", safety: 3, vibe: ["Old City Charm", "Pollution Alert"], cost: "$", color: "#ea580c", category: null, upvotes: 91, downvotes: 7 },
+  { lat: 26.8676, lng: 80.9205, text: "Aminabad bustling bazaar and street food", safety: 3, vibe: ["High Traffic / Affordable", "Old City Charm"], cost: "$", color: "#ea580c", category: "Restaurants", upvotes: 77, downvotes: 9 },
+  { lat: 26.8430, lng: 80.8973, text: "Vikas Nagar DDA housing affordable", safety: 3, vibe: ["High Traffic / Affordable", "Family"], cost: "$", color: "#9e9e9e", category: null, upvotes: 34, downvotes: 8 },
+  { lat: 26.8562, lng: 80.9302, text: "Nishatganj Gomti river view relaxed", safety: 4, vibe: ["Women Safe", "Metro Access King"], cost: "$", color: "#2563eb", category: "Parks", upvotes: 67, downvotes: 4 },
+  { lat: 26.8890, lng: 81.0130, text: "Indira Nagar new Lucknow premium", safety: 4, vibe: ["Upcoming Area", "Women Safe"], cost: "$$$", color: "#4caf50", category: null, upvotes: 73, downvotes: 6 },
+  { lat: 26.8654, lng: 80.9523, text: "Mahanagar peaceful tree-lined avenues", safety: 4, vibe: ["Women Safe", "Family"], cost: "$$", color: "#16a34a", category: null, upvotes: 58, downvotes: 3 },
+  { lat: 26.8011, lng: 80.9867, text: "Sushant Golf City luxury gated township", safety: 5, vibe: ["Upcoming Area", "Women Safe"], cost: "$$$", color: "#4caf50", category: null, upvotes: 71, downvotes: 5 },
   { lat: 26.8430, lng: 81.0045, text: "Faizabad Road IT parks and new malls", safety: 4, vibe: ["IT Hub", "Upcoming Area"], cost: "$$", color: "#64b5f6", category: "Coworking", upvotes: 45, downvotes: 7 },
-  { lat: 26.8753, lng: 80.9445, text: "Naka Hindola local market flavour", safety: 3, vibe: ["Family", "Loud"], cost: "$", color: "#ea580c", category: null, upvotes: 41, downvotes: 10 },
-  { lat: 26.8600, lng: 80.9580, text: "Gomti riverfront new park excellent", safety: 4, vibe: ["Family", "Chill"], cost: "$", color: "#16a34a", category: "Parks", upvotes: 83, downvotes: 2 },
+  { lat: 26.8753, lng: 80.9445, text: "Naka Hindola local market flavour", safety: 3, vibe: ["Old City Charm", "Pollution Alert"], cost: "$", color: "#ea580c", category: null, upvotes: 41, downvotes: 10 },
+  { lat: 26.8600, lng: 80.9580, text: "Gomti riverfront new park excellent", safety: 4, vibe: ["Women Safe", "Metro Access King"], cost: "$", color: "#16a34a", category: "Parks", upvotes: 83, downvotes: 2 },
 
   // ===== INDORE =====
-  { lat: 22.7543, lng: 75.8931, text: "Vijay Nagar upscale Indore commercial hub", safety: 4, vibe: ["Bougie", "IT Hub"], cost: "$$$", color: "#4caf50", category: "Coworking", upvotes: 91, downvotes: 5 },
-  { lat: 22.6946, lng: 75.8577, text: "Rajwada old Holkar palace heritage area", safety: 3, vibe: ["Old City Charm", "Family"], cost: "$", color: "#7c3aed", category: null, upvotes: 107, downvotes: 5 },
-  { lat: 22.7196, lng: 75.8577, text: "MG Road upscale dining and shopping", safety: 4, vibe: ["Bougie", "Family"], cost: "$$", color: "#ea580c", category: "Restaurants", upvotes: 79, downvotes: 6 },
-  { lat: 22.7325, lng: 75.9014, text: "Palasia College Road student zone", safety: 4, vibe: ["Student Zone", "Chill"], cost: "$", color: "#0d9488", category: "Cafes to work", upvotes: 73, downvotes: 4 },
-  { lat: 22.7426, lng: 75.8775, text: "Mahalakshmi Nagar family residential area", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: null, upvotes: 62, downvotes: 4 },
+  { lat: 22.7543, lng: 75.8931, text: "Vijay Nagar upscale Indore commercial hub", safety: 4, vibe: ["IT Hub", "Metro Access King"], cost: "$$$", color: "#4caf50", category: "Coworking", upvotes: 91, downvotes: 5 },
+  { lat: 22.6946, lng: 75.8577, text: "Rajwada old Holkar palace heritage area", safety: 3, vibe: ["Old City Charm", "Pollution Alert"], cost: "$", color: "#7c3aed", category: null, upvotes: 107, downvotes: 5 },
+  { lat: 22.7196, lng: 75.8577, text: "MG Road upscale dining and shopping", safety: 4, vibe: ["Metro Access King", "Women Safe"], cost: "$$", color: "#ea580c", category: "Restaurants", upvotes: 79, downvotes: 6 },
+  { lat: 22.7325, lng: 75.9014, text: "Palasia College Road student zone", safety: 4, vibe: ["Student Zone", "Women Safe"], cost: "$", color: "#0d9488", category: "Cafes to work", upvotes: 73, downvotes: 4 },
+  { lat: 22.7426, lng: 75.8775, text: "Mahalakshmi Nagar family residential area", safety: 4, vibe: ["Women Safe", "Family"], cost: "$$", color: "#16a34a", category: null, upvotes: 62, downvotes: 4 },
   { lat: 22.6837, lng: 75.9201, text: "Rau IT park Indore tech zone growing", safety: 4, vibe: ["IT Hub", "Upcoming Area"], cost: "$$", color: "#64b5f6", category: "Coworking", upvotes: 58, downvotes: 7 },
-  { lat: 22.7567, lng: 75.8427, text: "Bhawarkuan posh locality near airport", safety: 4, vibe: ["Bougie", "Chill"], cost: "$$$", color: "#4caf50", category: null, upvotes: 65, downvotes: 4 },
-  { lat: 22.7286, lng: 75.8649, text: "Annapurna Colony temple town vibe calm", safety: 4, vibe: ["Family", "Chill"], cost: "$", color: "#16a34a", category: null, upvotes: 54, downvotes: 3 },
-  { lat: 22.6995, lng: 75.8333, text: "Sudama Nagar working class affordable", safety: 3, vibe: ["Family"], cost: "$", color: "#9e9e9e", category: null, upvotes: 37, downvotes: 8 },
+  { lat: 22.7567, lng: 75.8427, text: "Bhawarkuan posh locality near airport", safety: 4, vibe: ["Women Safe", "Metro Access King"], cost: "$$$", color: "#4caf50", category: null, upvotes: 65, downvotes: 4 },
+  { lat: 22.7286, lng: 75.8649, text: "Annapurna Colony temple town vibe calm", safety: 4, vibe: ["Family", "Women Safe"], cost: "$", color: "#16a34a", category: null, upvotes: 54, downvotes: 3 },
+  { lat: 22.6995, lng: 75.8333, text: "Sudama Nagar working class affordable", safety: 3, vibe: ["High Traffic / Affordable", "Family"], cost: "$", color: "#9e9e9e", category: null, upvotes: 37, downvotes: 8 },
   { lat: 22.7703, lng: 75.9086, text: "Pipliyahana IT zone upcoming area", safety: 4, vibe: ["IT Hub", "Upcoming Area"], cost: "$$", color: "#64b5f6", category: "Coworking", upvotes: 49, downvotes: 6 },
   { lat: 22.7469, lng: 75.8267, text: "Silicon City new tech township", safety: 4, vibe: ["IT Hub", "Upcoming Area"], cost: "$$", color: "#64b5f6", category: null, upvotes: 44, downvotes: 8 },
-  { lat: 22.7154, lng: 75.9272, text: "Lasudia affordable eastern suburb", safety: 3, vibe: ["Family"], cost: "$", color: "#9e9e9e", category: null, upvotes: 31, downvotes: 7 },
-  { lat: 22.7412, lng: 75.8706, text: "Scheme 54 premium plotted development", safety: 4, vibe: ["Bougie", "Family"], cost: "$$$", color: "#4caf50", category: null, upvotes: 67, downvotes: 4 },
-  { lat: 22.7286, lng: 75.8793, text: "Treasure Island Mall area Indore nightlife", safety: 4, vibe: ["Family", "Nightlife"], cost: "$$", color: "#7c3aed", category: "Bars", upvotes: 55, downvotes: 7 },
-  { lat: 22.7534, lng: 75.8694, text: "Bicholi Mardana peaceful greens suburb", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: null, upvotes: 43, downvotes: 5 },
+  { lat: 22.7154, lng: 75.9272, text: "Lasudia affordable eastern suburb", safety: 3, vibe: ["High Traffic / Affordable", "Family"], cost: "$", color: "#9e9e9e", category: null, upvotes: 31, downvotes: 7 },
+  { lat: 22.7412, lng: 75.8706, text: "Scheme 54 premium plotted development", safety: 4, vibe: ["Upcoming Area", "Women Safe"], cost: "$$$", color: "#4caf50", category: null, upvotes: 67, downvotes: 4 },
+  { lat: 22.7286, lng: 75.8793, text: "Treasure Island Mall area Indore nightlife", safety: 4, vibe: ["Metro Access King", "Nightlife"], cost: "$$", color: "#7c3aed", category: "Bars", upvotes: 55, downvotes: 7 },
+  { lat: 22.7534, lng: 75.8694, text: "Bicholi Mardana peaceful greens suburb", safety: 4, vibe: ["Women Safe", "Family"], cost: "$$", color: "#16a34a", category: null, upvotes: 43, downvotes: 5 },
 
   // ===== COIMBATORE =====
-  { lat: 11.0035, lng: 76.9602, text: "RS Puram upscale residential Coimbatore best", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: null, upvotes: 84, downvotes: 3 },
+  { lat: 11.0035, lng: 76.9602, text: "RS Puram upscale residential Coimbatore best", safety: 4, vibe: ["Women Safe", "Metro Access King"], cost: "$$", color: "#16a34a", category: null, upvotes: 84, downvotes: 3 },
   { lat: 11.0168, lng: 77.0278, text: "Peelamedu IT colleges and tech zone", safety: 4, vibe: ["IT Hub", "Student Zone"], cost: "$$", color: "#64b5f6", category: "Coworking", upvotes: 79, downvotes: 5 },
-  { lat: 11.0004, lng: 76.9601, text: "Gandhipuram central bus stand chaotic bustling", safety: 3, vibe: ["Loud", "Family"], cost: "$", color: "#ea580c", category: null, upvotes: 45, downvotes: 14 },
-  { lat: 11.0228, lng: 76.9559, text: "Saibaba Colony clean tree-lined streets", safety: 4, vibe: ["Family", "Chill"], cost: "$$", color: "#16a34a", category: null, upvotes: 73, downvotes: 3 },
-  { lat: 11.0495, lng: 76.9782, text: "Singanallur manufacturing and mid-range housing", safety: 3, vibe: ["Family"], cost: "$", color: "#9e9e9e", category: null, upvotes: 38, downvotes: 7 },
-  { lat: 10.9839, lng: 76.9542, text: "Sungam junction busy commercial area", safety: 3, vibe: ["Loud", "Family"], cost: "$", color: "#ea580c", category: null, upvotes: 41, downvotes: 10 },
-  { lat: 11.0074, lng: 76.9710, text: "Race Course premium Coimbatore locality", safety: 5, vibe: ["Bougie", "Family"], cost: "$$$", color: "#4caf50", category: null, upvotes: 88, downvotes: 3 },
-  { lat: 11.0145, lng: 76.9226, text: "Vadavalli peaceful western suburb", safety: 4, vibe: ["Family", "Chill"], cost: "$", color: "#16a34a", category: null, upvotes: 62, downvotes: 4 },
-  { lat: 10.9613, lng: 76.9613, text: "Kovaipudur serene premium residential hills", safety: 5, vibe: ["Family", "Chill"], cost: "$$$", color: "#4caf50", category: null, upvotes: 71, downvotes: 3 },
-  { lat: 11.0202, lng: 77.0102, text: "Hopes College area student hangout zone", safety: 4, vibe: ["Student Zone", "Chill"], cost: "$", color: "#0d9488", category: "Cafes to work", upvotes: 67, downvotes: 4 },
-  { lat: 10.9725, lng: 76.9803, text: "Podanur railway junction affordable workers area", safety: 3, vibe: ["Family"], cost: "$", color: "#9e9e9e", category: null, upvotes: 29, downvotes: 8 },
+  { lat: 11.0004, lng: 76.9601, text: "Gandhipuram central bus stand chaotic bustling", safety: 3, vibe: ["High Traffic / Affordable", "Pollution Alert"], cost: "$", color: "#ea580c", category: null, upvotes: 45, downvotes: 14 },
+  { lat: 11.0228, lng: 76.9559, text: "Saibaba Colony clean tree-lined streets", safety: 4, vibe: ["Women Safe", "Family"], cost: "$$", color: "#16a34a", category: null, upvotes: 73, downvotes: 3 },
+  { lat: 11.0495, lng: 76.9782, text: "Singanallur manufacturing and mid-range housing", safety: 3, vibe: ["High Traffic / Affordable", "Family"], cost: "$", color: "#9e9e9e", category: null, upvotes: 38, downvotes: 7 },
+  { lat: 10.9839, lng: 76.9542, text: "Sungam junction busy commercial area", safety: 3, vibe: ["High Traffic / Affordable", "Metro Access King"], cost: "$", color: "#ea580c", category: null, upvotes: 41, downvotes: 10 },
+  { lat: 11.0074, lng: 76.9710, text: "Race Course premium Coimbatore locality", safety: 5, vibe: ["Women Safe", "Upcoming Area"], cost: "$$$", color: "#4caf50", category: null, upvotes: 88, downvotes: 3 },
+  { lat: 11.0145, lng: 76.9226, text: "Vadavalli peaceful western suburb", safety: 4, vibe: ["Women Safe", "Family"], cost: "$", color: "#16a34a", category: null, upvotes: 62, downvotes: 4 },
+  { lat: 10.9613, lng: 76.9613, text: "Kovaipudur serene premium residential hills", safety: 5, vibe: ["Women Safe", "Upcoming Area"], cost: "$$$", color: "#4caf50", category: null, upvotes: 71, downvotes: 3 },
+  { lat: 11.0202, lng: 77.0102, text: "Hopes College area student hangout zone", safety: 4, vibe: ["Student Zone", "Women Safe"], cost: "$", color: "#0d9488", category: "Cafes to work", upvotes: 67, downvotes: 4 },
+  { lat: 10.9725, lng: 76.9803, text: "Podanur railway junction affordable workers area", safety: 3, vibe: ["High Traffic / Affordable", "Metro Access King"], cost: "$", color: "#9e9e9e", category: null, upvotes: 29, downvotes: 8 },
   { lat: 11.0271, lng: 76.9762, text: "Tidel Park IT zone Coimbatore tech belt", safety: 4, vibe: ["IT Hub", "Women Safe"], cost: "$$", color: "#64b5f6", category: "Coworking", upvotes: 75, downvotes: 5 },
   { lat: 11.0337, lng: 76.9668, text: "Avinashi Road colleges and hostels student belt", safety: 4, vibe: ["Student Zone", "Upcoming Area"], cost: "$", color: "#0d9488", category: null, upvotes: 58, downvotes: 6 },
   { lat: 10.9957, lng: 76.9730, text: "Ramanathapuram north Coimbatore upcoming area", safety: 4, vibe: ["Upcoming Area", "Family"], cost: "$$", color: "#0d9488", category: null, upvotes: 46, downvotes: 5 },
@@ -805,15 +805,26 @@ const SEED_LABELS: SeedLabel[] = [
 ];
 
 export async function seedIfNeeded(): Promise<void> {
-  const [{ value: existingCount }] = await db.select({ value: count() }).from(labelsTable);
+  // Fetch all existing seed label texts to determine which seeds are already in DB.
+  // This is idempotent: user-generated labels are ignored because they won't match
+  // any seed text; duplicate seed insertion is prevented by text match.
+  const seedTexts = SEED_LABELS.map((l) => l.text);
 
-  if (existingCount >= SEED_LABELS.length) {
-    console.log(`Seed check: DB has ${existingCount} labels (${SEED_LABELS.length} defined), skipping.`);
+  const existingRows = await db
+    .select({ text: labelsTable.text })
+    .from(labelsTable)
+    .where(inArray(labelsTable.text, seedTexts));
+
+  const existingSet = new Set(existingRows.map((r) => r.text));
+  const labelsToInsert = SEED_LABELS.filter((l) => !existingSet.has(l.text));
+
+  if (labelsToInsert.length === 0) {
+    const [{ value: total }] = await db.select({ value: count() }).from(labelsTable);
+    console.log(`Seed check: all ${SEED_LABELS.length} seed labels already present. Total DB labels: ${total}`);
     return;
   }
 
-  const labelsToInsert = SEED_LABELS.slice(existingCount);
-  console.log(`Seeding ${labelsToInsert.length} new labels (${existingCount} already in DB)...`);
+  console.log(`Seeding ${labelsToInsert.length} new labels (${existingSet.size} seed labels already in DB)...`);
 
   const batchSize = 50;
   for (let i = 0; i < labelsToInsert.length; i += batchSize) {

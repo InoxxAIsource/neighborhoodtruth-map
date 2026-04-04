@@ -2,6 +2,7 @@ import { useEffect, useRef, useMemo } from "react";
 import L, { Map as LeafletMap } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { renderZoneLayer, ZONE_CATEGORIES } from "./ZoneOverlay";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export interface LabelData {
   id: string;
@@ -161,12 +162,22 @@ interface PendingTransport {
 let pendingTransport: PendingTransport | null = null;
 let transportOriginMarker: L.Marker | null = null;
 
+interface PopupStrings {
+  vibeOptions: Record<string, string>;
+  askAI: string;
+  stillAccurate: string;
+  tagThisArea: string;
+  localCosts: string;
+  estimateTravel: string;
+}
+
 function buildPopupContent(
   label: LabelData,
   onVote: (labelId: string, voteType: "upvote" | "downvote" | "accurate") => void,
   apiBase: string,
   voterId: string,
   myVotes?: { labelId: string; voteType: string }[],
+  strings?: PopupStrings,
 ): { el: HTMLElement; onOpen: () => void } {
   const wrapper = document.createElement("div");
   wrapper.style.fontFamily = "system-ui, sans-serif";
@@ -175,7 +186,10 @@ function buildPopupContent(
 
   const score = getScore(label);
   const vibes = (label.vibe ?? [])
-    .map((v) => `<span style="display:inline-block;background:#f3f4f6;border-radius:4px;padding:2px 7px;font-size:11px;margin:0 3px 3px 0;color:#374151;">${escapeHtml(v)}</span>`)
+    .map((v) => {
+      const label_text = strings?.vibeOptions[v] ?? v;
+      return `<span style="display:inline-block;background:#f3f4f6;border-radius:4px;padding:2px 7px;font-size:11px;margin:0 3px 3px 0;color:#374151;">${escapeHtml(label_text)}</span>`;
+    })
     .join("");
 
   const stars = Array.from({ length: 5 }, (_, i) =>
@@ -212,19 +226,19 @@ function buildPopupContent(
     <div style="display:flex;align-items:center;gap:6px;border-top:1px solid #e5e7eb;padding-top:8px;flex-wrap:wrap;">
       <button data-vote="upvote" title="${voteTitle}" style="cursor:${voteCursor};${upvotedStyle};border-radius:8px;padding:4px 10px;font-size:12px;display:flex;align-items:center;gap:3px;">👍 <strong data-count="upvotes">${label.upvotes}</strong></button>
       <button data-vote="downvote" title="${voteTitle}" style="cursor:${voteCursor};${downvotedStyle};border-radius:8px;padding:4px 10px;font-size:12px;display:flex;align-items:center;gap:3px;">👎 <strong data-count="downvotes">${label.downvotes}</strong></button>
-      <button data-vote="accurate" title="${voteTitle}" style="cursor:${voteCursor};${accurateStyle};border-radius:8px;padding:4px 10px;font-size:12px;display:flex;align-items:center;gap:3px;">🔁 Still accurate</button>
+      <button data-vote="accurate" title="${voteTitle}" style="cursor:${voteCursor};${accurateStyle};border-radius:8px;padding:4px 10px;font-size:12px;display:flex;align-items:center;gap:3px;">🔁 ${escapeHtml(strings?.stillAccurate ?? "Still accurate")}</button>
       <span data-score-badge style="margin-left:auto;background:${scoreBadgeColor};color:${scoreBadgeText};border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;">${score > 0 ? '+' : ''}${score}</span>
     </div>
     <div style="margin-top:8px;">
-      <button data-action="ask-ai" style="cursor:pointer;width:100%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;">✨ Ask AI about this area</button>
+      <button data-action="ask-ai" style="cursor:pointer;width:100%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;">✨ ${escapeHtml(strings?.askAI ?? "Ask AI about this area")}</button>
     </div>
     <div style="margin-top:10px;border-top:1px solid #e5e7eb;padding-top:10px;">
-      <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 6px;text-transform:uppercase;letter-spacing:0.05em;">Tag this area <span style="font-weight:400;color:#9ca3af;">(pick up to 4)</span></p>
+      <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 6px;text-transform:uppercase;letter-spacing:0.05em;">${escapeHtml(strings?.tagThisArea ?? "Tag this area")} <span style="font-weight:400;color:#9ca3af;">(pick up to 4)</span></p>
       <div data-tag-picker style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px;"></div>
       <p data-tag-msg style="font-size:11px;color:#6b7280;margin:4px 0 0;display:none;"></p>
     </div>
     <div data-cost-section style="margin-top:10px;border-top:1px solid #e5e7eb;padding-top:10px;">
-      <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 8px;text-transform:uppercase;letter-spacing:0.05em;">💰 Local Costs</p>
+      <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 8px;text-transform:uppercase;letter-spacing:0.05em;">${escapeHtml(strings?.localCosts ?? "💰 Local Costs")}</p>
       <div data-cost-body>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
           ${[1,2,3,4,5].map(() => `<div class="animate-pulse" style="height:16px;background:#f3f4f6;border-radius:4px;"></div><div class="animate-pulse" style="height:16px;background:#f3f4f6;border-radius:4px;"></div>`).join("")}
@@ -232,7 +246,7 @@ function buildPopupContent(
       </div>
     </div>
     <div style="margin-top:8px;">
-      <button data-action="transport" style="cursor:pointer;width:100%;background:#f9fafb;border:1px solid #d1d5db;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:600;color:#374151;display:flex;align-items:center;justify-content:center;gap:6px;">🚌 Estimate travel cost →</button>
+      <button data-action="transport" style="cursor:pointer;width:100%;background:#f9fafb;border:1px solid #d1d5db;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:600;color:#374151;display:flex;align-items:center;justify-content:center;gap:6px;">🚌 ${escapeHtml(strings?.estimateTravel ?? "Estimate travel cost →")}</button>
     </div>
     <div data-transport-section style="display:none;margin-top:8px;padding:8px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;">
       <div data-transport-body></div>
@@ -577,6 +591,7 @@ export function MapView({
   voterId,
   myVotes,
 }: MapViewProps) {
+  const { t } = useLanguage();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
@@ -782,7 +797,7 @@ export function MapView({
     labelsToShow.forEach((label) => {
       const icon = createTextIcon(label);
       const marker = L.marker([label.lat, label.lng], { icon });
-      const { el: popupEl, onOpen } = buildPopupContent(label, onVote, apiBase, voterId, myVotes);
+      const { el: popupEl, onOpen } = buildPopupContent(label, onVote, apiBase, voterId, myVotes, t);
       marker.bindPopup(popupEl, { maxWidth: 320, className: "hoodmap-popup" });
       marker.on("popupopen", () => {
         transportOriginMarker = marker;
@@ -834,7 +849,7 @@ export function MapView({
       labelsToShow.forEach((label) => {
         const icon = createTextIcon(label);
         const marker = L.marker([label.lat, label.lng], { icon });
-        const { el: popupEl, onOpen } = buildPopupContent(label, onVote, apiBase, voterId, myVotes);
+        const { el: popupEl, onOpen } = buildPopupContent(label, onVote, apiBase, voterId, myVotes, t);
         marker.bindPopup(popupEl, { maxWidth: 320, className: "hoodmap-popup" });
         marker.on("popupopen", () => {
           transportOriginMarker = marker;

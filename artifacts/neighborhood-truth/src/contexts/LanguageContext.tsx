@@ -28,6 +28,11 @@ const T = {
     tags: "Tags",
     upTo4: "up to 4",
     labelColor: "Label Color",
+    askAI: "Ask AI about this area",
+    stillAccurate: "Still accurate",
+    tagThisArea: "Tag this area",
+    localCosts: "💰 Local Costs",
+    estimateTravel: "Estimate travel cost →",
     vibeOptions: {
       Chill: "Chill",
       Loud: "Loud",
@@ -41,6 +46,8 @@ const T = {
       "Women Safe": "Women Safe",
       "Metro Access King": "Metro Access King",
       "Upcoming Area": "Upcoming Area",
+      "Pollution Alert": "Pollution Alert",
+      "High Traffic / Affordable": "High Traffic / Affordable",
     } as Record<string, string>,
     jumpToCity: "Jump to city",
   },
@@ -69,6 +76,11 @@ const T = {
     tags: "टैग",
     upTo4: "4 तक",
     labelColor: "रंग चुनें",
+    askAI: "✨ AI से पूछें",
+    stillAccurate: "अभी भी सही है",
+    tagThisArea: "इस क्षेत्र को टैग करें",
+    localCosts: "💰 स्थानीय कीमतें",
+    estimateTravel: "यात्रा खर्च अनुमान →",
     vibeOptions: {
       Chill: "शांत",
       Loud: "शोरगुल",
@@ -82,12 +94,46 @@ const T = {
       "Women Safe": "महिला सुरक्षित",
       "Metro Access King": "मेट्रो एक्सेस",
       "Upcoming Area": "उभरता इलाका",
+      "Pollution Alert": "प्रदूषण चेतावनी",
+      "High Traffic / Affordable": "ट्रैफिक / सस्ता",
     } as Record<string, string>,
     jumpToCity: "शहर चुनें",
   },
 } as const;
 
-type Translations = (typeof T)["en"];
+interface Translations {
+  filters: string;
+  safety: string;
+  cost: string;
+  vibes: string;
+  showHeatmap: string;
+  hideHeatmap: string;
+  reset: string;
+  search: string;
+  labels: string;
+  hidden: string;
+  filter: string;
+  cities: string;
+  locate: string;
+  dropLabel: string;
+  dropping: string;
+  cancel: string;
+  whatLike: string;
+  safetyRating: string;
+  costLevel: string;
+  category: string;
+  optional: string;
+  tags: string;
+  upTo4: string;
+  labelColor: string;
+  askAI: string;
+  stillAccurate: string;
+  tagThisArea: string;
+  localCosts: string;
+  estimateTravel: string;
+  vibeOptions: Record<string, string>;
+  jumpToCity: string;
+}
 
 interface LanguageContextValue {
   lang: Lang;

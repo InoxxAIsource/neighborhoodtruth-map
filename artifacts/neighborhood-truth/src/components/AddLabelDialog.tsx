@@ -18,6 +18,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 export const VIBE_OPTIONS = [
   "Chill", "Loud", "Bougie", "Artsy", "Family", "Nightlife",
   "IT Hub", "Old City Charm", "Student Zone", "Women Safe", "Metro Access King", "Upcoming Area",
+  "Pollution Alert", "High Traffic / Affordable",
 ];
 
 const COST_OPTIONS = ["$", "$$", "$$$", "$$$$"];
