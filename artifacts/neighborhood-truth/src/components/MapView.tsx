@@ -596,6 +596,61 @@ const POI_COLORS: Record<string, string> = {
   ev_charger: "#22d3ee",
 };
 
+const POI_EMOJIS: Record<string, string> = {
+  temple:     "🛕",
+  mosque:     "🕌",
+  church:     "⛪",
+  hospital:   "🏥",
+  school:     "🏫",
+  fuel:       "⛽",
+  ev_charger: "⚡",
+};
+
+function makePOIIcon(category: string) {
+  const emoji = POI_EMOJIS[category] ?? "📍";
+  const color = POI_COLORS[category] ?? "#888";
+  return L.divIcon({
+    html: `<div style="
+      background:${color};
+      color:#fff;
+      border-radius:50%;
+      width:28px;height:28px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:14px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.35);
+      border:2px solid rgba(255,255,255,0.9);
+    ">${emoji}</div>`,
+    className: "",
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+  });
+}
+
+function makeClusterIcon(category: string, count: number) {
+  const emoji = POI_EMOJIS[category] ?? "📍";
+  const color = POI_COLORS[category] ?? "#888";
+  const size = count < 10 ? 34 : count < 50 ? 40 : 46;
+  return L.divIcon({
+    html: `<div style="
+      background:${color};
+      color:#fff;
+      border-radius:50%;
+      width:${size}px;height:${size}px;
+      display:flex;align-items:center;justify-content:center;
+      flex-direction:column;
+      font-size:11px;font-weight:700;
+      box-shadow:0 2px 8px rgba(0,0,0,0.3);
+      border:2.5px solid rgba(255,255,255,0.95);
+    ">
+      <span style="font-size:14px;line-height:1">${emoji}</span>
+      <span style="font-size:9px;line-height:1;margin-top:1px">${count}</span>
+    </div>`,
+    className: "",
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+  });
+}
+
 export function MapView({
   labels,
   isPlacingPin,
@@ -722,9 +777,10 @@ export function MapView({
       zoomControl: true,
     });
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      maxZoom: 19,
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+      subdomains: "abcd",
+      maxZoom: 20,
     }).addTo(map);
 
     mapRef.current = map;
@@ -989,23 +1045,27 @@ export function MapView({
 
       let clusterGroup = poiLayersRef.current.get(category);
       if (!clusterGroup) {
-        clusterGroup = L.markerClusterGroup({ maxClusterRadius: 40 });
+        clusterGroup = L.markerClusterGroup({
+          maxClusterRadius: 60,
+          iconCreateFunction: (cluster) =>
+            makeClusterIcon(category, cluster.getChildCount()),
+        });
         poiLayersRef.current.set(category, clusterGroup);
       } else {
         clusterGroup.clearLayers();
       }
 
-      const color = POI_COLORS[category] ?? "#888";
+      const label = category.replace("_", " ");
       geojson.features.forEach((feat) => {
         const [lng, lat] = feat.geometry.coordinates;
-        const marker = L.circleMarker([lat, lng], {
-          radius: 7,
-          color,
-          fillColor: color,
-          fillOpacity: 0.85,
-          weight: 1.5,
-        });
-        marker.bindPopup(`<b>${feat.properties.name}</b><br/><small>${category.replace("_", " ")}</small>`);
+        const marker = L.marker([lat, lng], { icon: makePOIIcon(category) });
+        marker.bindPopup(
+          `<div style="font-family:system-ui,sans-serif;min-width:120px">
+            <b style="font-size:13px">${feat.properties.name}</b>
+            <br/><span style="font-size:11px;color:#666;text-transform:capitalize">${label}</span>
+          </div>`,
+          { maxWidth: 200 }
+        );
         clusterGroup!.addLayer(marker);
       });
 
