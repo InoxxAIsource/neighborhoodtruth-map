@@ -826,7 +826,7 @@ export function MapView({
       });
       marker.addTo(markerLayer);
     });
-  }, [filteredLabels, showLabels, selectedCategories, onVote, onLabelClick, apiBase, voterId, myVotes]);
+  }, [filteredLabels, showLabels, selectedCategories, onVote, onLabelClick, apiBase, voterId, myVotes, t]);
 
   // Re-render markers on zoom
   useEffect(() => {
@@ -879,7 +879,7 @@ export function MapView({
 
     map.on("zoomend", onZoom);
     return () => { map.off("zoomend", onZoom); };
-  }, [filteredLabels, showLabels, selectedCategories, onVote, onLabelClick]);
+  }, [filteredLabels, showLabels, selectedCategories, onVote, onLabelClick, apiBase, voterId, myVotes, t]);
 
   // Update zone layer
   useEffect(() => {

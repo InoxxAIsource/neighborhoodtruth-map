@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -89,6 +90,14 @@ interface TopToolbarProps {
   onSearchLocation: (coords: { lat: number; lng: number; zoom?: number }) => void;
 }
 
+const CITY_SLUGS: Record<string, string> = {
+  "mumbai": "mumbai", "delhi": "delhi", "bangalore": "bangalore",
+  "bengaluru": "bangalore", "hyderabad": "hyderabad", "pune": "pune",
+  "chennai": "chennai", "kolkata": "kolkata", "ahmedabad": "ahmedabad",
+  "jaipur": "jaipur", "lucknow": "lucknow", "chandigarh": "chandigarh",
+  "goa": "goa", "indore": "indore", "coimbatore": "coimbatore",
+};
+
 export function TopToolbar({
   showLabels,
   onToggleLabels,
@@ -106,6 +115,7 @@ export function TopToolbar({
   const [citiesOpen, setCitiesOpen] = useState(false);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const { lang, setLang, t } = useLanguage();
+  const [, navigate] = useLocation();
 
   const toggleCategory = (label: string) => {
     const next = selectedCategories.includes(label)
@@ -116,6 +126,13 @@ export function TopToolbar({
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
+    const slug = CITY_SLUGS[searchQuery.trim().toLowerCase()];
+    if (slug) {
+      navigate(`/${slug}`);
+      setSearchOpen(false);
+      setSearchQuery("");
+      return;
+    }
     setIsSearching(true);
     try {
       const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1`;
