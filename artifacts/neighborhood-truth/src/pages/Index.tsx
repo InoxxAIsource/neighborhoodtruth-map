@@ -340,7 +340,7 @@ export default function Index() {
           <LayerControlPanel
             layers={layers}
             mapZoom={mapZoom}
-            hasTrafficKey={!!HERE_API_KEY}
+            hasTrafficKey={!!TOMTOM_API_KEY}
             onToggleLayer={toggleLayer}
             onTogglePoi={togglePoi}
           />
