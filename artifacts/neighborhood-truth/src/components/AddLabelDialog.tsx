@@ -16,9 +16,14 @@ import { validateLabelText } from "@/lib/profanityFilter";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export const VIBE_OPTIONS = [
-  "Chill", "Loud", "Bougie", "Artsy", "Family", "Nightlife",
-  "IT Hub", "Old City Charm", "Student Zone", "Women Safe", "Metro Access King", "Upcoming Area",
-  "Pollution Alert", "High Traffic / Affordable",
+  "IT Hub",
+  "Old City Charm",
+  "Student Zone",
+  "Women Safe",
+  "Metro Access King",
+  "Upcoming Area",
+  "Pollution Alert",
+  "High Traffic / Affordable",
 ];
 
 const COST_OPTIONS = ["$", "$$", "$$$", "$$$$"];
@@ -123,9 +128,6 @@ export function AddLabelDialog({ open, onOpenChange, position, onSubmit, isSubmi
     setSelectedTags([]);
   };
 
-  const genericVibes = VIBE_OPTIONS.slice(0, 6);
-  const indiaVibes = VIBE_OPTIONS.slice(6);
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
@@ -176,25 +178,11 @@ export function AddLabelDialog({ open, onOpenChange, position, onSubmit, isSubmi
           <div>
             <Label>{t.vibes}</Label>
             <div className="flex flex-wrap gap-2 mt-1">
-              {genericVibes.map((v) => (
+              {VIBE_OPTIONS.map((v) => (
                 <Badge
                   key={v}
                   variant={selectedVibes.includes(v) ? "default" : "outline"}
                   className="cursor-pointer select-none"
-                  onClick={() => toggleVibe(v)}
-                >
-                  {t.vibeOptions[v] ?? v}
-                </Badge>
-              ))}
-            </div>
-            <p className="text-[10px] text-muted-foreground mt-2 mb-1 font-medium uppercase tracking-wide">🇮🇳 India-specific</p>
-            <div className="flex flex-wrap gap-2">
-              {indiaVibes.map((v) => (
-                <Badge
-                  key={v}
-                  variant={selectedVibes.includes(v) ? "default" : "outline"}
-                  className="cursor-pointer select-none border-orange-200 data-[selected=true]:bg-orange-600"
-                  data-selected={selectedVibes.includes(v)}
                   onClick={() => toggleVibe(v)}
                 >
                   {t.vibeOptions[v] ?? v}

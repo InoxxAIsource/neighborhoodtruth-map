@@ -309,7 +309,7 @@ export function TopToolbar({
           onClick={() => setLang(lang === "en" ? "hi" : "en")}
           title={lang === "en" ? "Switch to Hindi" : "Switch to English"}
         >
-          {lang === "en" ? "🇮🇳 हिं" : "EN"}
+          {lang === "en" ? "EN / हि" : "हि / EN"}
         </Button>
       </div>
     </div>

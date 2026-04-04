@@ -81,9 +81,6 @@ export function FilterSidebar({ filters, onFiltersChange, showHeatmap, onToggleH
     );
   }
 
-  const genericVibes = VIBE_OPTIONS.slice(0, 6);
-  const indiaVibes = VIBE_OPTIONS.slice(6);
-
   return (
     <div className="absolute left-4 top-20 sm:top-1/2 sm:-translate-y-1/2 z-[1000] w-64">
       <div className="bg-card/95 backdrop-blur-sm rounded-xl shadow-lg border p-4 space-y-4 max-h-[calc(100vh-100px)] overflow-y-auto">
@@ -163,20 +160,7 @@ export function FilterSidebar({ filters, onFiltersChange, showHeatmap, onToggleH
             {t.vibes}
           </Label>
           <div className="flex gap-1.5 flex-wrap">
-            {genericVibes.map((v) => (
-              <Badge
-                key={v}
-                variant={filters.vibes.includes(v) ? "default" : "outline"}
-                className="cursor-pointer text-xs select-none"
-                onClick={() => toggleVibe(v)}
-              >
-                {t.vibeOptions[v] ?? v}
-              </Badge>
-            ))}
-          </div>
-          <p className="text-[9px] text-muted-foreground font-semibold uppercase tracking-wide mt-1">🇮🇳 India</p>
-          <div className="flex gap-1.5 flex-wrap">
-            {indiaVibes.map((v) => (
+            {VIBE_OPTIONS.map((v) => (
               <Badge
                 key={v}
                 variant={filters.vibes.includes(v) ? "default" : "outline"}
