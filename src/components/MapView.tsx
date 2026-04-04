@@ -564,6 +564,74 @@ export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap 
     heatLayerRef.current = zoneLayer;
   }, [labels, showHeatmap]);
 
+  // Traffic tile layer
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (trafficLayerRef.current) {
+      map.removeLayer(trafficLayerRef.current);
+      trafficLayerRef.current = null;
+    }
+
+    if (!showTraffic) return;
+
+    const trafficLayer = L.tileLayer(
+      "https://{s}.google.com/vt/lyrs=m@221097413,traffic&x={x}&y={y}&z={z}",
+      { maxZoom: 19, subdomains: ["mt0", "mt1", "mt2", "mt3"], opacity: 0.6 }
+    ).addTo(map);
+    trafficLayerRef.current = trafficLayer;
+  }, [showTraffic]);
+
+  // Alert markers
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (alertLayerRef.current) {
+      map.removeLayer(alertLayerRef.current);
+      alertLayerRef.current = null;
+    }
+
+    if (alerts.length === 0) return;
+
+    const alertEmojis: Record<string, string> = {
+      crime: "🚨", festival: "🎉", weather: "🌧️", protest: "📢", accident: "🚗",
+    };
+    const severitySize: Record<string, number> = { high: 36, medium: 28, low: 22 };
+
+    const group = L.layerGroup();
+    alerts.forEach((alert) => {
+      const emoji = alertEmojis[alert.alert_type] || "⚠️";
+      const size = severitySize[alert.severity] || 28;
+      const icon = L.divIcon({
+        html: `<div style="font-size:${size}px;animation:pulse 2s infinite;cursor:pointer;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));">${emoji}</div>`,
+        className: "alert-marker-icon",
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size / 2],
+      });
+      const marker = L.marker([alert.lat, alert.lng], { icon }).addTo(group);
+      marker.bindPopup(`<div style="font-family:system-ui;"><strong>${alert.title}</strong><br/><span style="font-size:12px;color:#6b7280;">${alert.alert_type} · ${alert.severity}</span></div>`);
+    });
+    group.addTo(map);
+    alertLayerRef.current = group;
+  }, [alerts]);
+
+  // Tilt CSS
+  useEffect(() => {
+    const el = mapContainerRef.current;
+    if (!el) return;
+    if (showTilt) {
+      el.style.transform = "perspective(1000px) rotateX(30deg)";
+      el.style.transformOrigin = "center bottom";
+      el.style.transition = "transform 0.5s ease";
+    } else {
+      el.style.transform = "";
+      el.style.transformOrigin = "";
+      el.style.transition = "transform 0.5s ease";
+    }
+  }, [showTilt]);
+
   const legendItems = Object.values(ZONE_CATEGORIES);
 
   return (
