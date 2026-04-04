@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { X, MapPin, Sparkles, ChevronRight } from "lucide-react";
 
 const RATE_LIMIT_KEY = "pl_relocate_limit";
@@ -163,6 +163,10 @@ export function MigrationModal({ citySlug, cityName, cityLabels, apiBase, onClos
 
   const remaining = DAILY_LIMIT - rateLimit.count;
   const isLimited = remaining <= 0;
+
+  useEffect(() => {
+    return () => { abortRef.current?.abort(); };
+  }, []);
 
   const toggleLifestyle = (value: string) => {
     setLifestyle((prev) =>

@@ -264,7 +264,7 @@ router.post("/relocate", async (req, res) => {
       .where(
         sql`lat >= ${city.latMin} AND lat <= ${city.latMax} AND lng >= ${city.lngMin} AND lng <= ${city.lngMax}`
       )
-      .limit(200);
+      .limit(500);
   } catch (err) {
     req.log.error({ err }, "Failed to fetch city labels for relocation");
   }
