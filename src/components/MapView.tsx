@@ -639,6 +639,8 @@ export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap 
       <style>{`
         .hoodmap-label { background: none !important; border: none !important; }
         .zone-label-icon { background: none !important; border: none !important; }
+        .alert-marker-icon { background: none !important; border: none !important; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
         .hoodmap-popup .leaflet-popup-content-wrapper,
         .area-summary-popup .leaflet-popup-content-wrapper {
           border-radius: 14px;

@@ -9,6 +9,8 @@ import { TopToolbar } from "@/components/TopToolbar";
 import { HeroOverlay, MicroHints, useOnboarding } from "@/components/Onboarding";
 import { NeighborhoodChatDrawer } from "@/components/NeighborhoodChatDrawer";
 import { NeighborhoodScoreCard } from "@/components/NeighborhoodScoreCard";
+import { AlertPanel, type AreaAlert } from "@/components/AlertPanel";
+import { SubmitAlertDialog } from "@/components/SubmitAlertDialog";
 import { Button } from "@/components/ui/button";
 import { Plus, MapPin } from "lucide-react";
 import { useVoterId } from "@/hooks/useVoterId";
@@ -31,6 +33,10 @@ export default function Index() {
   const [chatAreaName, setChatAreaName] = useState("This Area");
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({ lat: 20.5937, lng: 78.9629 });
   const [mapZoom, setMapZoom] = useState(12);
+  const [showTraffic, setShowTraffic] = useState(false);
+  const [showTilt, setShowTilt] = useState(false);
+  const [alertPanelOpen, setAlertPanelOpen] = useState(false);
+  const [submitAlertOpen, setSubmitAlertOpen] = useState(false);
   const voterId = useVoterId();
   const queryClient = useQueryClient();
   const { showHero, hasInteracted, dismissHero, markInteracted } = useOnboarding();
@@ -56,6 +62,18 @@ export default function Index() {
         .eq("voter_id", voterId);
       if (error) throw error;
       return data;
+    },
+  });
+
+  const { data: alerts = [] } = useQuery({
+    queryKey: ["area_alerts"],
+    queryFn: async () => {
+      const { data, error } = await (supabase.from("area_alerts" as any) as any)
+        .select("*")
+        .eq("active", true)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data || []) as AreaAlert[];
     },
   });
 
@@ -151,6 +169,9 @@ export default function Index() {
         }}
         onLabelClick={handleLabelClick}
         onCenterChange={(center, zoom) => { setMapCenter(center); setMapZoom(zoom); }}
+        showTraffic={showTraffic}
+        showTilt={showTilt}
+        alerts={alerts}
       />
 
       <TopToolbar
@@ -163,6 +184,12 @@ export default function Index() {
         isLocating={locateUser}
         onLocate={() => setLocateUser(true)}
         onSearchLocation={(coords) => setFlyToLocation(coords)}
+        showTraffic={showTraffic}
+        onToggleTraffic={() => setShowTraffic((p) => !p)}
+        showTilt={showTilt}
+        onToggleTilt={() => setShowTilt((p) => !p)}
+        alertCount={alerts.length}
+        onOpenAlerts={() => setAlertPanelOpen(true)}
       />
 
       <FilterSidebar
@@ -172,21 +199,17 @@ export default function Index() {
         onToggleHeatmap={() => setShowHeatmap((p) => !p)}
       />
 
-      {/* Neighborhood Score Card */}
       <NeighborhoodScoreCard labels={labels} mapCenter={mapCenter} zoom={mapZoom} />
 
-      {/* Onboarding */}
       {showHero && <HeroOverlay onDismiss={dismissHero} />}
       {!showHero && <MicroHints hasInteracted={hasInteracted} />}
 
-      {/* App title */}
       <div className="absolute top-4 right-4 z-[1000]">
         <div className="bg-card/95 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border">
           <h1 className="text-lg font-bold text-foreground">NeighborhoodTruth</h1>
         </div>
       </div>
 
-      {/* Add Label button */}
       <div className="absolute bottom-6 right-6 z-[1000]">
         {isPlacingPin ? (
           <div className="flex flex-col items-end gap-2">
@@ -206,7 +229,6 @@ export default function Index() {
         )}
       </div>
 
-      {/* Empty state */}
       {!showHero && labels.length === 0 && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1000] pointer-events-none">
           <div className="bg-card/95 backdrop-blur-sm rounded-xl px-8 py-6 shadow-lg border text-center">
@@ -231,6 +253,23 @@ export default function Index() {
         clickedLabel={chatLabel}
         nearbyLabels={chatNearby}
         areaName={chatAreaName}
+      />
+
+      <AlertPanel
+        open={alertPanelOpen}
+        onOpenChange={setAlertPanelOpen}
+        alerts={alerts}
+        onSubmitAlert={() => {
+          setAlertPanelOpen(false);
+          setSubmitAlertOpen(true);
+        }}
+      />
+
+      <SubmitAlertDialog
+        open={submitAlertOpen}
+        onOpenChange={setSubmitAlertOpen}
+        mapCenter={mapCenter}
+        onSuccess={() => queryClient.invalidateQueries({ queryKey: ["area_alerts"] })}
       />
     </div>
   );
