@@ -1,33 +1,50 @@
 
 
-## Plan: Dense Seed Labels for India
+## Plan: India-Focused Enhanced Features
 
-Add 200+ labels across major Indian cities with realistic neighborhood-level coverage so zooming in reveals rich data.
+The user previously requested 4 features (3D view, live traffic, real-time events, religious/utility places). Since the app uses vanilla Leaflet (not Mapbox GL), true 3D isn't viable — but we can deliver practical alternatives focused on India.
 
-### Cities and Label Counts
+### What We'll Build
 
-- **Mumbai** — 30 labels (Bandra, Colaba, Juhu, Andheri, Dadar, Lower Parel, Worli, Powai, Dharavi, Marine Drive, Fort, Churchgate)
-- **Delhi/NCR** — 35 labels (Connaught Place, Chandni Chowk, Hauz Khas, Saket, Dwarka, Karol Bagh, Lajpat Nagar, Greater Kailash, Paharganj, Defence Colony, Khan Market, Nehru Place, Vasant Kunj, Janakpuri)
-- **Bangalore** — 25 labels (Koramangala, Indiranagar, MG Road, Whitefield, Electronic City, HSR Layout, Jayanagar, Malleshwaram, Brigade Road, JP Nagar)
-- **Chennai** — 20 labels (T. Nagar, Adyar, Anna Nagar, Mylapore, Nungambakkam, Velachery, Besant Nagar, Guindy, Egmore)
-- **Kolkata** — 20 labels (Park Street, Salt Lake, New Town, Howrah, College Street, Esplanade, Ballygunge, Gariahat, Kalighat)
-- **Hyderabad** — 20 labels (Banjara Hills, Jubilee Hills, Hitech City, Charminar, Secunderabad, Gachibowli, Madhapur, Ameerpet)
-- **Jaipur** — 15 labels (Hawa Mahal area, C-Scheme, Malviya Nagar, Vaishali Nagar, MI Road, Amer)
-- **Goa** — 15 labels (Baga, Calangute, Panjim, Old Goa, Anjuna, Vagator, Mapusa)
-- **Pune** — 15 labels (Koregaon Park, FC Road, Hinjewadi, Shivaji Nagar, Camp, Kothrud)
-- **Varanasi** — 10 labels (Dashashwamedh Ghat, Assi Ghat, Lanka, Godowlia, BHU area)
+**1. Tilt/Perspective View (instead of true 3D)**
+- Add a "Tilt" toggle button that applies a CSS perspective transform to the map container, giving a pseudo-3D angled view
+- Lightweight, no library change needed — pure CSS transform on the map div
 
-### Data Variety per Label
-Each label will have contextually accurate:
-- **Text**: Neighborhood-specific descriptions (e.g., "Street food paradise", "IT hub, overpriced cafes", "Temple quarter, peaceful mornings")
-- **Safety**: 1-5 based on real neighborhood reputation
-- **Vibes**: Relevant tags (e.g., `["street-food", "loud", "busy"]` for Chandni Chowk; `["hipster", "nightlife", "trendy"]` for Hauz Khas)
-- **Cost**: `$` to `$$$$` matching actual cost of living
-- **Category**: Mix of Good (Cafes, Parks, Coworking, Street Food, Temples) and Bad (Traffic, Pollution, Tourist Trap, Overpriced)
-- **Color**: Matching category sentiment
+**2. Live Traffic Layer**
+- Overlay a traffic tile layer from TomTom's free API (no key needed for basic tiles) or use OpenStreetMap-based traffic data
+- Add a "Traffic" toggle button in the toolbar
+- Shows real-time traffic flow overlay on Indian roads
 
-### Technical
-- Single SQL INSERT via database migration tool (~205 rows)
-- No schema changes needed
-- Coordinates will use precise lat/lng for each specific neighborhood/landmark
+**3. Real-Time Events / Alerts System**
+- New `area_alerts` database table: `id, lat, lng, city, title, description, alert_type (crime | festival | weather | protest | accident), severity (low | medium | high), active, created_at, expires_at`
+- Seed with ~30 sample alerts across Indian cities (festivals like upcoming events, known traffic-heavy zones, safety advisories)
+- Display as pulsing markers on the map with distinct icons per type
+- Alert panel/drawer showing active alerts for the current viewport
+- Users can submit new alerts via a simple form
+
+**4. Points of Interest — Religious & Utility Places**
+- New category groups in the Places filter: **Religious** (🕌 Mosque, 🛕 Temple, ⛪ Church, 🕍 Gurudwara) and **Utilities** (⛽ Fuel Pump, ⚡ EV Charger, 🏥 Hospital, 💊 Pharmacy)
+- Add these to `PLACE_CATEGORIES` in TopToolbar
+- Seed ~60 labels for major religious landmarks and utility spots across Indian cities (Golden Temple Amritsar, Jama Masjid Delhi, Basilica of Bom Jesus Goa, etc.)
+- Update label colors: religious = purple, utilities = blue
+
+### Technical Details
+
+**Database changes:**
+- New `area_alerts` table with RLS (public read, authenticated insert)
+- Seed migration with ~30 alerts + ~60 religious/utility labels
+
+**Frontend changes:**
+- `TopToolbar.tsx` — Add Traffic toggle, Tilt toggle, expand PLACE_CATEGORIES with religious/utility groups
+- `MapView.tsx` — Add traffic tile layer, CSS tilt transform, alert marker rendering with pulsing animation
+- New `AlertPanel.tsx` — Slide-out panel listing active alerts in viewport
+- New `SubmitAlertDialog.tsx` — Form for users to report events
+- `Index.tsx` — Wire up new state and components
+
+**Map stays centered on India** — default view remains `[20.5937, 78.9629]`.
+
+### Scope
+- ~6 files modified/created
+- 2 database migrations (alerts table + seed data)
+- No external API keys required (traffic tiles use free tier)
 
