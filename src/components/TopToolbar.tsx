@@ -36,6 +36,18 @@ export const PLACE_CATEGORIES = {
     { label: "Money transfer", emoji: "💸" },
     { label: "Tourist traps", emoji: "📸" },
   ],
+  religious: [
+    { label: "Temples", emoji: "🛕" },
+    { label: "Mosques", emoji: "🕌" },
+    { label: "Churches", emoji: "⛪" },
+    { label: "Gurudwaras", emoji: "🙏" },
+  ],
+  utilities: [
+    { label: "Fuel pumps", emoji: "⛽" },
+    { label: "EV chargers", emoji: "⚡" },
+    { label: "Hospitals", emoji: "🏥" },
+    { label: "Pharmacies", emoji: "💊" },
+  ],
 };
 
 export const ALL_PLACE_LABELS = [
