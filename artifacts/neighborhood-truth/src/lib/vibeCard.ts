@@ -99,13 +99,16 @@ export async function generateVibeCard(data: VibeCardData): Promise<Blob> {
   topVibes.forEach((vibe, idx) => {
     const color = VIBE_COLORS[idx % VIBE_COLORS.length];
     const cw = ctx.measureText(vibe).width + 28;
-    ctx.fillStyle = "rgba(255,255,255,0.18)";
+    // Chip background in the per-vibe colour at low opacity
+    ctx.fillStyle = color + "44";
     roundRect(ctx, chipX, chipY, cw, 32, 16);
     ctx.fill();
-    ctx.strokeStyle = "rgba(255,255,255,0.4)";
-    ctx.lineWidth = 1;
+    // Chip border in the per-vibe colour
+    ctx.strokeStyle = color + "cc";
+    ctx.lineWidth = 1.5;
     roundRect(ctx, chipX, chipY, cw, 32, 16);
     ctx.stroke();
+    // Text in the per-vibe colour (white on dark cards looks better, so mix)
     ctx.fillStyle = "white";
     ctx.font = "bold 14px system-ui, sans-serif";
     ctx.fillText(vibe, chipX + 14, chipY + 21);

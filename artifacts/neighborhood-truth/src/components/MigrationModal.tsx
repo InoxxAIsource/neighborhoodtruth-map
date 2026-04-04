@@ -177,7 +177,11 @@ export function MigrationModal({ citySlug, cityName, cityLabels, apiBase, onClos
   };
 
   const handleSubmit = useCallback(async () => {
-    if (!budget || !jobType || isLimited || isStreaming) return;
+    if (!budget || !jobType || isStreaming) return;
+    if (isLimited) {
+      setShowProModal(true);
+      return;
+    }
 
     const newLimit = { count: rateLimit.count + 1, date: getTodayStr() };
     setRelocateLimit(newLimit);

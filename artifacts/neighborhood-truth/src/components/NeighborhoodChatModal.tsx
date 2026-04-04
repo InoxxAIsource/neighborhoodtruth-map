@@ -252,7 +252,11 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase, onVo
 
   useEffect(() => {
     if (chatOpen) {
-      setTimeout(() => inputRef.current?.focus(), 100);
+      if (isLimited) {
+        setShowProModal(true);
+      } else {
+        setTimeout(() => inputRef.current?.focus(), 100);
+      }
     }
   }, [chatOpen]);
 

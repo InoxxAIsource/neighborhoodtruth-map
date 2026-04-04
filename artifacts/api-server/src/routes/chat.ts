@@ -27,14 +27,17 @@ async function buildContextExtras(lat: number, lng: number): Promise<string> {
   const extras: string[] = [];
 
   try {
-    // Time-of-day context for transit questions
-    const hour = new Date().getUTCHours();
-    const istHour = (hour + 5) % 24;
+    // Time-of-day context for transit questions (IST = UTC+5:30)
+    const nowMs = Date.now();
+    const istMinutes = Math.floor(nowMs / 60000) + 5 * 60 + 30;
+    const istHour = Math.floor(istMinutes / 60) % 24;
+    const istMin = istMinutes % 60;
+    const istTimeStr = `${String(istHour).padStart(2, "0")}:${String(istMin).padStart(2, "0")} IST`;
     let timeCtx = "";
-    if (istHour >= 8 && istHour <= 10) timeCtx = "It is currently morning rush hour (8–10 AM IST) — transit will be congested.";
-    else if (istHour >= 17 && istHour <= 20) timeCtx = "It is currently evening rush hour (5–8 PM IST) — expect heavy traffic.";
-    else if (istHour >= 22 || istHour <= 5) timeCtx = "It is currently late night/early morning — reduced transit, quieter streets.";
-    else timeCtx = `Current time in India: ${istHour}:00 IST — off-peak hours, traffic should be normal.`;
+    if (istHour >= 8 && istHour <= 10) timeCtx = `It is currently morning rush hour (${istTimeStr}) — transit will be congested.`;
+    else if (istHour >= 17 && istHour <= 20) timeCtx = `It is currently evening rush hour (${istTimeStr}) — expect heavy traffic.`;
+    else if (istHour >= 22 || istHour <= 5) timeCtx = `It is currently late night/early morning (${istTimeStr}) — reduced transit, quieter streets.`;
+    else timeCtx = `Current time in India: ${istTimeStr} — off-peak hours, traffic should be normal.`;
     extras.push(timeCtx);
 
     // 30-day vote accuracy signal: count "accurate" votes in last 30 days for labels within RADIUS
