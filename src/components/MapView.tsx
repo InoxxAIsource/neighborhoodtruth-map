@@ -393,11 +393,13 @@ function applyFilters(labels: LabelData[], filters: Filters = DEFAULT_FILTERS): 
   });
 }
 
-export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap = false, filters = DEFAULT_FILTERS, onAreaClick, onLabelClick, showLabels = true, selectedCategories = [], locateUser = false, onLocated, flyToLocation, onFlownTo, onCenterChange }: MapViewProps) {
+export function MapView({ labels, isPlacingPin, onMapClick, onVote, showHeatmap = false, filters = DEFAULT_FILTERS, onAreaClick, onLabelClick, showLabels = true, selectedCategories = [], locateUser = false, onLocated, flyToLocation, onFlownTo, onCenterChange, showTraffic = false, showTilt = false, alerts = [] }: MapViewProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const markerLayerRef = useRef<L.LayerGroup | null>(null);
   const heatLayerRef = useRef<L.Layer | null>(null);
+  const trafficLayerRef = useRef<L.TileLayer | null>(null);
+  const alertLayerRef = useRef<L.LayerGroup | null>(null);
   const labelsRef = useRef<LabelData[]>([]);
   const userMarkerRef = useRef<L.CircleMarker | null>(null);
 
