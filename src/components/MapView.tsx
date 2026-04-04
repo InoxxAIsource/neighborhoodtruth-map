@@ -42,6 +42,9 @@ interface MapViewProps {
   flyToLocation?: { lat: number; lng: number } | null;
   onFlownTo?: () => void;
   onCenterChange?: (center: { lat: number; lng: number }, zoom: number) => void;
+  showTraffic?: boolean;
+  showTilt?: boolean;
+  alerts?: Array<{ id: string; lat: number; lng: number; title: string; alert_type: string; severity: string }>;
 }
 
 export interface AreaSummary {
