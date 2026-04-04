@@ -67,6 +67,12 @@ interface TopToolbarProps {
   isLocating: boolean;
   onLocate: () => void;
   onSearchLocation?: (coords: { lat: number; lng: number }) => void;
+  showTraffic: boolean;
+  onToggleTraffic: () => void;
+  showTilt: boolean;
+  onToggleTilt: () => void;
+  alertCount: number;
+  onOpenAlerts: () => void;
 }
 
 export function TopToolbar({
