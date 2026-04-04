@@ -155,6 +155,31 @@ const SUGGESTED_QUESTIONS = [
   "How well-connected is the transit?",
 ];
 
+const INDIA_QUESTIONS = [
+  "Good for working women?",
+  "Traffic during office hours?",
+  "Nearby PGs or hostels?",
+  "Is it well-connected by metro?",
+  "How's water & electricity supply?",
+  "Safe for solo women at night?",
+];
+
+function isInIndia(lat: number, lng: number): boolean {
+  return lat >= 8 && lat <= 37 && lng >= 68 && lng <= 97;
+}
+
+function getSuggestedQuestions(lat: number, lng: number): string[] {
+  if (isInIndia(lat, lng)) {
+    return [
+      "What's the vibe here?",
+      "Is it safe at night?",
+      "How much is rent here?",
+      ...INDIA_QUESTIONS,
+    ];
+  }
+  return SUGGESTED_QUESTIONS;
+}
+
 const CATEGORY_COLORS: Record<string, string> = {
   hipster: "#8b5cf6",
   tourist: "#f59e0b",
@@ -175,7 +200,7 @@ interface NeighborhoodChatModalProps {
 }
 
 export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase, onVote, myVotes }: NeighborhoodChatModalProps) {
-  const [chatOpen, setChatOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(true);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
@@ -713,7 +738,7 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase, onVo
 
                 {messages.length === 0 && !isLimited && (
                   <div className="flex flex-wrap gap-1.5 mb-3">
-                    {SUGGESTED_QUESTIONS.map((q) => (
+                    {getSuggestedQuestions(label.lat, label.lng).map((q) => (
                       <button
                         key={q}
                         onClick={() => { setInput(q); setTimeout(() => inputRef.current?.focus(), 50); }}

@@ -18,6 +18,9 @@ export function HeroOverlay({ onDismiss }: { onDismiss: () => void }) {
           <p className="text-muted-foreground text-sm leading-relaxed">
             See what locals actually think about each area across the world. Drop labels, vote on insights, and find your perfect neighborhood.
           </p>
+          <p className="text-xs text-muted-foreground/70 italic pt-1">
+            Tired of Google Maps guesses? Get real local vibes + AI answers from people who actually live here.
+          </p>
         </div>
         <Button size="lg" className="gap-2 w-full" onClick={onDismiss}>
           Explore Map

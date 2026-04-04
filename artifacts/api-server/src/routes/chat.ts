@@ -110,7 +110,7 @@ function buildSystemPrompt(clickedLabel: LabelRow, nearbyLabels: LabelRow[], cos
     const score = l.upvotes - l.downvotes;
     const vibes = l.vibe?.length ? l.vibe.join(", ") : "none";
     const cat = l.category ? ` | Category: ${l.category}` : "";
-    return `• "${l.text}" — Safety: ${l.safety}/5 | Cost: ${l.cost} | Vibes: ${vibes}${cat} | Score: ${score > 0 ? "+" : ""}${score}`;
+    return `• "${l.text}" — 👍 ${l.upvotes} upvotes / 👎 ${l.downvotes} downvotes | Safety: ${l.safety}/5 | Cost: ${l.cost} | Vibes: ${vibes}${cat} | Net: ${score > 0 ? "+" : ""}${score}`;
   };
 
   const allLabels = [clickedLabel, ...nearbyLabels];
@@ -139,12 +139,13 @@ ${labelLines}
 
 ANSWERING RULES:
 1. **Be specific and local** — give real numbers, real place names, real comparisons. Never give vague answers.
-2. **Use crowd data first** — quote label names, safety scores, vibes. Then supplement with city knowledge.
-3. **Flag general knowledge** — if going beyond crowd data, say "Based on this area generally..." once, briefly.
-4. **Format clearly** — use **bold** for key points, short bullet lists (- item) for comparisons or breakdowns. No walls of text.
-5. **Length** — 80–140 words max unless user asks for detail. One focused section, not a generic essay.
-6. **Prices** — ALWAYS use the Live Cost Intelligence numbers when they exist. Quote them directly: "A coffee runs ${costContext ? "the actual range from the data" : "~$X–$Y"}."
-7. **Never invent** crowd votes, labels, or fake price ranges.
+2. **Cite vote counts by name** — whenever referencing a crowd label, name it AND quote its upvote count. E.g. "47 locals upvoted 'Safe Family Zone'" or "The community gave 'Artsy Hub' 91 upvotes". This signals credibility and makes answers feel data-backed.
+3. **Use crowd data first** — quote label names, upvotes, safety scores, vibes. Then supplement with city knowledge.
+4. **Flag general knowledge** — if going beyond crowd data, say "Based on this area generally..." once, briefly.
+5. **Format clearly** — use **bold** for key points, short bullet lists (- item) for comparisons or breakdowns. No walls of text.
+6. **Length** — 80–140 words max unless user asks for detail. One focused section, not a generic essay.
+7. **Prices** — ALWAYS use the Live Cost Intelligence numbers when they exist. Quote them directly: "A coffee runs ${costContext ? "the actual range from the data" : "~$X–$Y"}."
+8. **Never invent** crowd votes, labels, or fake price ranges.
 
 TOPIC CHEAT SHEET:
 - SAFETY: safety 4–5 = safe, 3 = moderate, 1–2 = take care. Mention specific label signals.
