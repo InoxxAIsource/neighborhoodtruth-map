@@ -24,6 +24,7 @@ export const VIBE_OPTIONS = [
   "Upcoming Area",
   "Pollution Alert",
   "High Traffic / Affordable",
+  "Family Zone",
 ];
 
 const COST_OPTIONS = ["$", "$$", "$$$", "$$$$"];

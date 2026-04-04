@@ -11,6 +11,7 @@ import { Plus, MapPin } from "lucide-react";
 import { useVoterId } from "@/hooks/useVoterId";
 import { toast } from "sonner";
 import type { Filters } from "@/components/MapView";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const AddLabelDialog = lazy(() => import("@/components/AddLabelDialog").then(m => ({ default: m.AddLabelDialog })));
 const NeighborhoodChatModal = lazy(() => import("@/components/NeighborhoodChatModal").then(m => ({ default: m.NeighborhoodChatModal })));
@@ -65,6 +66,7 @@ export default function Index() {
   const voterId = useVoterId();
   const queryClient = useQueryClient();
   const { showHero, hasInteracted, dismissHero, markInteracted } = useOnboarding();
+  const { t } = useLanguage();
 
   const { data: labels = [] } = useQuery<LabelDTO[]>({
     queryKey: ["labels"],
@@ -214,15 +216,15 @@ export default function Index() {
             <div className="bg-card/95 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border animate-pulse">
               <p className="text-sm text-muted-foreground flex items-center gap-2">
                 <MapPin className="h-4 w-4 animate-bounce" />
-                Tap the map to drop your label
+                {t.dropping}
               </p>
             </div>
-            <Button variant="outline" onClick={() => setIsPlacingPin(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setIsPlacingPin(false)}>{t.cancel}</Button>
           </div>
         ) : (
           <Button size="lg" className="shadow-lg gap-2 h-12 px-5 text-base" onClick={() => setIsPlacingPin(true)}>
             <Plus className="h-5 w-5" />
-            Drop Label
+            {t.dropLabel}
           </Button>
         )}
       </div>
