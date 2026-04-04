@@ -1102,7 +1102,7 @@ export function MapView({
     };
   }, [layers?.buildings3d]);
 
-  // ─── HERE Maps traffic layer ───────────────────────────────────────────────
+  // ─── TomTom traffic layer ──────────────────────────────────────────────────
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !layers || !hereApiKey) return;
@@ -1110,8 +1110,8 @@ export function MapView({
     if (layers.traffic) {
       if (!trafficLayerRef.current) {
         trafficLayerRef.current = L.tileLayer(
-          `https://{s}.traffic.maps.ls.hereapi.com/maptile/2.1/traffictile/newest/normal.day/{z}/{x}/{y}/256/png8?apiKey=${hereApiKey}`,
-          { subdomains: ["1", "2", "3", "4"], opacity: 0.7, attribution: "© HERE Maps" }
+          `https://{s}.api.tomtom.com/traffic/map/4/tile/flow/relative0/{z}/{x}/{y}.png?key=${hereApiKey}`,
+          { subdomains: ["a", "b", "c", "d"], opacity: 0.7, attribution: "© TomTom Traffic" }
         );
       }
       if (!map.hasLayer(trafficLayerRef.current)) {

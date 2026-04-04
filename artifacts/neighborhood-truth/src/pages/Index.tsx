@@ -18,7 +18,7 @@ import { LayerControlPanel } from "@/components/LayerControlPanel";
 import { FestivalBanner } from "@/components/FestivalBanner";
 import { useLayerState } from "@/hooks/useLayerState";
 
-const HERE_API_KEY = (import.meta.env.VITE_HERE_API_KEY as string | undefined) ?? "";
+const TOMTOM_API_KEY = (import.meta.env.VITE_TOMTOM_API_KEY as string | undefined) ?? "";
 
 const AddLabelDialog = lazy(() => import("@/components/AddLabelDialog").then(m => ({ default: m.AddLabelDialog })));
 const NeighborhoodChatModal = lazy(() => import("@/components/NeighborhoodChatModal").then(m => ({ default: m.NeighborhoodChatModal })));
@@ -265,7 +265,7 @@ export default function Index() {
         myVotes={userVotes}
         onMapViewChange={handleMapViewChange}
         layers={layers}
-        hereApiKey={HERE_API_KEY || undefined}
+        hereApiKey={TOMTOM_API_KEY || undefined}
         onZoomChange={setMapZoom}
       />
 

@@ -122,7 +122,7 @@ export function LayerControlPanel({
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-gray-800 leading-tight">Live Traffic</p>
                   {!hasTrafficKey && (
-                    <p className="text-[10px] text-gray-400 leading-tight">HERE API key required</p>
+                    <p className="text-[10px] text-gray-400 leading-tight">TomTom API key required</p>
                   )}
                 </div>
               </div>
