@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { MapPin, TagsIcon, EyeOff, LocateFixed, Search, Loader2 } from "lucide-react";
+import { MapPin, TagsIcon, EyeOff, LocateFixed, Search, Loader2, AlertTriangle, Car, Rotate3D } from "lucide-react";
 
 interface SearchResult {
   display_name: string;
