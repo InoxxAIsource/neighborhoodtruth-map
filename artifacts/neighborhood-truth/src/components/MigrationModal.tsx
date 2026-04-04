@@ -69,6 +69,16 @@ function renderInline(text: string): ReactNode[] {
   });
 }
 
+function extractAreaName(line: string): string | null {
+  // Match markdown heading: ### Name or ## Name or # Name
+  const hMatch = line.match(/^#{1,3}\s+(.+)/);
+  if (hMatch) return hMatch[1].replace(/[*_]/g, "").trim();
+  // Match a line that is ONLY bold text: **Name** (the bold-fallback case)
+  const boldOnlyMatch = line.match(/^\*\*([^*]+)\*\*\s*$/);
+  if (boldOnlyMatch) return boldOnlyMatch[1].trim();
+  return null;
+}
+
 function MarkdownResult({ text, cityLabels, onViewOnMap }: {
   text: string;
   cityLabels: { text: string; lat: number; lng: number }[];
@@ -82,16 +92,16 @@ function MarkdownResult({ text, cityLabels, onViewOnMap }: {
         const lines = block.split("\n").filter(Boolean);
         if (!lines.length) return null;
 
-        const hMatch = lines[0].match(/^#{1,3}\s+(.+)/);
-        if (hMatch) {
-          const areaName = hMatch[1].replace(/[*_]/g, "").trim();
+        const areaName = extractAreaName(lines[0]);
+        if (areaName) {
           const matchedLabel = cityLabels.find((l) =>
             l.text.toLowerCase().includes(areaName.toLowerCase()) ||
             areaName.toLowerCase().includes(l.text.toLowerCase())
           );
+          const displayName = lines[0].match(/^#{1,3}\s+(.+)/) ? lines[0].replace(/^#+\s+/, "") : lines[0];
           return (
-            <div key={bi} className="flex items-center justify-between gap-2">
-              <p className="font-bold text-gray-900 text-base">{renderInline(hMatch[1])}</p>
+            <div key={bi} className="flex items-center justify-between gap-2 mt-3 first:mt-0">
+              <p className="font-bold text-gray-900 text-base">{renderInline(displayName)}</p>
               {matchedLabel && (
                 <button
                   onClick={() => onViewOnMap(matchedLabel.lat, matchedLabel.lng, matchedLabel.text)}

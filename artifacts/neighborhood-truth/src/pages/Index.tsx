@@ -18,6 +18,27 @@ const AddLabelDialog = lazy(() => import("@/components/AddLabelDialog").then(m =
 const NeighborhoodChatModal = lazy(() => import("@/components/NeighborhoodChatModal").then(m => ({ default: m.NeighborhoodChatModal })));
 
 const CITIES_MAP: { slug: string; name: string; latMin: number; latMax: number; lngMin: number; lngMax: number }[] = [
+  { slug: "new-york", name: "New York", latMin: 40.4, latMax: 41.0, lngMin: -74.3, lngMax: -73.7 },
+  { slug: "san-francisco", name: "San Francisco", latMin: 37.6, latMax: 37.9, lngMin: -122.6, lngMax: -122.3 },
+  { slug: "los-angeles", name: "Los Angeles", latMin: 33.7, latMax: 34.4, lngMin: -118.7, lngMax: -118.0 },
+  { slug: "toronto", name: "Toronto", latMin: 43.5, latMax: 43.9, lngMin: -79.7, lngMax: -79.1 },
+  { slug: "mexico-city", name: "Mexico City", latMin: 19.2, latMax: 19.6, lngMin: -99.4, lngMax: -98.9 },
+  { slug: "buenos-aires", name: "Buenos Aires", latMin: -34.8, latMax: -34.4, lngMin: -58.7, lngMax: -58.2 },
+  { slug: "london", name: "London", latMin: 51.3, latMax: 51.7, lngMin: -0.3, lngMax: 0.1 },
+  { slug: "amsterdam", name: "Amsterdam", latMin: 52.3, latMax: 52.5, lngMin: 4.7, lngMax: 5.1 },
+  { slug: "rome", name: "Rome", latMin: 41.7, latMax: 42.1, lngMin: 12.3, lngMax: 12.7 },
+  { slug: "istanbul", name: "Istanbul", latMin: 40.8, latMax: 41.3, lngMin: 28.6, lngMax: 29.5 },
+  { slug: "tel-aviv", name: "Tel Aviv", latMin: 31.9, latMax: 32.2, lngMin: 34.7, lngMax: 35.05 },
+  { slug: "jerusalem", name: "Jerusalem", latMin: 31.6, latMax: 31.9, lngMin: 35.1, lngMax: 35.4 },
+  { slug: "tehran", name: "Tehran", latMin: 35.5, latMax: 36.0, lngMin: 51.0, lngMax: 51.7 },
+  { slug: "cairo", name: "Cairo", latMin: 29.9, latMax: 30.2, lngMin: 31.1, lngMax: 31.5 },
+  { slug: "cape-town", name: "Cape Town", latMin: -34.2, latMax: -33.7, lngMin: 18.3, lngMax: 18.7 },
+  { slug: "tokyo", name: "Tokyo", latMin: 35.5, latMax: 35.8, lngMin: 139.5, lngMax: 139.9 },
+  { slug: "seoul", name: "Seoul", latMin: 37.4, latMax: 37.7, lngMin: 126.8, lngMax: 127.3 },
+  { slug: "hong-kong", name: "Hong Kong", latMin: 22.1, latMax: 22.6, lngMin: 113.9, lngMax: 114.5 },
+  { slug: "bali", name: "Bali", latMin: -8.9, latMax: -8.3, lngMin: 115.0, lngMax: 115.5 },
+  { slug: "karachi", name: "Karachi", latMin: 24.7, latMax: 25.2, lngMin: 66.8, lngMax: 67.4 },
+  { slug: "lahore", name: "Lahore", latMin: 31.3, latMax: 31.7, lngMin: 74.1, lngMax: 74.5 },
   { slug: "mumbai", name: "Mumbai", latMin: 18.7, latMax: 19.4, lngMin: 72.4, lngMax: 73.3 },
   { slug: "delhi", name: "Delhi", latMin: 28.3, latMax: 29.1, lngMin: 76.7, lngMax: 77.5 },
   { slug: "bangalore", name: "Bangalore", latMin: 12.5, latMax: 13.4, lngMin: 77.2, lngMax: 78.0 },
@@ -32,12 +53,6 @@ const CITIES_MAP: { slug: string; name: string; latMin: number; latMax: number; 
   { slug: "goa", name: "Goa", latMin: 14.8, latMax: 15.8, lngMin: 73.3, lngMax: 74.3 },
   { slug: "indore", name: "Indore", latMin: 22.2, latMax: 23.0, lngMin: 75.4, lngMax: 76.2 },
   { slug: "coimbatore", name: "Coimbatore", latMin: 10.8, latMax: 11.2, lngMin: 76.8, lngMax: 77.2 },
-  { slug: "new-york", name: "New York", latMin: 40.4, latMax: 41.0, lngMin: -74.3, lngMax: -73.7 },
-  { slug: "san-francisco", name: "San Francisco", latMin: 37.6, latMax: 37.9, lngMin: -122.6, lngMax: -122.3 },
-  { slug: "los-angeles", name: "Los Angeles", latMin: 33.7, latMax: 34.4, lngMin: -118.7, lngMax: -118.0 },
-  { slug: "london", name: "London", latMin: 51.3, latMax: 51.7, lngMin: -0.3, lngMax: 0.1 },
-  { slug: "toronto", name: "Toronto", latMin: 43.5, latMax: 43.9, lngMin: -79.7, lngMax: -79.1 },
-  { slug: "tokyo", name: "Tokyo", latMin: 35.5, latMax: 35.8, lngMin: 139.5, lngMax: 139.9 },
 ];
 
 function detectCity(lat: number, lng: number, zoom: number) {

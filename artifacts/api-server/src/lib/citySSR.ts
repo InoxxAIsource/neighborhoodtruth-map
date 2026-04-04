@@ -7,7 +7,7 @@ import { db, labelsTable, labelTagsTable } from "@workspace/db";
 import { sql, inArray, count as countFn } from "drizzle-orm";
 import { ssrHtmlShell } from "./ssrShared";
 
-interface CityDef {
+export interface CityDef {
   slug: string;
   name: string;
   country: string;
@@ -27,7 +27,7 @@ interface AreaData {
   downvotes: number;
 }
 
-const CITIES: CityDef[] = [
+export const CITIES: CityDef[] = [
   { slug: "new-york", name: "New York", country: "US", latMin: 40.4, latMax: 41.0, lngMin: -74.3, lngMax: -73.7 },
   { slug: "san-francisco", name: "San Francisco", country: "US", latMin: 37.6, latMax: 37.9, lngMin: -122.6, lngMax: -122.3 },
   { slug: "los-angeles", name: "Los Angeles", country: "US", latMin: 33.7, latMax: 34.4, lngMin: -118.7, lngMax: -118.0 },
