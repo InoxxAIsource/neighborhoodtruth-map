@@ -272,14 +272,34 @@ export function TopToolbar({
             <p className="text-[10px] uppercase tracking-wider text-red-500 font-bold mb-1.5">👎 Bad</p>
             <div className="space-y-1">
               {PLACE_CATEGORIES.bad.map((cat) => (
-                <label
-                  key={cat.label}
-                  className="flex items-center gap-2 px-2 py-1 rounded hover:bg-accent/50 cursor-pointer text-sm"
-                >
-                  <Checkbox
-                    checked={selectedCategories.includes(cat.label)}
-                    onCheckedChange={() => toggleCategory(cat.label)}
-                  />
+                <label key={cat.label} className="flex items-center gap-2 px-2 py-1 rounded hover:bg-accent/50 cursor-pointer text-sm">
+                  <Checkbox checked={selectedCategories.includes(cat.label)} onCheckedChange={() => toggleCategory(cat.label)} />
+                  <span>{cat.emoji}</span>
+                  <span className="text-foreground">{cat.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-purple-600 font-bold mb-1.5">🙏 Religious</p>
+            <div className="space-y-1">
+              {PLACE_CATEGORIES.religious.map((cat) => (
+                <label key={cat.label} className="flex items-center gap-2 px-2 py-1 rounded hover:bg-accent/50 cursor-pointer text-sm">
+                  <Checkbox checked={selectedCategories.includes(cat.label)} onCheckedChange={() => toggleCategory(cat.label)} />
+                  <span>{cat.emoji}</span>
+                  <span className="text-foreground">{cat.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-blue-600 font-bold mb-1.5">🔧 Utilities</p>
+            <div className="space-y-1">
+              {PLACE_CATEGORIES.utilities.map((cat) => (
+                <label key={cat.label} className="flex items-center gap-2 px-2 py-1 rounded hover:bg-accent/50 cursor-pointer text-sm">
+                  <Checkbox checked={selectedCategories.includes(cat.label)} onCheckedChange={() => toggleCategory(cat.label)} />
                   <span>{cat.emoji}</span>
                   <span className="text-foreground">{cat.label}</span>
                 </label>
@@ -288,6 +308,42 @@ export function TopToolbar({
           </div>
         </PopoverContent>
       </Popover>
+
+      {/* Traffic toggle */}
+      <Button
+        size="sm"
+        variant={showTraffic ? "default" : "outline"}
+        className="gap-1.5 rounded-full shadow-md bg-card/95 backdrop-blur-sm border"
+        onClick={onToggleTraffic}
+      >
+        <Car className="h-3.5 w-3.5" />
+        Traffic
+      </Button>
+
+      {/* Tilt toggle */}
+      <Button
+        size="sm"
+        variant={showTilt ? "default" : "outline"}
+        className="gap-1.5 rounded-full shadow-md bg-card/95 backdrop-blur-sm border"
+        onClick={onToggleTilt}
+      >
+        <Rotate3D className="h-3.5 w-3.5" />
+        Tilt
+      </Button>
+
+      {/* Alerts */}
+      <Button
+        size="sm"
+        variant={alertCount > 0 ? "default" : "outline"}
+        className="gap-1.5 rounded-full shadow-md bg-card/95 backdrop-blur-sm border"
+        onClick={onOpenAlerts}
+      >
+        <AlertTriangle className="h-3.5 w-3.5" />
+        Alerts
+        {alertCount > 0 && (
+          <span className="ml-1 bg-primary-foreground/20 rounded-full px-1.5 text-[10px] font-bold">{alertCount}</span>
+        )}
+      </Button>
 
       {/* No tags toggle */}
       <Button
