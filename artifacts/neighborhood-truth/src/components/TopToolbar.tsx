@@ -1,10 +1,27 @@
-import { useState } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { MapPin, TagsIcon, EyeOff, LocateFixed, Search, Loader2, Globe, SlidersHorizontal } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+
+interface NominatimResult {
+  place_id: number;
+  lat: string;
+  lon: string;
+  display_name: string;
+  type: string;
+  importance: number;
+  address?: {
+    city?: string;
+    town?: string;
+    suburb?: string;
+    neighbourhood?: string;
+    country?: string;
+    state?: string;
+  };
+}
 
 export const PLACE_CATEGORIES = {
   good: [
@@ -111,8 +128,11 @@ export function TopToolbar({
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [citiesOpen, setCitiesOpen] = useState(false);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { lang, setLang, t } = useLanguage();
 
   const toggleCategory = (label: string) => {
@@ -122,32 +142,78 @@ export function TopToolbar({
     onCategoriesChange(next);
   };
 
+  const fetchSuggestions = useCallback(async (q: string) => {
+    if (q.length < 2) { setSuggestions([]); return; }
+    setIsSearching(true);
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=6&addressdetails=1`;
+      const res = await fetch(url, { headers: { "Accept-Language": "en" } });
+      const data: NominatimResult[] = await res.json();
+      setSuggestions(data);
+      setShowSuggestions(true);
+    } catch {
+      setSuggestions([]);
+    } finally {
+      setIsSearching(false);
+    }
+  }, []);
+
+  const handleQueryChange = (val: string) => {
+    setSearchQuery(val);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!val.trim()) { setSuggestions([]); setShowSuggestions(false); return; }
+    debounceRef.current = setTimeout(() => fetchSuggestions(val), 350);
+  };
+
+  const selectSuggestion = (result: NominatimResult) => {
+    const isNeighbourhood = ["suburb", "neighbourhood", "quarter", "residential", "village", "hamlet"].includes(result.type);
+    const zoom = isNeighbourhood ? 15 : 12;
+    onSearchLocation({ lat: parseFloat(result.lat), lng: parseFloat(result.lon), zoom });
+    setSearchOpen(false);
+    setSearchQuery("");
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
+
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
     const q = searchQuery.trim().toLowerCase();
-    const knownCity = CITIES.find((c) => c.name.toLowerCase() === q || CITY_SLUGS[q] === c.name.toLowerCase().replace(/\s+/g, "-") || c.name.toLowerCase().replace(/\s+/g, "-") === q);
+    const knownCity = CITIES.find(
+      (c) => c.name.toLowerCase() === q ||
+        CITY_SLUGS[q] === c.name.toLowerCase().replace(/\s+/g, "-") ||
+        c.name.toLowerCase().replace(/\s+/g, "-") === q
+    );
     if (knownCity) {
       onSearchLocation({ lat: knownCity.lat, lng: knownCity.lng, zoom: 12 });
       setSearchOpen(false);
       setSearchQuery("");
       return;
     }
+    if (suggestions.length > 0) {
+      selectSuggestion(suggestions[0]);
+      return;
+    }
     setIsSearching(true);
     try {
-      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1`;
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1&addressdetails=1`;
       const res = await fetch(url, { headers: { "Accept-Language": "en" } });
-      const data = await res.json();
-      if (data.length > 0) {
-        onSearchLocation({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
-        setSearchOpen(false);
-        setSearchQuery("");
-      }
+      const data: NominatimResult[] = await res.json();
+      if (data.length > 0) selectSuggestion(data[0]);
     } catch {
       // silently fail
     } finally {
       setIsSearching(false);
     }
   };
+
+  const formatSuggestionLabel = (r: NominatimResult) => {
+    const parts = r.display_name.split(",").map((s) => s.trim());
+    return parts.slice(0, 3).join(", ");
+  };
+
+  useEffect(() => {
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, []);
 
   const globalCities = CITIES.filter((c) => c.flag !== "🇮🇳");
   const indiaCities = CITIES.filter((c) => c.flag === "🇮🇳");
@@ -164,19 +230,46 @@ export function TopToolbar({
               <span className="hidden sm:inline">{t.search}</span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-72 p-3" align="center">
-            <div className="flex gap-2">
-              <Input
-                placeholder="Search city or place..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                className="h-8 text-sm"
-                autoFocus
-              />
-              <Button size="sm" onClick={handleSearch} disabled={isSearching} className="h-8 px-3">
-                {isSearching ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Search className="h-3.5 w-3.5" />}
-              </Button>
+          <PopoverContent className="w-80 p-3" align="center">
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Input
+                    placeholder="e.g. Andheri, Mumbai"
+                    value={searchQuery}
+                    onChange={(e) => handleQueryChange(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                    className="h-8 text-sm pr-7"
+                    autoFocus
+                  />
+                  {isSearching && (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin absolute right-2 top-2 text-muted-foreground" />
+                  )}
+                </div>
+                <Button size="sm" onClick={handleSearch} disabled={isSearching} className="h-8 px-3">
+                  <Search className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+              <p className="text-[10px] text-muted-foreground">
+                Try "Bandra, Mumbai" · "Koramangala, Bangalore" · "Connaught Place, Delhi"
+              </p>
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="border rounded-md overflow-hidden divide-y">
+                  {suggestions.map((r) => (
+                    <button
+                      key={r.place_id}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors flex items-start gap-2"
+                      onMouseDown={(e) => { e.preventDefault(); selectSuggestion(r); }}
+                    >
+                      <MapPin className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-muted-foreground" />
+                      <span className="line-clamp-2 leading-snug">{formatSuggestionLabel(r)}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {showSuggestions && suggestions.length === 0 && !isSearching && searchQuery.length > 2 && (
+                <p className="text-xs text-muted-foreground text-center py-1">No results found</p>
+              )}
             </div>
           </PopoverContent>
         </Popover>
