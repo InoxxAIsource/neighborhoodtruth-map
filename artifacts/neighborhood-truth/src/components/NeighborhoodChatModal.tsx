@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, Fragment } from "react";
 import type { ReactNode } from "react";
-import { X, Send, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import { X, Send, Sparkles, ChevronDown, ChevronUp, Share2 } from "lucide-react";
 import type { LabelData } from "./MapView";
 import { ProUpsellModal } from "./ProUpsellModal";
 
@@ -493,8 +493,8 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase, onVo
               </div>
             )}
 
-            {/* Vote buttons for focused label */}
-            <div className="flex items-center gap-2 mb-3">
+            {/* Vote buttons + Share for focused label */}
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
               <button
                 onClick={() => handleVote(label, "upvote")}
                 disabled={focusedVote.hasVoted}
@@ -524,6 +524,14 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase, onVo
               {focusedVote.hasVoted && (
                 <span className="text-xs text-gray-400">Voted!</span>
               )}
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent("hoodmap:share", { detail: label }))}
+                className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors"
+                title="Share vibe card"
+              >
+                <Share2 className="h-3.5 w-3.5" />
+                <span>Share</span>
+              </button>
             </div>
 
             {/* 💰 Local Costs panel */}

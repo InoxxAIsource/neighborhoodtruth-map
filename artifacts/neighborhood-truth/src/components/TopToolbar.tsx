@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { MapPin, TagsIcon, EyeOff, LocateFixed, Search, Loader2, Globe, SlidersHorizontal } from "lucide-react";
+import { MapPin, TagsIcon, EyeOff, LocateFixed, Search, Loader2, Globe, SlidersHorizontal, Flame } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface NominatimResult {
@@ -286,6 +286,18 @@ export function TopToolbar({
         >
           {showLabels ? <TagsIcon className="h-3.5 w-3.5 flex-shrink-0" /> : <EyeOff className="h-3.5 w-3.5 flex-shrink-0" />}
           <span className="hidden sm:inline">{showLabels ? t.labels : t.hidden}</span>
+        </Button>
+
+        {/* Heatmap toggle */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className={`gap-1 sm:gap-1.5 text-xs h-8 px-2 sm:px-3 transition-colors ${showHeatmap ? "bg-orange-100 text-orange-700 hover:bg-orange-200" : ""}`}
+          onClick={onToggleHeatmap}
+          title={showHeatmap ? "Hide heatmap" : "Show density heatmap"}
+        >
+          <Flame className={`h-3.5 w-3.5 flex-shrink-0 ${showHeatmap ? "text-orange-600" : ""}`} />
+          <span className="hidden sm:inline">Heatmap</span>
         </Button>
 
         <div className="w-px h-5 bg-border" />
