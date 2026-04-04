@@ -45,7 +45,8 @@ paths = [
   "/lucknow",
   "/chandigarh",
   "/goa",
-  "/indore"
+  "/indore",
+  "/coimbatore"
 ]
 
 [services.development]

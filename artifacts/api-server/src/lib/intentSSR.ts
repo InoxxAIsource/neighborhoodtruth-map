@@ -59,6 +59,7 @@ const CITIES: CityDef[] = [
   { slug: "chandigarh", name: "Chandigarh", latMin: 30.3, latMax: 31.1, lngMin: 76.3, lngMax: 77.2 },
   { slug: "goa", name: "Goa", latMin: 14.8, latMax: 15.8, lngMin: 73.3, lngMax: 74.3 },
   { slug: "indore", name: "Indore", latMin: 22.2, latMax: 23.0, lngMin: 75.4, lngMax: 76.2 },
+  { slug: "coimbatore", name: "Coimbatore", latMin: 10.8, latMax: 11.2, lngMin: 76.8, lngMax: 77.2 },
 ];
 
 // Related intents shown as cross-links on each intent page

@@ -4,6 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { MapPin, TagsIcon, EyeOff, LocateFixed, Search, Loader2, Globe, SlidersHorizontal } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const PLACE_CATEGORIES = {
   good: [
@@ -47,8 +48,6 @@ export const CITIES = [
   { name: "Barcelona", lat: 41.3922, lng: 2.1577, flag: "🇪🇸" },
   { name: "Bangkok", lat: 13.7308, lng: 100.5238, flag: "🇹🇭" },
   { name: "Seoul", lat: 37.5326, lng: 127.0246, flag: "🇰🇷" },
-  { name: "Mumbai", lat: 19.0596, lng: 72.8295, flag: "🇮🇳" },
-  { name: "Delhi", lat: 28.6315, lng: 77.2167, flag: "🇮🇳" },
   { name: "Cairo", lat: 30.0561, lng: 31.2394, flag: "🇪🇬" },
   { name: "Hong Kong", lat: 22.2796, lng: 114.1745, flag: "🇭🇰" },
   { name: "Bali", lat: -8.4095, lng: 115.1889, flag: "🇮🇩" },
@@ -61,6 +60,21 @@ export const CITIES = [
   { name: "Chicago", lat: 41.8781, lng: -87.6298, flag: "🇺🇸" },
   { name: "Miami", lat: 25.7617, lng: -80.1918, flag: "🇺🇸" },
   { name: "Vienna", lat: 48.2082, lng: 16.3738, flag: "🇦🇹" },
+  // India
+  { name: "Mumbai", lat: 19.0596, lng: 72.8295, flag: "🇮🇳" },
+  { name: "Delhi", lat: 28.6315, lng: 77.2167, flag: "🇮🇳" },
+  { name: "Bangalore", lat: 12.9716, lng: 77.5946, flag: "🇮🇳" },
+  { name: "Hyderabad", lat: 17.3850, lng: 78.4867, flag: "🇮🇳" },
+  { name: "Pune", lat: 18.5362, lng: 73.8929, flag: "🇮🇳" },
+  { name: "Chennai", lat: 13.0827, lng: 80.2707, flag: "🇮🇳" },
+  { name: "Kolkata", lat: 22.5726, lng: 88.3639, flag: "🇮🇳" },
+  { name: "Ahmedabad", lat: 23.0225, lng: 72.5714, flag: "🇮🇳" },
+  { name: "Jaipur", lat: 26.9124, lng: 75.7873, flag: "🇮🇳" },
+  { name: "Lucknow", lat: 26.8467, lng: 80.9462, flag: "🇮🇳" },
+  { name: "Chandigarh", lat: 30.7333, lng: 76.7794, flag: "🇮🇳" },
+  { name: "Goa", lat: 15.2993, lng: 74.1240, flag: "🇮🇳" },
+  { name: "Indore", lat: 22.7196, lng: 75.8577, flag: "🇮🇳" },
+  { name: "Coimbatore", lat: 11.0168, lng: 76.9558, flag: "🇮🇳" },
 ];
 
 interface TopToolbarProps {
@@ -91,6 +105,7 @@ export function TopToolbar({
   const [searchOpen, setSearchOpen] = useState(false);
   const [citiesOpen, setCitiesOpen] = useState(false);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const { lang, setLang, t } = useLanguage();
 
   const toggleCategory = (label: string) => {
     const next = selectedCategories.includes(label)
@@ -118,6 +133,9 @@ export function TopToolbar({
     }
   };
 
+  const globalCities = CITIES.filter((c) => c.flag !== "🇮🇳");
+  const indiaCities = CITIES.filter((c) => c.flag === "🇮🇳");
+
   return (
     <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] flex items-center gap-2 px-2 max-w-[calc(100vw-16px)]">
       <div className="bg-card/95 backdrop-blur-sm rounded-lg shadow-lg border flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-1.5">
@@ -127,7 +145,7 @@ export function TopToolbar({
           <PopoverTrigger asChild>
             <Button variant="ghost" size="sm" className="gap-1 sm:gap-1.5 text-xs h-8 px-2 sm:px-3">
               <Search className="h-3.5 w-3.5 flex-shrink-0" />
-              <span className="hidden sm:inline">Search</span>
+              <span className="hidden sm:inline">{t.search}</span>
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-72 p-3" align="center">
@@ -158,7 +176,7 @@ export function TopToolbar({
           title={showLabels ? "Hide labels" : "Show labels"}
         >
           {showLabels ? <TagsIcon className="h-3.5 w-3.5 flex-shrink-0" /> : <EyeOff className="h-3.5 w-3.5 flex-shrink-0" />}
-          <span className="hidden sm:inline">{showLabels ? "Labels" : "Hidden"}</span>
+          <span className="hidden sm:inline">{showLabels ? t.labels : t.hidden}</span>
         </Button>
 
         <div className="w-px h-5 bg-border" />
@@ -168,7 +186,7 @@ export function TopToolbar({
           <PopoverTrigger asChild>
             <Button variant="ghost" size="sm" className="gap-1 sm:gap-1.5 text-xs h-8 px-2 sm:px-3 relative">
               <SlidersHorizontal className="h-3.5 w-3.5 flex-shrink-0" />
-              <span className="hidden sm:inline">Filter</span>
+              <span className="hidden sm:inline">{t.filter}</span>
               {selectedCategories.length > 0 && (
                 <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center text-[9px] font-bold">
                   {selectedCategories.length}
@@ -229,13 +247,27 @@ export function TopToolbar({
           <PopoverTrigger asChild>
             <Button variant="ghost" size="sm" className="gap-1 sm:gap-1.5 text-xs h-8 px-2 sm:px-3">
               <Globe className="h-3.5 w-3.5 flex-shrink-0" />
-              <span className="hidden sm:inline">Cities</span>
+              <span className="hidden sm:inline">{t.cities}</span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-56 p-2" align="center">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 px-1">Jump to city</p>
-            <div className="max-h-64 overflow-y-auto space-y-0.5">
-              {CITIES.map((city) => (
+          <PopoverContent className="w-64 p-2" align="center">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 px-1">{t.jumpToCity}</p>
+            <div className="max-h-72 overflow-y-auto space-y-0.5">
+              {globalCities.map((city) => (
+                <button
+                  key={city.name}
+                  className="w-full text-left text-sm px-2 py-1.5 rounded-md hover:bg-accent transition-colors flex items-center gap-2"
+                  onClick={() => {
+                    onSearchLocation({ lat: city.lat, lng: city.lng, zoom: 11 });
+                    setCitiesOpen(false);
+                  }}
+                >
+                  <span className="text-base leading-none">{city.flag}</span>
+                  <span>{city.name}</span>
+                </button>
+              ))}
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mt-2 mb-1 px-1">🇮🇳 India</p>
+              {indiaCities.map((city) => (
                 <button
                   key={city.name}
                   className="w-full text-left text-sm px-2 py-1.5 rounded-md hover:bg-accent transition-colors flex items-center gap-2"
@@ -264,7 +296,20 @@ export function TopToolbar({
           title="Locate me"
         >
           {isLocating ? <Loader2 className="h-3.5 w-3.5 animate-spin flex-shrink-0" /> : <LocateFixed className="h-3.5 w-3.5 flex-shrink-0" />}
-          <span className="hidden sm:inline">Locate</span>
+          <span className="hidden sm:inline">{t.locate}</span>
+        </Button>
+
+        <div className="w-px h-5 bg-border" />
+
+        {/* Hindi / English toggle */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="gap-1 text-xs h-8 px-2 sm:px-3 font-semibold"
+          onClick={() => setLang(lang === "en" ? "hi" : "en")}
+          title={lang === "en" ? "Switch to Hindi" : "Switch to English"}
+        >
+          {lang === "en" ? "🇮🇳 हिं" : "EN"}
         </Button>
       </div>
     </div>

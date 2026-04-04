@@ -13,8 +13,13 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Star } from "lucide-react";
 import { validateLabelText } from "@/lib/profanityFilter";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-const VIBE_OPTIONS = ["Chill", "Loud", "Bougie", "Artsy", "Family", "Nightlife"];
+export const VIBE_OPTIONS = [
+  "Chill", "Loud", "Bougie", "Artsy", "Family", "Nightlife",
+  "IT Hub", "Old City Charm", "Student Zone", "Women Safe", "Metro Access King", "Upcoming Area",
+];
+
 const COST_OPTIONS = ["$", "$$", "$$$", "$$$$"];
 const CATEGORY_OPTIONS = [
   "Cafes to work", "Coworking", "Yoga studios", "Parks", "Playgrounds", "Gyms",
@@ -64,6 +69,7 @@ interface AddLabelDialogProps {
 }
 
 export function AddLabelDialog({ open, onOpenChange, position, onSubmit, isSubmitting }: AddLabelDialogProps) {
+  const { t } = useLanguage();
   const [text, setText] = useState("");
   const [safety, setSafety] = useState(3);
   const [selectedVibes, setSelectedVibes] = useState<string[]>([]);
@@ -116,13 +122,16 @@ export function AddLabelDialog({ open, onOpenChange, position, onSubmit, isSubmi
     setSelectedTags([]);
   };
 
+  const genericVibes = VIBE_OPTIONS.slice(0, 6);
+  const indiaVibes = VIBE_OPTIONS.slice(6);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5 text-primary" />
-            Drop a Label
+            {t.dropLabel}
           </DialogTitle>
           <DialogDescription className="sr-only">
             Add a label to describe what this neighborhood is like
@@ -131,7 +140,7 @@ export function AddLabelDialog({ open, onOpenChange, position, onSubmit, isSubmi
 
         <div className="space-y-4">
           <div>
-            <Label htmlFor="label-text">What's this place like?</Label>
+            <Label htmlFor="label-text">{t.whatLike}</Label>
             <Input
               id="label-text"
               placeholder="e.g. Great coffee shops, Too loud at night..."
@@ -145,7 +154,7 @@ export function AddLabelDialog({ open, onOpenChange, position, onSubmit, isSubmi
           </div>
 
           <div>
-            <Label>Safety Rating</Label>
+            <Label>{t.safetyRating}</Label>
             <div className="flex items-center gap-1 mt-1">
               {[1, 2, 3, 4, 5].map((s) => (
                 <button
@@ -164,23 +173,37 @@ export function AddLabelDialog({ open, onOpenChange, position, onSubmit, isSubmi
           </div>
 
           <div>
-            <Label>Vibes</Label>
+            <Label>{t.vibes}</Label>
             <div className="flex flex-wrap gap-2 mt-1">
-              {VIBE_OPTIONS.map((v) => (
+              {genericVibes.map((v) => (
                 <Badge
                   key={v}
                   variant={selectedVibes.includes(v) ? "default" : "outline"}
                   className="cursor-pointer select-none"
                   onClick={() => toggleVibe(v)}
                 >
-                  {v}
+                  {t.vibeOptions[v] ?? v}
+                </Badge>
+              ))}
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2 mb-1 font-medium uppercase tracking-wide">🇮🇳 India-specific</p>
+            <div className="flex flex-wrap gap-2">
+              {indiaVibes.map((v) => (
+                <Badge
+                  key={v}
+                  variant={selectedVibes.includes(v) ? "default" : "outline"}
+                  className="cursor-pointer select-none border-orange-200 data-[selected=true]:bg-orange-600"
+                  data-selected={selectedVibes.includes(v)}
+                  onClick={() => toggleVibe(v)}
+                >
+                  {t.vibeOptions[v] ?? v}
                 </Badge>
               ))}
             </div>
           </div>
 
           <div>
-            <Label>Cost Level</Label>
+            <Label>{t.costLevel}</Label>
             <div className="flex gap-2 mt-1">
               {COST_OPTIONS.map((c) => (
                 <Button
@@ -197,7 +220,7 @@ export function AddLabelDialog({ open, onOpenChange, position, onSubmit, isSubmi
           </div>
 
           <div>
-            <Label>Category <span className="text-muted-foreground font-normal">(optional)</span></Label>
+            <Label>{t.category} <span className="text-muted-foreground font-normal">({t.optional})</span></Label>
             <div className="flex flex-wrap gap-1.5 mt-1">
               {CATEGORY_OPTIONS.map((c) => (
                 <Badge
@@ -214,19 +237,19 @@ export function AddLabelDialog({ open, onOpenChange, position, onSubmit, isSubmi
 
           <div>
             <Label>
-              Tags{" "}
-              <span className="text-muted-foreground font-normal">(optional, up to 4)</span>
+              {t.tags}{" "}
+              <span className="text-muted-foreground font-normal">({t.optional}, {t.upTo4})</span>
             </Label>
             <div className="flex flex-wrap gap-2 mt-1">
-              {TAG_OPTIONS.map((t) => {
-                const selected = selectedTags.includes(t.key);
+              {TAG_OPTIONS.map((tag) => {
+                const selected = selectedTags.includes(tag.key);
                 const disabled = !selected && selectedTags.length >= 4;
                 return (
                   <button
-                    key={t.key}
+                    key={tag.key}
                     type="button"
                     disabled={disabled}
-                    onClick={() => toggleTag(t.key)}
+                    onClick={() => toggleTag(tag.key)}
                     className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-colors select-none ${
                       selected
                         ? "bg-teal-50 border-teal-500 text-teal-700"
@@ -235,8 +258,8 @@ export function AddLabelDialog({ open, onOpenChange, position, onSubmit, isSubmi
                           : "bg-white border-gray-200 text-gray-600 hover:border-teal-300 cursor-pointer"
                     }`}
                   >
-                    <span>{t.emoji}</span>
-                    {t.label}
+                    <span>{tag.emoji}</span>
+                    {tag.label}
                   </button>
                 );
               })}
@@ -247,7 +270,7 @@ export function AddLabelDialog({ open, onOpenChange, position, onSubmit, isSubmi
           </div>
 
           <div>
-            <Label>Label Color</Label>
+            <Label>{t.labelColor}</Label>
             <div className="flex flex-wrap gap-2 mt-1">
               {COLOR_OPTIONS.map((c) => (
                 <button
@@ -264,9 +287,9 @@ export function AddLabelDialog({ open, onOpenChange, position, onSubmit, isSubmi
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t.cancel}</Button>
           <Button onClick={handleSubmit} disabled={isSubmitting || !text.trim()}>
-            {isSubmitting ? "Dropping..." : "Drop Label"}
+            {isSubmitting ? t.dropping : t.dropLabel}
           </Button>
         </DialogFooter>
       </DialogContent>

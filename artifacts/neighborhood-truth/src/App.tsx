@@ -7,6 +7,7 @@ import CityPage from "@/pages/seo/CityPage";
 import AreaPage from "@/pages/seo/AreaPage";
 import IntentPage from "@/pages/seo/IntentPage";
 import ComparePage from "@/pages/seo/ComparePage";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,27 +19,29 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Router base={BASE}>
-          <Switch>
-            <Route path="/compare/:slug" component={ComparePage} />
-            <Route path="/:city/safe-neighborhoods" component={IntentPage} />
-            <Route path="/:city/affordable-areas" component={IntentPage} />
-            <Route path="/:city/nightlife-areas" component={IntentPage} />
-            <Route path="/:city/family-friendly" component={IntentPage} />
-            <Route path="/:city/best-areas-for-students" component={IntentPage} />
-            <Route path="/:city/best-areas-for-young-professionals" component={IntentPage} />
-            <Route path="/:city/quiet-neighborhoods" component={IntentPage} />
-            <Route path="/:city/expensive-neighborhoods" component={IntentPage} />
-            <Route path="/:city/:area" component={AreaPage} />
-            <Route path="/:city" component={CityPage} />
-            <Route path="/" component={Index} />
-          </Switch>
-        </Router>
-        <Toaster richColors position="top-center" />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <LanguageProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Router base={BASE}>
+            <Switch>
+              <Route path="/compare/:slug" component={ComparePage} />
+              <Route path="/:city/safe-neighborhoods" component={IntentPage} />
+              <Route path="/:city/affordable-areas" component={IntentPage} />
+              <Route path="/:city/nightlife-areas" component={IntentPage} />
+              <Route path="/:city/family-friendly" component={IntentPage} />
+              <Route path="/:city/best-areas-for-students" component={IntentPage} />
+              <Route path="/:city/best-areas-for-young-professionals" component={IntentPage} />
+              <Route path="/:city/quiet-neighborhoods" component={IntentPage} />
+              <Route path="/:city/expensive-neighborhoods" component={IntentPage} />
+              <Route path="/:city/:area" component={AreaPage} />
+              <Route path="/:city" component={CityPage} />
+              <Route path="/" component={Index} />
+            </Switch>
+          </Router>
+          <Toaster richColors position="top-center" />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </LanguageProvider>
   );
 }
 

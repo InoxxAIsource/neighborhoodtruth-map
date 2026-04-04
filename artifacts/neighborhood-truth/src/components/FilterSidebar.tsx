@@ -14,8 +14,9 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import type { Filters } from "@/components/MapView";
+import { VIBE_OPTIONS } from "@/components/AddLabelDialog";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-const VIBE_OPTIONS = ["Chill", "Loud", "Bougie", "Artsy", "Family", "Nightlife"];
 const COST_OPTIONS = ["$", "$$", "$$$", "$$$$"];
 
 export const DEFAULT_FILTERS: Filters = {
@@ -35,6 +36,7 @@ interface FilterSidebarProps {
 
 export function FilterSidebar({ filters, onFiltersChange, showHeatmap, onToggleHeatmap }: FilterSidebarProps) {
   const [collapsed, setCollapsed] = useState(() => window.innerWidth < 640);
+  const { t } = useLanguage();
 
   const updateFilter = <K extends keyof Filters>(key: K, value: Filters[K]) => {
     onFiltersChange({ ...filters, [key]: value });
@@ -79,13 +81,16 @@ export function FilterSidebar({ filters, onFiltersChange, showHeatmap, onToggleH
     );
   }
 
+  const genericVibes = VIBE_OPTIONS.slice(0, 6);
+  const indiaVibes = VIBE_OPTIONS.slice(6);
+
   return (
     <div className="absolute left-4 top-20 sm:top-1/2 sm:-translate-y-1/2 z-[1000] w-64">
       <div className="bg-card/95 backdrop-blur-sm rounded-xl shadow-lg border p-4 space-y-4 max-h-[calc(100vh-100px)] overflow-y-auto">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-muted-foreground" />
-            <span className="font-semibold text-sm">Filters</span>
+            <span className="font-semibold text-sm">{t.filters}</span>
             {hasActiveFilters && (
               <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Active</Badge>
             )}
@@ -97,7 +102,7 @@ export function FilterSidebar({ filters, onFiltersChange, showHeatmap, onToggleH
                 size="icon"
                 className="h-7 w-7"
                 onClick={() => onFiltersChange(DEFAULT_FILTERS)}
-                title="Reset filters"
+                title={t.reset}
               >
                 <RotateCcw className="h-3 w-3" />
               </Button>
@@ -118,7 +123,7 @@ export function FilterSidebar({ filters, onFiltersChange, showHeatmap, onToggleH
         <div className="space-y-2">
           <Label className="text-xs flex items-center gap-1.5">
             <Shield className="h-3 w-3" />
-            Safety: {filters.safetyMin}–{filters.safetyMax}
+            {t.safety}: {filters.safetyMin}–{filters.safetyMax}
           </Label>
           <Slider
             min={1}
@@ -136,7 +141,7 @@ export function FilterSidebar({ filters, onFiltersChange, showHeatmap, onToggleH
         <div className="space-y-2">
           <Label className="text-xs flex items-center gap-1.5">
             <DollarSign className="h-3 w-3" />
-            Cost
+            {t.cost}
           </Label>
           <div className="flex gap-1.5 flex-wrap">
             {COST_OPTIONS.map((c) => (
@@ -155,17 +160,30 @@ export function FilterSidebar({ filters, onFiltersChange, showHeatmap, onToggleH
         <div className="space-y-2">
           <Label className="text-xs flex items-center gap-1.5">
             <Sparkles className="h-3 w-3" />
-            Vibes
+            {t.vibes}
           </Label>
           <div className="flex gap-1.5 flex-wrap">
-            {VIBE_OPTIONS.map((v) => (
+            {genericVibes.map((v) => (
               <Badge
                 key={v}
                 variant={filters.vibes.includes(v) ? "default" : "outline"}
                 className="cursor-pointer text-xs select-none"
                 onClick={() => toggleVibe(v)}
               >
-                {v}
+                {t.vibeOptions[v] ?? v}
+              </Badge>
+            ))}
+          </div>
+          <p className="text-[9px] text-muted-foreground font-semibold uppercase tracking-wide mt-1">🇮🇳 India</p>
+          <div className="flex gap-1.5 flex-wrap">
+            {indiaVibes.map((v) => (
+              <Badge
+                key={v}
+                variant={filters.vibes.includes(v) ? "default" : "outline"}
+                className="cursor-pointer text-xs select-none"
+                onClick={() => toggleVibe(v)}
+              >
+                {t.vibeOptions[v] ?? v}
               </Badge>
             ))}
           </div>
@@ -179,7 +197,7 @@ export function FilterSidebar({ filters, onFiltersChange, showHeatmap, onToggleH
           className="w-full text-xs"
           onClick={onToggleHeatmap}
         >
-          {showHeatmap ? "Hide Heatmap" : "Show Heatmap"}
+          {showHeatmap ? t.hideHeatmap : t.showHeatmap}
         </Button>
       </div>
     </div>

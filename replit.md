@@ -48,6 +48,14 @@ Every package extends `tsconfig.base.json` which sets `composite: true`. The roo
 - `pnpm run build` — runs `typecheck` first, then recursively runs `build` in all packages that define it
 - `pnpm run typecheck` — runs `tsc --build --emitDeclarationOnly` using project references
 
+## PlaceLabels — Feature Notes
+
+- **India Identity (Task #11)**: Added 6 India-specific vibe tags (IT Hub, Old City Charm, Student Zone, Women Safe, Metro Access King, Upcoming Area) to AddLabelDialog and FilterSidebar alongside the 6 generic vibes. Hindi/English language toggle (`🇮🇳 हिं / EN`) in TopToolbar — powered by `LanguageContext` (localStorage-persisted). All Indian cities now listed in Cities dropdown (Mumbai, Delhi, Bangalore, Hyderabad, Pune, Chennai, Kolkata, Ahmedabad, Jaipur, Lucknow, Chandigarh, Goa, Indore, Coimbatore).
+- **Coimbatore**: Added as a new city — SSR city page, 14 intent pages, sitemap entries, routing via artifact.toml, 15 seed labels.
+- **Lucknow + Indore**: Seeded with 15 labels each (both cities were already routed).
+- **Seed logic fix**: `seedIfNeeded()` now uses `slice(existingCount)` so only NEW labels are inserted on restart — no duplicate issues.
+- **Sitemap**: 833 URLs including 30 for Coimbatore.
+
 ## Packages
 
 ### `artifacts/api-server` (`@workspace/api-server`)
