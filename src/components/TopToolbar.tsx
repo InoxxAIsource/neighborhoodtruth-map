@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { MapPin, TagsIcon, EyeOff, LocateFixed, Search, Loader2 } from "lucide-react";
+import { MapPin, TagsIcon, EyeOff, LocateFixed, Search, Loader2, AlertTriangle, Car, Rotate3D } from "lucide-react";
 
 interface SearchResult {
   display_name: string;
@@ -36,11 +36,25 @@ export const PLACE_CATEGORIES = {
     { label: "Money transfer", emoji: "💸" },
     { label: "Tourist traps", emoji: "📸" },
   ],
+  religious: [
+    { label: "Temples", emoji: "🛕" },
+    { label: "Mosques", emoji: "🕌" },
+    { label: "Churches", emoji: "⛪" },
+    { label: "Gurudwaras", emoji: "🙏" },
+  ],
+  utilities: [
+    { label: "Fuel pumps", emoji: "⛽" },
+    { label: "EV chargers", emoji: "⚡" },
+    { label: "Hospitals", emoji: "🏥" },
+    { label: "Pharmacies", emoji: "💊" },
+  ],
 };
 
 export const ALL_PLACE_LABELS = [
   ...PLACE_CATEGORIES.good.map((c) => c.label),
   ...PLACE_CATEGORIES.bad.map((c) => c.label),
+  ...PLACE_CATEGORIES.religious.map((c) => c.label),
+  ...PLACE_CATEGORIES.utilities.map((c) => c.label),
 ];
 
 interface TopToolbarProps {
@@ -53,6 +67,12 @@ interface TopToolbarProps {
   isLocating: boolean;
   onLocate: () => void;
   onSearchLocation?: (coords: { lat: number; lng: number }) => void;
+  showTraffic: boolean;
+  onToggleTraffic: () => void;
+  showTilt: boolean;
+  onToggleTilt: () => void;
+  alertCount: number;
+  onOpenAlerts: () => void;
 }
 
 export function TopToolbar({
@@ -65,6 +85,12 @@ export function TopToolbar({
   isLocating,
   onLocate,
   onSearchLocation,
+  showTraffic,
+  onToggleTraffic,
+  showTilt,
+  onToggleTilt,
+  alertCount,
+  onOpenAlerts,
 }: TopToolbarProps) {
   const [placesOpen, setPlacesOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -246,14 +272,34 @@ export function TopToolbar({
             <p className="text-[10px] uppercase tracking-wider text-red-500 font-bold mb-1.5">👎 Bad</p>
             <div className="space-y-1">
               {PLACE_CATEGORIES.bad.map((cat) => (
-                <label
-                  key={cat.label}
-                  className="flex items-center gap-2 px-2 py-1 rounded hover:bg-accent/50 cursor-pointer text-sm"
-                >
-                  <Checkbox
-                    checked={selectedCategories.includes(cat.label)}
-                    onCheckedChange={() => toggleCategory(cat.label)}
-                  />
+                <label key={cat.label} className="flex items-center gap-2 px-2 py-1 rounded hover:bg-accent/50 cursor-pointer text-sm">
+                  <Checkbox checked={selectedCategories.includes(cat.label)} onCheckedChange={() => toggleCategory(cat.label)} />
+                  <span>{cat.emoji}</span>
+                  <span className="text-foreground">{cat.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-purple-600 font-bold mb-1.5">🙏 Religious</p>
+            <div className="space-y-1">
+              {PLACE_CATEGORIES.religious.map((cat) => (
+                <label key={cat.label} className="flex items-center gap-2 px-2 py-1 rounded hover:bg-accent/50 cursor-pointer text-sm">
+                  <Checkbox checked={selectedCategories.includes(cat.label)} onCheckedChange={() => toggleCategory(cat.label)} />
+                  <span>{cat.emoji}</span>
+                  <span className="text-foreground">{cat.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-blue-600 font-bold mb-1.5">🔧 Utilities</p>
+            <div className="space-y-1">
+              {PLACE_CATEGORIES.utilities.map((cat) => (
+                <label key={cat.label} className="flex items-center gap-2 px-2 py-1 rounded hover:bg-accent/50 cursor-pointer text-sm">
+                  <Checkbox checked={selectedCategories.includes(cat.label)} onCheckedChange={() => toggleCategory(cat.label)} />
                   <span>{cat.emoji}</span>
                   <span className="text-foreground">{cat.label}</span>
                 </label>
@@ -262,6 +308,42 @@ export function TopToolbar({
           </div>
         </PopoverContent>
       </Popover>
+
+      {/* Traffic toggle */}
+      <Button
+        size="sm"
+        variant={showTraffic ? "default" : "outline"}
+        className="gap-1.5 rounded-full shadow-md bg-card/95 backdrop-blur-sm border"
+        onClick={onToggleTraffic}
+      >
+        <Car className="h-3.5 w-3.5" />
+        Traffic
+      </Button>
+
+      {/* Tilt toggle */}
+      <Button
+        size="sm"
+        variant={showTilt ? "default" : "outline"}
+        className="gap-1.5 rounded-full shadow-md bg-card/95 backdrop-blur-sm border"
+        onClick={onToggleTilt}
+      >
+        <Rotate3D className="h-3.5 w-3.5" />
+        Tilt
+      </Button>
+
+      {/* Alerts */}
+      <Button
+        size="sm"
+        variant={alertCount > 0 ? "default" : "outline"}
+        className="gap-1.5 rounded-full shadow-md bg-card/95 backdrop-blur-sm border"
+        onClick={onOpenAlerts}
+      >
+        <AlertTriangle className="h-3.5 w-3.5" />
+        Alerts
+        {alertCount > 0 && (
+          <span className="ml-1 bg-primary-foreground/20 rounded-full px-1.5 text-[10px] font-bold">{alertCount}</span>
+        )}
+      </Button>
 
       {/* No tags toggle */}
       <Button

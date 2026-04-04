@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      area_alerts: {
+        Row: {
+          active: boolean
+          alert_type: string
+          city: string
+          created_at: string
+          description: string | null
+          expires_at: string | null
+          id: string
+          lat: number
+          lng: number
+          severity: string
+          title: string
+        }
+        Insert: {
+          active?: boolean
+          alert_type?: string
+          city: string
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          lat: number
+          lng: number
+          severity?: string
+          title: string
+        }
+        Update: {
+          active?: boolean
+          alert_type?: string
+          city?: string
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          lat?: number
+          lng?: number
+          severity?: string
+          title?: string
+        }
+        Relationships: []
+      }
       chat_logs: {
         Row: {
           ai_response: string
