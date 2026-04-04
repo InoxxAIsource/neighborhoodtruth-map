@@ -53,6 +53,8 @@ export const PLACE_CATEGORIES = {
 export const ALL_PLACE_LABELS = [
   ...PLACE_CATEGORIES.good.map((c) => c.label),
   ...PLACE_CATEGORIES.bad.map((c) => c.label),
+  ...PLACE_CATEGORIES.religious.map((c) => c.label),
+  ...PLACE_CATEGORIES.utilities.map((c) => c.label),
 ];
 
 interface TopToolbarProps {
