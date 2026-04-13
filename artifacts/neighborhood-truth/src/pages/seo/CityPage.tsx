@@ -66,9 +66,13 @@ export default function CityPage() {
     staleTime: 1000 * 60 * 60, // 1 hour cache
   });
 
-  // Placeholder meta tags for loading/error states
-  const placeholderTitle = `${city ? city.charAt(0).toUpperCase() + city.slice(1) : "City"} Neighborhoods | PlaceLabels`;
-  const placeholderDescription = "Discover real neighborhood vibes from locals. Check safety, cost, and local vibes for every neighborhood.";
+  // City display name: "new-york" → "New York"
+  const cityDisplayName = city
+    ? city.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")
+    : "City";
+
+  const placeholderTitle = `${cityDisplayName} Neighborhoods — Real Local Reviews | PlaceLabels`;
+  const placeholderDescription = `Discover the best neighborhoods in ${cityDisplayName} based on real community insights. Check safety ratings, cost of living, and local vibes for every area in ${cityDisplayName}.`;
 
   if (isLoading) {
     return (
@@ -81,6 +85,13 @@ export default function CityPage() {
             <meta property="og:description" content={placeholderDescription} />
             <link rel="canonical" href={`https://placelabels.com/${city}`} />
           </Helmet>
+          {/* Visible H1 + description renders immediately — no API call needed */}
+          <div className="mb-8">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-3">
+              {cityDisplayName} Neighborhoods
+            </h1>
+            <p className="text-gray-500 text-lg leading-relaxed max-w-2xl">{placeholderDescription}</p>
+          </div>
           <LoadingState />
         </>
       </SEOLayout>

@@ -1,0 +1,61 @@
+I have a React + Vite + TypeScript SPA (placelabels.com) with 36 city routes 
+using a /:city wildcard in React Router. Google cannot index these pages because 
+they are fully client-side rendered — Googlebot sees a blank <div id="root"></div>.
+
+I need to implement prerendering/SSG using vite-plugin-prerender so that each 
+city URL generates a static HTML file at build time with real content visible 
+to crawlers WITHOUT migrating to Next.js.
+
+---
+
+STEP 1 — Install the plugin
+Run: npm install --save-dev vite-plugin-prerender
+
+---
+
+STEP 2 — Update vite.config.ts
+Import and configure the prerender plugin. The list of routes to prerender is:
+
+'/',
+'/new-york', '/san-francisco', '/los-angeles', '/toronto', '/mexico-city',
+'/buenos-aires', '/london', '/amsterdam', '/rome', '/istanbul', '/tel-aviv',
+'/cairo', '/cape-town', '/tokyo', '/seoul', '/hong-kong', '/bali', '/mumbai',
+'/delhi', '/bangalore', '/hyderabad', '/pune', '/chennai', '/kolkata',
+'/jaipur', '/karachi', '/lahore', '/goa', '/ahmedabad', '/lucknow',
+'/chandigarh', '/indore', '/coimbatore', '/tehran', '/jerusalem'
+
+Set headless browser renderer to Puppeteer.
+
+---
+
+STEP 3 — Confirm the CityPage component renders meaningful HTML server-side
+Check src/pages/CityPage.tsx (or equivalent). The page must render:
+- An <h1> with the city name
+- A <meta name="description"> specific to that city
+- A <title> tag specific to that city (e.g. "Mumbai Neighborhoods — Real Local 
+  Reviews | PlaceLabels")
+- At minimum a static intro paragraph about the city even if map labels load 
+  async
+
+If the CityPage component currently renders nothing meaningful before Supabase 
+data loads, add a static fallback skeleton with the city name and description 
+visible immediately on mount — before any async fetch completes.
+
+---
+
+STEP 4 — Verify
+After build, check the /dist folder. Each city should have its own 
+/dist/new-york/index.html file containing real visible HTML — not just 
+<div id="root"></div>.
+
+Show me the contents of /dist/mumbai/index.html after build to confirm 
+prerendering worked.
+
+---
+
+CONSTRAINTS:
+- Do NOT migrate to Next.js
+- Do NOT change Supabase queries or map functionality
+- Do NOT change any existing routes
+- Preserve all existing Tailwind styling
+- Preserve all existing schema markup in index.html
