@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { ArrowLeft, Map, Globe } from "lucide-react";
+import { CityFooter } from "@/components/CityFooter";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 export const API = `${BASE}/api`;
@@ -53,50 +54,7 @@ export function SEOLayout({ children, breadcrumbs = [] }: SEOLayoutProps) {
         {children}
       </main>
 
-      <footer className="border-t bg-white mt-16">
-        <div className="max-w-5xl mx-auto px-4 py-8">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 mb-8 pb-8 border-b">
-            <div>
-              <p className="font-semibold text-gray-900 text-sm mb-3">Browse Cities</p>
-              <ul className="space-y-2 text-xs text-gray-600">
-                <li><Link href="/new-york" className="hover:text-teal-600">New York</Link></li>
-                <li><Link href="/san-francisco" className="hover:text-teal-600">San Francisco</Link></li>
-                <li><Link href="/los-angeles" className="hover:text-teal-600">Los Angeles</Link></li>
-                <li><Link href="/london" className="hover:text-teal-600">London</Link></li>
-              </ul>
-            </div>
-            <div>
-              <p className="font-semibold text-gray-900 text-sm mb-3">Asia</p>
-              <ul className="space-y-2 text-xs text-gray-600">
-                <li><Link href="/mumbai" className="hover:text-teal-600">Mumbai</Link></li>
-                <li><Link href="/delhi" className="hover:text-teal-600">Delhi</Link></li>
-                <li><Link href="/bangalore" className="hover:text-teal-600">Bangalore</Link></li>
-                <li><Link href="/tokyo" className="hover:text-teal-600">Tokyo</Link></li>
-              </ul>
-            </div>
-            <div>
-              <p className="font-semibold text-gray-900 text-sm mb-3">More Cities</p>
-              <ul className="space-y-2 text-xs text-gray-600">
-                <li><Link href="/tokyo" className="hover:text-teal-600">Tokyo</Link></li>
-                <li><Link href="/hong-kong" className="hover:text-teal-600">Hong Kong</Link></li>
-                <li><Link href="/seoul" className="hover:text-teal-600">Seoul</Link></li>
-                <li><Link href="/dubai" className="hover:text-teal-600">Dubai</Link></li>
-              </ul>
-            </div>
-            <div>
-              <p className="font-semibold text-gray-900 text-sm mb-3">About</p>
-              <ul className="space-y-2 text-xs text-gray-600">
-                <li><Link href="/" className="hover:text-teal-600">Home</Link></li>
-                <li><a href="https://placelabels.com" className="hover:text-teal-600">Back to Map</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="text-center text-sm text-gray-400">
-            <p>© {new Date().getFullYear()} PlaceLabels — Crowd-sourced neighborhood intelligence</p>
-            <p className="mt-1">Data powered by real locals and visitors worldwide.</p>
-          </div>
-        </div>
-      </footer>
+      <CityFooter />
     </div>
   );
 }

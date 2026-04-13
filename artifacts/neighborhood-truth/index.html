@@ -65,9 +65,17 @@
       "legalName": "PlaceLabels",
       "alternateName": "NeighborhoodTruth",
       "url": "https://placelabels.com",
-      "logo": "https://placelabels.com/og-image.png",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://placelabels.com/icons/icon-192.png",
+        "width": 192,
+        "height": 192
+      },
       "description": "Crowd-sourced global neighborhood map with honest local insights, safety ratings, and community-verified area reviews.",
-      "sameAs": []
+      "sameAs": [
+        "https://twitter.com/placelabels",
+        "https://github.com/InoxxAIsource/neighborhoodtruth-map"
+      ]
     }
     </script>
 
@@ -158,44 +166,6 @@
     </script>
   </head>
   <body>
-    <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Honest Neighborhood Reviews from Real Locals | PlaceLabels</h1>
-    <nav aria-label="Cities" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">
-      <a href="/new-york">New York Neighborhoods</a>
-      <a href="/san-francisco">San Francisco Neighborhoods</a>
-      <a href="/los-angeles">Los Angeles Neighborhoods</a>
-      <a href="/toronto">Toronto Neighborhoods</a>
-      <a href="/mexico-city">Mexico City Neighborhoods</a>
-      <a href="/buenos-aires">Buenos Aires Neighborhoods</a>
-      <a href="/london">London Neighborhoods</a>
-      <a href="/amsterdam">Amsterdam Neighborhoods</a>
-      <a href="/rome">Rome Neighborhoods</a>
-      <a href="/istanbul">Istanbul Neighborhoods</a>
-      <a href="/tel-aviv">Tel Aviv Neighborhoods</a>
-      <a href="/cairo">Cairo Neighborhoods</a>
-      <a href="/cape-town">Cape Town Neighborhoods</a>
-      <a href="/tokyo">Tokyo Neighborhoods</a>
-      <a href="/seoul">Seoul Neighborhoods</a>
-      <a href="/hong-kong">Hong Kong Neighborhoods</a>
-      <a href="/bali">Bali Neighborhoods</a>
-      <a href="/mumbai">Mumbai Neighborhoods</a>
-      <a href="/delhi">Delhi Neighborhoods</a>
-      <a href="/bangalore">Bangalore Neighborhoods</a>
-      <a href="/hyderabad">Hyderabad Neighborhoods</a>
-      <a href="/pune">Pune Neighborhoods</a>
-      <a href="/chennai">Chennai Neighborhoods</a>
-      <a href="/kolkata">Kolkata Neighborhoods</a>
-      <a href="/jaipur">Jaipur Neighborhoods</a>
-      <a href="/karachi">Karachi Neighborhoods</a>
-      <a href="/lahore">Lahore Neighborhoods</a>
-      <a href="/goa">Goa Neighborhoods</a>
-      <a href="/ahmedabad">Ahmedabad Neighborhoods</a>
-      <a href="/lucknow">Lucknow Neighborhoods</a>
-      <a href="/chandigarh">Chandigarh Neighborhoods</a>
-      <a href="/indore">Indore Neighborhoods</a>
-      <a href="/coimbatore">Coimbatore Neighborhoods</a>
-      <a href="/tehran">Tehran Neighborhoods</a>
-      <a href="/jerusalem">Jerusalem Neighborhoods</a>
-    </nav>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

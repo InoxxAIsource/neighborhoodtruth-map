@@ -1,0 +1,130 @@
+You are an expert SEO engineer and React/TypeScript developer. I need you to fix 
+critical SEO issues in my project (placelabels.com) without breaking any existing 
+functionality. This is a React + Vite + TypeScript SPA using Tailwind CSS and 
+Leaflet maps. The backend is Supabase.
+
+---
+
+## CRITICAL FIXES REQUIRED IN index.html
+
+### FIX 1 — Make the H1 tag visible (currently hidden, cloaking risk)
+
+CURRENT CODE (line ~170 in index.html):
+<h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">
+  Honest Neighborhood Reviews from Real Locals | PlaceLabels
+</h1>
+
+ACTION: Remove the inline style entirely. Instead, move this H1 into the 
+React component tree (src/App.tsx or the homepage component) so it renders 
+visually. Style it with Tailwind as a large, attractive hero headline. 
+Do NOT keep it hidden. Google flags hidden H1s as cloaking.
+
+---
+
+### FIX 2 — Replace hidden city navigation with a real visible footer
+
+CURRENT CODE (line ~171-207 in index.html):
+<nav aria-label="Cities" style="position:absolute;width:1px;height:1px;
+padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);
+white-space:nowrap;border:0">
+  <a href="/new-york">New York Neighborhoods</a>
+  ... (36 city links, all hidden from users)
+</nav>
+
+ACTION: 
+1. DELETE this entire hidden <nav> block from index.html completely.
+2. Create a new React component: src/components/CityFooter.tsx
+3. This component should be a fully visible, well-styled footer section 
+   using Tailwind CSS. It must display all 36 city links in a responsive 
+   grid layout (4 columns on desktop, 2 on mobile). 
+4. Style it cleanly — dark or neutral background, white or muted text, 
+   hover underline on links.
+5. Import and render <CityFooter /> at the bottom of the main App layout, 
+   above any existing footer.
+
+The 36 cities and their routes are:
+/new-york → New York Neighborhoods
+/san-francisco → San Francisco Neighborhoods
+/los-angeles → Los Angeles Neighborhoods
+/toronto → Toronto Neighborhoods
+/mexico-city → Mexico City Neighborhoods
+/buenos-aires → Buenos Aires Neighborhoods
+/london → London Neighborhoods
+/amsterdam → Amsterdam Neighborhoods
+/rome → Rome Neighborhoods
+/istanbul → Istanbul Neighborhoods
+/tel-aviv → Tel Aviv Neighborhoods
+/cairo → Cairo Neighborhoods
+/cape-town → Cape Town Neighborhoods
+/tokyo → Tokyo Neighborhoods
+/seoul → Seoul Neighborhoods
+/hong-kong → Hong Kong Neighborhoods
+/bali → Bali Neighborhoods
+/mumbai → Mumbai Neighborhoods
+/delhi → Delhi Neighborhoods
+/bangalore → Bangalore Neighborhoods
+/hyderabad → Hyderabad Neighborhoods
+/pune → Pune Neighborhoods
+/chennai → Chennai Neighborhoods
+/kolkata → Kolkata Neighborhoods
+/jaipur → Jaipur Neighborhoods
+/karachi → Karachi Neighborhoods
+/lahore → Lahore Neighborhoods
+/goa → Goa Neighborhoods
+/ahmedabad → Ahmedabad Neighborhoods
+/lucknow → Lucknow Neighborhoods
+/chandigarh → Chandigarh Neighborhoods
+/indore → Indore Neighborhoods
+/coimbatore → Coimbatore Neighborhoods
+/tehran → Tehran Neighborhoods
+/jerusalem → Jerusalem Neighborhoods
+
+---
+
+### FIX 3 — Update Organization schema sameAs (index.html line ~72)
+
+CURRENT:
+"sameAs": []
+
+REPLACE WITH:
+"sameAs": [
+  "https://twitter.com/placelabels",
+  "https://github.com/InoxxAIsource/neighborhoodtruth-map"
+]
+
+---
+
+### FIX 4 — Fix the Organization schema logo field (index.html line ~69)
+
+CURRENT:
+"logo": "https://placelabels.com/og-image.png"
+
+REPLACE WITH:
+"logo": {
+  "@type": "ImageObject",
+  "url": "https://placelabels.com/icons/icon-192.png",
+  "width": 192,
+  "height": 192
+}
+
+---
+
+## IMPORTANT CONSTRAINTS
+
+- Do NOT modify any map functionality, Supabase queries, or label/voting logic.
+- Do NOT change any existing route structure.
+- Do NOT remove any existing schema blocks (FAQPage, WebSite, BreadcrumbList).
+- Do NOT change the title tag or meta description.
+- Preserve all existing Tailwind class patterns used elsewhere in the project.
+- After making changes, confirm which files were modified and show a diff summary.
+
+---
+
+## AFTER THE FIXES — ALSO DO THIS:
+
+Check if the city routes (/new-york, /london, etc.) are defined in the React 
+Router config. If they are NOT defined as real routes with actual page components, 
+flag this clearly and tell me what files I need to create to make each city URL 
+return a real server-renderable page. Do not create the pages yet — just identify 
+the gap and list the files that would need to be created.

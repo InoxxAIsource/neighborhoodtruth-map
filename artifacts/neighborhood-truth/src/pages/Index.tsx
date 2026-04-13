@@ -291,11 +291,9 @@ export default function Index() {
       {showHero && <HeroOverlay onDismiss={dismissHero} />}
       {!showHero && <MicroHints hasInteracted={hasInteracted} />}
 
-      {/* Always-present H1 for SEO crawlers; visually shown only on sm+ */}
-      <h1 className="sr-only">NeighborhoodTruth — Honest Neighborhood Reviews &amp; Local Insights</h1>
       <div className="absolute top-4 right-4 z-[1000] hidden sm:block">
         <div className="bg-card/95 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border">
-          <span className="text-lg font-bold text-foreground">PlaceLabels</span>
+          <h1 className="text-lg font-bold text-foreground leading-none">PlaceLabels</h1>
           <p className="text-[10px] text-muted-foreground">{labels.length} insights worldwide</p>
         </div>
       </div>
