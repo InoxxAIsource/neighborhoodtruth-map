@@ -6,8 +6,8 @@ const STORAGE_KEY = "nt-onboarded-v2";
 
 export function HeroOverlay({ onDismiss }: { onDismiss: () => void }) {
   return (
-    <div className="absolute inset-0 z-[2000] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-500">
-      <div className="bg-card rounded-2xl shadow-2xl border px-8 py-10 max-w-md mx-4 text-center space-y-5 animate-in zoom-in-95 duration-300">
+    <div className="absolute inset-0 z-[2000] flex items-center justify-center bg-black/50 backdrop-blur-sm" style={{ contentVisibility: 'auto' }}>
+      <div className="bg-card rounded-2xl shadow-2xl border px-8 py-10 max-w-md mx-4 text-center space-y-5">
         <div className="mx-auto w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
           <Compass className="h-7 w-7 text-primary" />
         </div>

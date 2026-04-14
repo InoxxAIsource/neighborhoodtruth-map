@@ -1,0 +1,120 @@
+Fix the mobile Core Web Vitals on placelabels.com.
+Current: Mobile Performance 58, Mobile LCP 9.1s, Mobile FCP 7.2s
+Target: Mobile Performance 75+, Mobile LCP under 3.5s
+
+Desktop is already at 87 — do NOT change anything that affects desktop.
+Focus ONLY on mobile FCP and LCP improvements.
+
+---
+
+FIX 1 — Eliminate render-blocking Google Fonts (saves 910ms on mobile)
+
+The current font loading in index.html uses preload + onload swap,
+but it's still blocking on mobile. Replace it entirely with this 
+optimized approach:
+
+REMOVE these lines:
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?
+family=Inter:wght@400;500;600;700;800&display=swap" 
+onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="..."></noscript>
+
+REPLACE WITH this single non-blocking tag:
+<link rel="stylesheet" 
+href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;
+700;800&display=swap&display=swap" 
+media="print" onload="this.media='all'">
+<noscript>
+<link rel="stylesheet" 
+href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;
+700;800&display=swap">
+</noscript>
+
+Then add this to the main CSS file as a fallback so text shows 
+immediately without waiting for Inter to load:
+body { font-family: Inter, -apple-system, BlinkMacSystemFont, 
+'Segoe UI', sans-serif; }
+
+---
+
+FIX 2 — Move Google Analytics to load after page paint (saves ~200ms)
+
+In index.html, move the GA script block to load after the page 
+is interactive. Replace the current inline GA block:
+
+REMOVE:
+<script async src="https://www.googletagmanager.com/gtag/js?
+id=G-3DYJNWSKJP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-3DYJNWSKJP');
+</script>
+
+REPLACE WITH (deferred load after page interactive):
+<script>
+  window.addEventListener('load', function() {
+    var s = document.createElement('script');
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=G-3DYJNWSKJP';
+    s.async = true;
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    window.gtag = gtag;
+    gtag('js', new Date());
+    gtag('config', 'G-3DYJNWSKJP');
+  });
+</script>
+
+---
+
+FIX 3 — Ensure hero text is LCP element on mobile, not the map
+
+The mobile LCP element is currently the map background image (9.1s).
+We need the hero headline text to paint first and become the LCP 
+element instead.
+
+In the hero/landing component (the modal or overlay shown on first 
+visit), make these changes:
+
+a) Add fetchpriority="high" hint to the hero section
+b) Ensure the hero text div renders with no conditional loading —
+   it must be in the DOM immediately on mount with no 
+   loading state gates
+c) Add this inline style to the outermost hero container:
+   content-visibility: auto
+d) If there's any useState loading check before showing the hero 
+   text, remove it — show the text unconditionally on first render
+
+---
+
+FIX 4 — Reduce unused JavaScript on mobile (442 KiB)
+
+Check if Supabase client is imported at the top level of the app.
+If so, lazy-load it:
+
+Instead of: import { supabase } from './lib/supabase'
+Use dynamic import inside useEffect:
+useEffect(() => {
+  import('./lib/supabase').then(({ supabase }) => {
+    // fetch data here
+  });
+}, []);
+
+This removes Supabase SDK from the initial JS parse on mobile.
+
+---
+
+CONSTRAINTS:
+- Do NOT touch any desktop performance code
+- Do NOT change vite.config.ts chunk splitting (desktop is working)
+- Do NOT change any Supabase data queries or map functionality  
+- Do NOT change any schema markup or SEO meta tags
+- Do NOT change routing
+
+After changes, rebuild and run PageSpeed on mobile again.
+Target: Mobile LCP under 4s, Mobile FCP under 3s, 
+Mobile Performance score 70+.
