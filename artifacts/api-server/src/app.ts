@@ -2,11 +2,30 @@ import express, { type Express, type Request, type Response } from "express";
 import cors from "cors";
 import compression from "compression";
 import pinoHttp from "pino-http";
+import path from "path";
+import fs from "fs";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { generateSitemapXml } from "./lib/sitemap";
 import { getCityHtml } from "./lib/citySSR";
 import { getIntentHtml } from "./lib/intentSSR";
+import { getNeighborhoodHtml } from "./lib/neighborhoodSSR";
+
+// Path to the built SPA index.html — served as the catch-all for any
+// route not handled by SSR or the Replit static file layer.
+// Uses __dirname so the path is consistent whether running from
+// the workspace root (deployed) or the package dir (dev).
+const SPA_INDEX = path.resolve(__dirname, "../../neighborhood-truth/dist/public/index.html");
+
+function serveSpaCatchAll(res: Response): void {
+  if (fs.existsSync(SPA_INDEX)) {
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.setHeader("Cache-Control", "no-store");
+    res.sendFile(SPA_INDEX);
+  } else {
+    res.status(404).send("Not found");
+  }
+}
 
 const app: Express = express();
 
@@ -110,20 +129,30 @@ app.get("/api/healthz", (_req: Request, res: Response) => {
 app.use("/api", router);
 
 // SSR routes for city and intent pages
-app.get("/:citySlug/:intentSlug", async (req: Request, res: Response) => {
+app.get("/:citySlug/:secondSlug", async (req: Request, res: Response) => {
   try {
     const citySlug = req.params.citySlug as string;
-    const intentSlug = req.params.intentSlug as string;
-    const html = await getIntentHtml(citySlug, intentSlug);
+    const secondSlug = req.params.secondSlug as string;
+
+    // 1. Try known intent slugs first (safe-neighborhoods, affordable-areas, etc.)
+    let html = await getIntentHtml(citySlug, secondSlug);
+
+    // 2. If not an intent, try neighborhood/label slug (e.g. cubbon-park-morning-jogs-peaceful)
     if (!html) {
-      res.status(404).send("Page not found");
+      html = await getNeighborhoodHtml(citySlug, secondSlug);
+    }
+
+    // 3. If still no match, fall back to serving the SPA
+    if (!html) {
+      serveSpaCatchAll(res);
       return;
     }
+
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.setHeader("Cache-Control", "public, max-age=3600");
     res.send(html);
   } catch (err) {
-    logger.error({ err }, "Failed to render intent page");
+    logger.error({ err }, "Failed to render intent/neighborhood page");
     res.status(500).send("Page rendering failed");
   }
 });
@@ -133,7 +162,8 @@ app.get("/:citySlug", async (req: Request, res: Response) => {
     const citySlug = req.params.citySlug as string;
     const html = await getCityHtml(citySlug);
     if (!html) {
-      res.status(404).send("Page not found");
+      // Unknown city — serve the SPA so React can handle it
+      serveSpaCatchAll(res);
       return;
     }
     res.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -143,6 +173,14 @@ app.get("/:citySlug", async (req: Request, res: Response) => {
     logger.error({ err }, "Failed to render city page");
     res.status(500).send("Page rendering failed");
   }
+});
+
+// Catch-all: serve the React SPA for any route not matched above.
+// Replit's static layer already serves static assets (JS/CSS/images),
+// so this only fires for HTML navigation requests.
+// Express 5 requires a named wildcard parameter (not bare *).
+app.get("/{*wildcard}", (_req: Request, res: Response) => {
+  serveSpaCatchAll(res);
 });
 
 export default app;
