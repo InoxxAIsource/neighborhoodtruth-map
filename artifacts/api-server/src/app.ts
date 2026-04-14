@@ -11,6 +11,12 @@ import { getCityHtml } from "./lib/citySSR";
 import { getIntentHtml } from "./lib/intentSSR";
 import { getNeighborhoodHtml } from "./lib/neighborhoodSSR";
 
+// Path to the built SPA static assets (JS, CSS, XML, etc.)
+// Served by express.static BEFORE any route handlers so that
+// /sitemap.xml, /robots.txt, and other static files get their
+// correct Content-Type instead of being caught by the SPA handler.
+const STATIC_DIR = path.resolve(__dirname, "../../neighborhood-truth/dist/public");
+
 // Path to the built SPA index.html — served as the catch-all for any
 // route not handled by SSR or the Replit static file layer.
 // Uses __dirname so the path is consistent whether running from
@@ -53,6 +59,13 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ── 1. Static assets ─────────────────────────────────────────────────────────
+// Must be BEFORE all app.get() routes and the catch-all wildcard.
+// { index: false } prevents index.html from being served for directory
+// requests — the SSR/SPA route handlers below take care of those.
+app.use(express.static(STATIC_DIR, { index: false }));
+
+// ── 2. Specific route handlers ────────────────────────────────────────────────
 app.get("/sitemap.xml", async (_req: Request, res: Response) => {
   try {
     const xml = await generateSitemapXml();
