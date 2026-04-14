@@ -69,6 +69,7 @@ export function FilterSidebar({ filters, onFiltersChange, showHeatmap, onToggleH
         <Button
           variant="outline"
           size="icon"
+          aria-label="Open filters"
           onClick={() => setCollapsed(false)}
           className="bg-card/95 backdrop-blur-sm shadow-lg h-10 w-10"
         >
@@ -99,6 +100,7 @@ export function FilterSidebar({ filters, onFiltersChange, showHeatmap, onToggleH
                 size="icon"
                 className="h-7 w-7"
                 onClick={() => onFiltersChange(DEFAULT_FILTERS)}
+                aria-label={t.reset}
                 title={t.reset}
               >
                 <RotateCcw className="h-3 w-3" />
@@ -107,6 +109,7 @@ export function FilterSidebar({ filters, onFiltersChange, showHeatmap, onToggleH
             <Button
               variant="ghost"
               size="icon"
+              aria-label="Close filters"
               className="h-7 w-7"
               onClick={() => setCollapsed(true)}
             >
