@@ -1,0 +1,119 @@
+Fix the mobile LCP on placelabels.com. Current: 9.6s. Target: under 3s.
+
+The root cause is that the Leaflet map (full viewport) is the LCP element.
+The fix is to show a static poster image instantly, then swap in the 
+real Leaflet map once it's ready — identical to how YouTube loads a 
+thumbnail before the video player.
+
+---
+
+FIX 1 — Create a static map poster image
+
+Take a screenshot of the current Leaflet map at 390×844px (mobile viewport)
+showing a world map view at zoom level 2. Save it as:
+  /public/map-poster.jpg
+  
+Compress it to under 80KB using sharp or similar. This is the image that 
+loads instantly and becomes the LCP element.
+
+---
+
+FIX 2 — Show poster first, swap to real map after load
+
+In the main map component (wherever Leaflet is initialised), wrap the 
+MapContainer with this pattern:
+
+const [mapReady, setMapReady] = useState(false);
+
+return (
+  <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+    
+    {/* POSTER — loads instantly, is the LCP element */}
+    {!mapReady && (
+      <img
+        src="/map-poster.jpg"
+        alt="World neighborhood map"
+        fetchpriority="high"
+        decoding="async"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          zIndex: 1
+        }}
+      />
+    )}
+
+    {/* REAL MAP — loads behind poster, fades in when ready */}
+    <div style={{ 
+      position: 'absolute', 
+      inset: 0,
+      opacity: mapReady ? 1 : 0,
+      transition: 'opacity 0.3s ease',
+      zIndex: 2
+    }}>
+      <MapContainer
+        whenReady={() => setMapReady(true)}
+        {/* ... all existing props unchanged ... */}
+      >
+        {/* ... all existing children unchanged ... */}
+      </MapContainer>
+    </div>
+
+  </div>
+);
+
+The poster image is a real <img> tag — browsers load it at highest 
+priority and it paints in under 500ms. This becomes the LCP element.
+Leaflet loads behind it invisibly and fades in when tiles are ready.
+
+---
+
+FIX 3 — Add fetchpriority="high" preload for the poster in index.html
+
+Add this line to index.html <head>, before the CSS links:
+<link rel="preload" as="image" href="/map-poster.jpg" 
+      fetchpriority="high">
+
+This tells the browser to download map-poster.jpg at highest priority,
+before JS bundles, before CSS — it will be ready to paint almost 
+immediately on mobile.
+
+---
+
+FIX 4 — Inline critical CSS to eliminate remaining render-blocking 750ms
+
+The main CSS bundle (index.css) is render-blocking. Extract the minimum
+CSS needed for above-the-fold content and inline it directly in index.html
+inside a <style> tag in <head>:
+
+Minimum critical CSS to inline:
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body { font-family: Inter, -apple-system, BlinkMacSystemFont, 
+         'Segoe UI', sans-serif; background: #0f172a; }
+  #root { height: 100%; }
+  .map-poster { 
+    position: absolute; inset: 0; 
+    width: 100%; height: 100%; 
+    object-fit: cover; 
+  }
+</style>
+
+Then load the full CSS non-blocking:
+Change: <link rel="stylesheet" href="/assets/index.css">
+To: <link rel="stylesheet" href="/assets/index.css" 
+         media="print" onload="this.media='all'">
+
+---
+
+CONSTRAINTS:
+- Do NOT change any Supabase/API queries
+- Do NOT change routing or schema markup
+- Do NOT change desktop layout — poster only shows while map loads
+- Preserve all existing map functionality (labels, voting, pins)
+- The poster image must be a real static file in /public/
+- map-poster.jpg must be under 80KB

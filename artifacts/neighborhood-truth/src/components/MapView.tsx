@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo, useCallback } from "react";
+import { useEffect, useRef, useMemo, useCallback, useState } from "react";
 import L, { Map as LeafletMap } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster";
@@ -675,6 +675,7 @@ export function MapView({
   onZoomChange,
 }: MapViewProps) {
   const { t } = useLanguage();
+  const [mapReady, setMapReady] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
@@ -777,10 +778,12 @@ export function MapView({
       zoomControl: true,
     });
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    const tileLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 19,
     }).addTo(map);
+
+    tileLayer.once("tileload", () => setMapReady(true));
 
     mapRef.current = map;
     markersRef.current = L.layerGroup().addTo(map);
@@ -1183,11 +1186,39 @@ export function MapView({
     }
   }, [layers?.traffic, hereApiKey]);
 
+  const posterSrc = `${import.meta.env.BASE_URL}map-poster.jpg`;
+
   return (
-    <div
-      ref={containerRef}
-      style={{ width: "100%", height: "100%" }}
-      className="z-0"
-    />
+    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+      {!mapReady && (
+        <img
+          src={posterSrc}
+          alt="World neighborhood map"
+          fetchPriority="high"
+          decoding="async"
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            zIndex: 1,
+          }}
+        />
+      )}
+      <div
+        ref={containerRef}
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          opacity: mapReady ? 1 : 0,
+          transition: "opacity 0.3s ease",
+          zIndex: 2,
+        }}
+        className="z-0"
+      />
+    </div>
   );
 }

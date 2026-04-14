@@ -18,6 +18,18 @@
     <link rel="manifest" href="./manifest.json" />
     <link rel="apple-touch-icon" href="./icons/icon-192.png" />
 
+    <!-- Critical: preload map poster at highest priority (mobile LCP fix) -->
+    <link rel="preload" as="image" href="./map-poster.jpg" fetchpriority="high">
+
+    <!-- Inline critical CSS: text + layout renders before any stylesheet loads -->
+    <style>
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; height: 100%; }
+      body { font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #e8e0d8; }
+      #root { height: 100%; }
+      .map-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    </style>
+
     <!-- Open Graph -->
     <meta property="og:site_name" content="PlaceLabels" />
     <meta property="og:title" content="PlaceLabels | Honest Neighborhood Reviews from Real Locals" />
