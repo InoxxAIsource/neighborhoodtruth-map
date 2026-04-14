@@ -280,6 +280,7 @@ export function MigrationModal({ citySlug, cityName, cityLabels, apiBase, onClos
             </div>
           </div>
           <button
+            aria-label="Close"
             onClick={onClose}
             className="text-white/80 hover:text-white rounded-full p-1 transition-colors"
           >

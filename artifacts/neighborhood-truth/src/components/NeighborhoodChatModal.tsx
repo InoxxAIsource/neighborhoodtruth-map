@@ -454,6 +454,7 @@ export function NeighborhoodChatModal({ label, allLabels, onClose, apiBase, onVo
             </div>
           </div>
           <button
+            aria-label="Close"
             onClick={onClose}
             className="text-white/80 hover:text-white rounded-full p-1 transition-colors flex-shrink-0"
           >

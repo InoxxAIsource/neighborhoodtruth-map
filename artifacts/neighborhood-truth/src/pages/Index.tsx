@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect, lazy, Suspense } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { MapView } from "@/components/MapView";
-import type { AreaSummary, LabelData } from "@/components/MapView";
+import type { AreaSummary, LabelData, Filters } from "@/components/MapView";
 import { FilterSidebar, DEFAULT_FILTERS } from "@/components/FilterSidebar";
 import { TopToolbar } from "@/components/TopToolbar";
 import { HeroOverlay, MicroHints, useOnboarding } from "@/components/Onboarding";
@@ -10,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Plus, MapPin, Sparkles, X } from "lucide-react";
 import { useVoterId } from "@/hooks/useVoterId";
 import { toast } from "sonner";
-import type { Filters } from "@/components/MapView";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { MigrationModal } from "@/components/MigrationModal";
 import { ShareSheet } from "@/components/ShareSheet";
@@ -20,6 +18,7 @@ import { useLayerState } from "@/hooks/useLayerState";
 
 const TOMTOM_API_KEY = (import.meta.env.VITE_TOMTOM_API_KEY as string | undefined) ?? "";
 
+const MapView = lazy(() => import("@/components/MapView").then((m) => ({ default: m.MapView })));
 const AddLabelDialog = lazy(() => import("@/components/AddLabelDialog").then(m => ({ default: m.AddLabelDialog })));
 const NeighborhoodChatModal = lazy(() => import("@/components/NeighborhoodChatModal").then(m => ({ default: m.NeighborhoodChatModal })));
 
@@ -243,31 +242,40 @@ export default function Index() {
 
   return (
     <div className="h-screen w-screen relative overflow-hidden">
-      <MapView
-        labels={labels}
-        isPlacingPin={isPlacingPin}
-        onMapClick={handleMapClick}
-        onVote={handleVote}
-        onLabelClick={handleLabelClick}
-        showHeatmap={showHeatmap}
-        filters={filters}
-        showLabels={showLabels}
-        selectedCategories={selectedCategories}
-        locateUser={locateUser}
-        onLocated={() => setLocateUser(false)}
-        flyToLocation={flyToLocation}
-        onFlownTo={() => setFlyToLocation(null)}
-        onAreaClick={(area: AreaSummary) => {
-          toast.info(`Exploring ${area.name} — ${area.labelCount} labels nearby`);
-        }}
-        apiBase={API}
-        voterId={voterId}
-        myVotes={userVotes}
-        onMapViewChange={handleMapViewChange}
-        layers={layers}
-        hereApiKey={TOMTOM_API_KEY || undefined}
-        onZoomChange={setMapZoom}
-      />
+      <Suspense fallback={
+        <div className="absolute inset-0 bg-[#e8e0d8] flex flex-col items-center justify-center z-0">
+          <div className="flex flex-col items-center gap-3 text-gray-500">
+            <MapPin className="h-8 w-8 animate-bounce text-teal-600" />
+            <p className="text-sm font-medium">Loading map…</p>
+          </div>
+        </div>
+      }>
+        <MapView
+          labels={labels}
+          isPlacingPin={isPlacingPin}
+          onMapClick={handleMapClick}
+          onVote={handleVote}
+          onLabelClick={handleLabelClick}
+          showHeatmap={showHeatmap}
+          filters={filters}
+          showLabels={showLabels}
+          selectedCategories={selectedCategories}
+          locateUser={locateUser}
+          onLocated={() => setLocateUser(false)}
+          flyToLocation={flyToLocation}
+          onFlownTo={() => setFlyToLocation(null)}
+          onAreaClick={(area: AreaSummary) => {
+            toast.info(`Exploring ${area.name} — ${area.labelCount} labels nearby`);
+          }}
+          apiBase={API}
+          voterId={voterId}
+          myVotes={userVotes}
+          onMapViewChange={handleMapViewChange}
+          layers={layers}
+          hereApiKey={TOMTOM_API_KEY || undefined}
+          onZoomChange={setMapZoom}
+        />
+      </Suspense>
 
       <TopToolbar
         showLabels={showLabels}
@@ -366,6 +374,7 @@ export default function Index() {
             Start quiz
           </button>
           <button
+            aria-label="Dismiss banner"
             onClick={() => {
               setMigrationBannerDismissed(true);
               try { sessionStorage.setItem("pl_migration_banner_dismissed", "1"); } catch {}

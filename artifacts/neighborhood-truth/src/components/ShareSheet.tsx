@@ -80,7 +80,7 @@ export function ShareSheet({ cardData, shareUrl, whatsappText, onClose }: ShareS
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b">
           <p className="font-bold text-gray-900 text-sm">Share Vibe Card</p>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 transition-colors">
+          <button aria-label="Close" onClick={onClose} className="text-gray-400 hover:text-gray-700 transition-colors">
             <X className="h-5 w-5" />
           </button>
         </div>

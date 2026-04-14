@@ -225,7 +225,7 @@ export function TopToolbar({
         {/* Search */}
         <Popover open={searchOpen} onOpenChange={setSearchOpen}>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="sm" className="gap-1 sm:gap-1.5 text-xs h-8 px-2 sm:px-3">
+            <Button variant="ghost" size="sm" aria-label={t.search} className="gap-1 sm:gap-1.5 text-xs h-8 px-2 sm:px-3">
               <Search className="h-3.5 w-3.5 flex-shrink-0" />
               <span className="hidden sm:inline">{t.search}</span>
             </Button>
@@ -246,7 +246,7 @@ export function TopToolbar({
                     <Loader2 className="h-3.5 w-3.5 animate-spin absolute right-2 top-2 text-muted-foreground" />
                   )}
                 </div>
-                <Button size="sm" onClick={handleSearch} disabled={isSearching} className="h-8 px-3">
+                <Button size="sm" aria-label="Search" onClick={handleSearch} disabled={isSearching} className="h-8 px-3">
                   <Search className="h-3.5 w-3.5" />
                 </Button>
               </div>
@@ -282,6 +282,7 @@ export function TopToolbar({
           size="sm"
           className="gap-1 sm:gap-1.5 text-xs h-8 px-2 sm:px-3"
           onClick={onToggleLabels}
+          aria-label={showLabels ? "Hide labels" : "Show labels"}
           title={showLabels ? "Hide labels" : "Show labels"}
         >
           {showLabels ? <TagsIcon className="h-3.5 w-3.5 flex-shrink-0" /> : <EyeOff className="h-3.5 w-3.5 flex-shrink-0" />}
@@ -294,6 +295,7 @@ export function TopToolbar({
           size="sm"
           className={`gap-1 sm:gap-1.5 text-xs h-8 px-2 sm:px-3 transition-colors ${showHeatmap ? "bg-orange-100 text-orange-700 hover:bg-orange-200" : ""}`}
           onClick={onToggleHeatmap}
+          aria-label={showHeatmap ? "Hide heatmap" : "Show density heatmap"}
           title={showHeatmap ? "Hide heatmap" : "Show density heatmap"}
         >
           <Flame className={`h-3.5 w-3.5 flex-shrink-0 ${showHeatmap ? "text-orange-600" : ""}`} />
@@ -414,6 +416,7 @@ export function TopToolbar({
           className="gap-1 sm:gap-1.5 text-xs h-8 px-2 sm:px-3"
           onClick={onLocate}
           disabled={isLocating}
+          aria-label="Locate me"
           title="Locate me"
         >
           {isLocating ? <Loader2 className="h-3.5 w-3.5 animate-spin flex-shrink-0" /> : <LocateFixed className="h-3.5 w-3.5 flex-shrink-0" />}

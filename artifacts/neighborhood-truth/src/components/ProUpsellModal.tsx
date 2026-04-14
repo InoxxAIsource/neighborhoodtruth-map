@@ -74,7 +74,7 @@ export function ProUpsellModal({ reason, cityInterest, apiBase, onClose }: ProUp
               <p className="text-teal-100 text-xs mt-0.5 leading-snug">{copy.sub}</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-white/70 hover:text-white transition-colors ml-2 flex-shrink-0 mt-0.5">
+          <button aria-label="Close" onClick={onClose} className="text-white/70 hover:text-white transition-colors ml-2 flex-shrink-0 mt-0.5">
             <X className="h-5 w-5" />
           </button>
         </div>

@@ -1,0 +1,101 @@
+Fix the Core Web Vitals performance issues on placelabels.com.
+Current scores: Mobile Performance 57, Desktop Performance 52.
+Target: Mobile 75+, Desktop 80+.
+
+The site is React + Vite + TypeScript + Leaflet + Tailwind.
+Google uses mobile-first indexing so mobile fixes are highest priority.
+
+---
+
+FIX 1 — Lazy load the Leaflet map (fixes mobile LCP 8.1s → target <3s)
+
+The Leaflet map is the LCP element and loads immediately on mount,
+blocking all rendering. Fix this by:
+
+a) Wrapping the map component in React.lazy() + Suspense
+b) Showing a static placeholder/skeleton FIRST before the map loads:
+   - Display the hero text and CTA button immediately
+   - Show a grey map-shaped placeholder with a loading spinner
+   - Load the actual Leaflet map only after the initial paint completes
+c) Use dynamic import for the map:
+   const MapComponent = React.lazy(() => import('./components/MapView'))
+
+This ensures users see content instantly, and the map loads in the 
+background — dramatically improving FCP and LCP.
+
+---
+
+FIX 2 — Remove excess preconnect tags (fixes render-blocking 1,060ms)
+
+In index.html, REMOVE these 3 preconnect tags:
+<link rel="preconnect" href="https://a.tile.openstreetmap.org">
+<link rel="preconnect" href="https://b.tile.openstreetmap.org">
+<link rel="preconnect" href="https://c.tile.openstreetmap.org">
+
+Keep only:
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+The OSM tile preconnects are triggering the "more than 4 preconnect"
+warning and causing render delays on mobile. Leaflet handles its own
+tile connections — these preconnects are redundant and harmful.
+
+---
+
+FIX 3 — Fix viewport maximum-scale (fixes Best Practices warning)
+
+In index.html line 6, change:
+<meta name="viewport" content="width=device-width, initial-scale=1.0, 
+maximum-scale=1, viewport-fit=cover" />
+
+To:
+<meta name="viewport" content="width=device-width, initial-scale=1.0, 
+viewport-fit=cover" />
+
+Remove maximum-scale=1 entirely. This fixes the accessibility 
+violation and improves Best Practices score.
+
+---
+
+FIX 4 — Code-split Leaflet out of the main bundle (fixes TBT + unused JS)
+
+In vite.config.ts, add manual chunk splitting to keep Leaflet 
+separate from the main app bundle:
+
+build: {
+  rollupOptions: {
+    output: {
+      manualChunks: {
+        'react-vendor': ['react', 'react-dom'],
+        'leaflet-vendor': ['leaflet', 'react-leaflet'],
+        'radix-vendor': ['@radix-ui/react-dialog', 
+                         '@radix-ui/react-dropdown-menu'],
+      }
+    }
+  }
+}
+
+This prevents Leaflet (~400KB) from blocking the initial JS parse.
+
+---
+
+FIX 5 — Add accessible labels to icon-only buttons (fixes Accessibility)
+
+Search the codebase for <button> elements that contain only an icon 
+(no visible text). Add aria-label attributes to each one.
+Examples:
+- Close button → aria-label="Close"
+- Menu button → aria-label="Open menu"  
+- Map zoom buttons → aria-label="Zoom in" / aria-label="Zoom out"
+
+---
+
+CONSTRAINTS:
+- Do NOT change any Supabase queries or data logic
+- Do NOT change any existing routes
+- Do NOT remove schema markup from index.html
+- Do NOT change the title, meta description, or canonical tags
+- Preserve all existing Tailwind styling
+- After changes, rebuild and confirm the new bundle sizes in /dist
+
+Show me the updated index.html and the new bundle chunk sizes after build.

@@ -91,7 +91,7 @@ export function LayerControlPanel({
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50">
             <span className="text-sm font-semibold text-gray-800">Map Layers</span>
-            <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-gray-600">
+            <button aria-label="Close" onClick={() => setOpen(false)} className="text-gray-400 hover:text-gray-600">
               <X className="w-4 h-4" />
             </button>
           </div>
