@@ -1,10 +1,13 @@
 /**
  * Post-build prerender script for PlaceLabels.
  *
- * After `vite build`, this script reads dist/public/index.html and generates
- * a city-specific index.html for each of the 36 city routes so that
- * Googlebot (which does not execute JavaScript) sees real, meaningful HTML
- * instead of a blank <div id="root"></div>.
+ * After `vite build`, this script:
+ *  1. Generates a city-specific index.html for each of the 35 city routes
+ *     so that Googlebot sees real HTML instead of a blank React shell.
+ *  2. Queries the Postgres database (via DATABASE_URL) to build a complete
+ *     sitemap.xml that includes every label page URL, then writes it to
+ *     dist/public/sitemap.xml (overwriting the static fallback Vite copied).
+ *  3. Pings Google Search Console to re-index the updated sitemap.
  *
  * No Puppeteer / headless browser required — runs in plain Node.js.
  */
@@ -19,43 +22,61 @@ const __dirname = dirname(__filename);
 const DIST = resolve(__dirname, "../dist/public");
 const TEMPLATE_PATH = resolve(DIST, "index.html");
 
-// ─── City list (slug → display name) ────────────────────────────────────────
+// ─── City list (slug → display name + bounding box) ─────────────────────────
 const CITIES = [
-  { slug: "new-york",      name: "New York" },
-  { slug: "san-francisco", name: "San Francisco" },
-  { slug: "los-angeles",   name: "Los Angeles" },
-  { slug: "toronto",       name: "Toronto" },
-  { slug: "mexico-city",   name: "Mexico City" },
-  { slug: "buenos-aires",  name: "Buenos Aires" },
-  { slug: "london",        name: "London" },
-  { slug: "amsterdam",     name: "Amsterdam" },
-  { slug: "rome",          name: "Rome" },
-  { slug: "istanbul",      name: "Istanbul" },
-  { slug: "tel-aviv",      name: "Tel Aviv" },
-  { slug: "cairo",         name: "Cairo" },
-  { slug: "cape-town",     name: "Cape Town" },
-  { slug: "tokyo",         name: "Tokyo" },
-  { slug: "seoul",         name: "Seoul" },
-  { slug: "hong-kong",     name: "Hong Kong" },
-  { slug: "bali",          name: "Bali" },
-  { slug: "mumbai",        name: "Mumbai" },
-  { slug: "delhi",         name: "Delhi" },
-  { slug: "bangalore",     name: "Bangalore" },
-  { slug: "hyderabad",     name: "Hyderabad" },
-  { slug: "pune",          name: "Pune" },
-  { slug: "chennai",       name: "Chennai" },
-  { slug: "kolkata",       name: "Kolkata" },
-  { slug: "jaipur",        name: "Jaipur" },
-  { slug: "karachi",       name: "Karachi" },
-  { slug: "lahore",        name: "Lahore" },
-  { slug: "goa",           name: "Goa" },
-  { slug: "ahmedabad",     name: "Ahmedabad" },
-  { slug: "lucknow",       name: "Lucknow" },
-  { slug: "chandigarh",    name: "Chandigarh" },
-  { slug: "indore",        name: "Indore" },
-  { slug: "coimbatore",    name: "Coimbatore" },
-  { slug: "tehran",        name: "Tehran" },
-  { slug: "jerusalem",     name: "Jerusalem" },
+  { slug: "new-york",      name: "New York",      latMin: 40.4, latMax: 41.0, lngMin: -74.3, lngMax: -73.7 },
+  { slug: "san-francisco", name: "San Francisco", latMin: 37.6, latMax: 37.9, lngMin: -122.6, lngMax: -122.3 },
+  { slug: "los-angeles",   name: "Los Angeles",   latMin: 33.7, latMax: 34.4, lngMin: -118.7, lngMax: -118.0 },
+  { slug: "toronto",       name: "Toronto",       latMin: 43.5, latMax: 43.9, lngMin: -79.7, lngMax: -79.1 },
+  { slug: "mexico-city",   name: "Mexico City",   latMin: 19.2, latMax: 19.6, lngMin: -99.4, lngMax: -98.9 },
+  { slug: "buenos-aires",  name: "Buenos Aires",  latMin: -34.8, latMax: -34.4, lngMin: -58.7, lngMax: -58.2 },
+  { slug: "london",        name: "London",        latMin: 51.3, latMax: 51.7, lngMin: -0.3, lngMax: 0.1 },
+  { slug: "amsterdam",     name: "Amsterdam",     latMin: 52.3, latMax: 52.5, lngMin: 4.7, lngMax: 5.1 },
+  { slug: "rome",          name: "Rome",          latMin: 41.7, latMax: 42.1, lngMin: 12.3, lngMax: 12.7 },
+  { slug: "istanbul",      name: "Istanbul",      latMin: 40.8, latMax: 41.3, lngMin: 28.6, lngMax: 29.5 },
+  { slug: "tel-aviv",      name: "Tel Aviv",      latMin: 31.9, latMax: 32.2, lngMin: 34.7, lngMax: 35.05 },
+  { slug: "cairo",         name: "Cairo",         latMin: 29.9, latMax: 30.2, lngMin: 31.1, lngMax: 31.5 },
+  { slug: "cape-town",     name: "Cape Town",     latMin: -34.2, latMax: -33.7, lngMin: 18.3, lngMax: 18.7 },
+  { slug: "tokyo",         name: "Tokyo",         latMin: 35.5, latMax: 35.8, lngMin: 139.5, lngMax: 139.9 },
+  { slug: "seoul",         name: "Seoul",         latMin: 37.4, latMax: 37.7, lngMin: 126.8, lngMax: 127.3 },
+  { slug: "hong-kong",     name: "Hong Kong",     latMin: 22.1, latMax: 22.6, lngMin: 113.9, lngMax: 114.5 },
+  { slug: "bali",          name: "Bali",          latMin: -8.9, latMax: -8.3, lngMin: 115.0, lngMax: 115.5 },
+  { slug: "mumbai",        name: "Mumbai",        latMin: 18.7, latMax: 19.4, lngMin: 72.4, lngMax: 73.3 },
+  { slug: "delhi",         name: "Delhi",         latMin: 28.3, latMax: 29.1, lngMin: 76.7, lngMax: 77.5 },
+  { slug: "bangalore",     name: "Bangalore",     latMin: 12.5, latMax: 13.4, lngMin: 77.2, lngMax: 78.0 },
+  { slug: "hyderabad",     name: "Hyderabad",     latMin: 16.9, latMax: 17.8, lngMin: 78.0, lngMax: 78.9 },
+  { slug: "pune",          name: "Pune",          latMin: 18.0, latMax: 18.9, lngMin: 73.4, lngMax: 74.3 },
+  { slug: "chennai",       name: "Chennai",       latMin: 12.6, latMax: 13.5, lngMin: 79.8, lngMax: 80.8 },
+  { slug: "kolkata",       name: "Kolkata",       latMin: 22.1, latMax: 22.9, lngMin: 88.0, lngMax: 88.8 },
+  { slug: "jaipur",        name: "Jaipur",        latMin: 26.4, latMax: 27.2, lngMin: 75.4, lngMax: 76.2 },
+  { slug: "karachi",       name: "Karachi",       latMin: 24.7, latMax: 25.2, lngMin: 66.8, lngMax: 67.4 },
+  { slug: "lahore",        name: "Lahore",        latMin: 31.3, latMax: 31.7, lngMin: 74.1, lngMax: 74.5 },
+  { slug: "goa",           name: "Goa",           latMin: 14.8, latMax: 15.8, lngMin: 73.3, lngMax: 74.3 },
+  { slug: "ahmedabad",     name: "Ahmedabad",     latMin: 22.5, latMax: 23.3, lngMin: 72.3, lngMax: 73.2 },
+  { slug: "lucknow",       name: "Lucknow",       latMin: 26.3, latMax: 27.1, lngMin: 80.5, lngMax: 81.3 },
+  { slug: "chandigarh",    name: "Chandigarh",    latMin: 30.3, latMax: 31.1, lngMin: 76.3, lngMax: 77.2 },
+  { slug: "indore",        name: "Indore",        latMin: 22.2, latMax: 23.0, lngMin: 75.4, lngMax: 76.2 },
+  { slug: "coimbatore",    name: "Coimbatore",    latMin: 10.8, latMax: 11.2, lngMin: 76.8, lngMax: 77.2 },
+  { slug: "tehran",        name: "Tehran",        latMin: 35.5, latMax: 36.0, lngMin: 51.0, lngMax: 51.7 },
+  { slug: "jerusalem",     name: "Jerusalem",     latMin: 31.6, latMax: 31.9, lngMin: 35.1, lngMax: 35.4 },
+];
+
+// All 14 intent slugs used by intentSSR.ts
+const INTENT_SLUGS = [
+  "safe-neighborhoods",
+  "quiet-neighborhoods",
+  "walkable-neighborhoods",
+  "affordable-areas",
+  "cheap-rent",
+  "cost-of-living",
+  "expensive-neighborhoods",
+  "luxury-real-estate",
+  "transit-friendly",
+  "nightlife-areas",
+  "family-friendly",
+  "best-areas-for-students",
+  "best-areas-for-young-professionals",
+  "expat-neighborhoods",
 ];
 
 // All city links for the footer (keeps internal linking intact in every page)
@@ -129,7 +150,140 @@ function cityBodyShell(slug, name) {
 </div>`;
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
+// ─── Sitemap helpers ──────────────────────────────────────────────────────────
+
+function slugify(text) {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/[\s]+/g, "-")
+    .replace(/-+/g, "-");
+}
+
+function xmlEscape(str) {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function toIsoDate(d) {
+  const date = d ? new Date(d) : new Date();
+  return date.toISOString().split("T")[0];
+}
+
+function getCityForCoords(lat, lng) {
+  return CITIES.find(
+    (c) => lat >= c.latMin && lat <= c.latMax && lng >= c.lngMin && lng <= c.lngMax
+  ) ?? null;
+}
+
+function urlEntry(loc, lastmod, changefreq, priority) {
+  return `  <url>\n    <loc>${xmlEscape(loc)}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n  </url>`;
+}
+
+// ─── Database sitemap generator ──────────────────────────────────────────────
+
+async function generateSitemap() {
+  const today = toIsoDate(new Date());
+  const BASE = "https://placelabels.com";
+
+  const entries = [];
+
+  // 1. Homepage
+  entries.push(urlEntry(`${BASE}/`, today, "daily", "1.0"));
+
+  // 2. City pages + intent pages (static — same regardless of DB content)
+  for (const city of CITIES) {
+    entries.push(urlEntry(`${BASE}/${city.slug}`, today, "weekly", "0.8"));
+    for (const intent of INTENT_SLUGS) {
+      entries.push(urlEntry(`${BASE}/${city.slug}/${intent}`, today, "weekly", "0.7"));
+    }
+  }
+
+  // 3. Label pages — require DB query
+  if (!process.env.DATABASE_URL) {
+    console.warn("  ⚠  DATABASE_URL not set — skipping label pages in sitemap.");
+  } else {
+    let pool;
+    try {
+      const pg = (await import("pg")).default;
+      pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+
+      const { rows: labels } = await pool.query(
+        "SELECT lat, lng, text, created_at FROM labels ORDER BY created_at DESC"
+      );
+
+      // Deduplicate: one URL per city + slugified text combination
+      const seen = new Set();
+      let labelCount = 0;
+
+      for (const row of labels) {
+        const city = getCityForCoords(row.lat, row.lng);
+        if (!city) continue;
+
+        const labelSlug = slugify(row.text);
+        const key = `${city.slug}/${labelSlug}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+
+        entries.push(
+          urlEntry(
+            `${BASE}/${city.slug}/${labelSlug}`,
+            toIsoDate(row.created_at),
+            "weekly",
+            "0.5"
+          )
+        );
+        labelCount++;
+      }
+
+      console.log(`  ✓ Added ${labelCount} unique label URLs to sitemap`);
+    } catch (err) {
+      console.error("  ✗ DB query failed — sitemap written without label pages:", err.message);
+    } finally {
+      if (pool) await pool.end().catch(() => {});
+    }
+  }
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+${entries.join("\n")}
+
+</urlset>`;
+
+  const sitemapPath = resolve(DIST, "sitemap.xml");
+  writeFileSync(sitemapPath, xml, "utf-8");
+
+  const cityCount   = CITIES.length;
+  const intentCount = CITIES.length * INTENT_SLUGS.length;
+  const totalUrls   = entries.length;
+  console.log(`  ✓ sitemap.xml written → ${sitemapPath}`);
+  console.log(`    1 homepage + ${cityCount} city + ${intentCount} intent + ${totalUrls - 1 - cityCount - intentCount} label = ${totalUrls} total URLs`);
+
+  return totalUrls;
+}
+
+// ─── Google ping ─────────────────────────────────────────────────────────────
+
+async function pingGoogle() {
+  // Google requires the sitemap URL to be percent-encoded in the query string.
+  const sitemapUrl = "https://placelabels.com/sitemap.xml";
+  const PING_URL = `https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`;
+  try {
+    const res = await fetch(PING_URL, { redirect: "follow" });
+    if (res.ok || res.status === 204) {
+      console.log(`  ✓ Google pinged (${res.status}) — sitemap reindex requested`);
+    } else {
+      // Non-fatal: Google deprecated the ping endpoint in June 2023.
+      // Submit via Search Console for full control.
+      console.warn(`  ⚠  Google ping returned ${res.status} (non-fatal — use Search Console for manual resubmission)`);
+    }
+  } catch (err) {
+    console.warn(`  ⚠  Google ping failed (non-fatal): ${err.message}`);
+  }
+}
+
+// ─── HTML prerender helpers ───────────────────────────────────────────────────
 
 function patchHead(html, { title, description, canonical, breadcrumbSchema }) {
   // <title>
@@ -166,8 +320,13 @@ function patchHead(html, { title, description, canonical, breadcrumbSchema }) {
 }
 
 function patchBody(html, bodyShell) {
-  return html.replace('<div id="root"></div>', `<div id="root">${bodyShell}</div>`);
+  return html.replace(
+    /<div id="root">[\s\S]*?<\/div>/,
+    `<div id="root">${bodyShell}</div>`
+  );
 }
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function run() {
   if (!existsSync(TEMPLATE_PATH)) {
@@ -176,6 +335,8 @@ async function run() {
     process.exit(1);
   }
 
+  // ── Step 1: prerender city HTML pages ──
+  console.log("\n📄 Prerendering city pages…");
   const template = readFileSync(TEMPLATE_PATH, "utf-8");
   let ok = 0;
 
@@ -197,6 +358,16 @@ async function run() {
   }
 
   console.log(`\n🎉 Prerender complete — ${ok}/${CITIES.length} city pages written to dist/public/`);
+
+  // ── Step 2: generate sitemap.xml with all label URLs ──
+  console.log("\n🗺️  Generating sitemap.xml…");
+  const totalUrls = await generateSitemap();
+
+  // ── Step 3: ping Google ──
+  console.log("\n📡 Pinging Google Search Console…");
+  await pingGoogle();
+
+  console.log(`\n✅ Done — ${totalUrls} URLs in sitemap.xml\n`);
 }
 
 run().catch((err) => { console.error(err); process.exit(1); });

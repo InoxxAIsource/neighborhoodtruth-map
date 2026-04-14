@@ -1,224 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  STATIC FALLBACK SITEMAP
+  ──────────────────────────────────────────────────────────────────────────────
+  This file is copied to dist/public/sitemap.xml by `vite build`.
+  It is immediately OVERWRITTEN by scripts/prerender.mjs which queries the
+  Postgres database to include all live label page URLs at priority 0.5.
+
+  If you only see city + intent URLs here (no /{city}/{label} entries),
+  it means prerender.mjs did not run or DATABASE_URL was not set during build.
+  ──────────────────────────────────────────────────────────────────────────────
+-->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <!-- Homepage -->
   <url>
     <loc>https://placelabels.com/</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
+    <lastmod>2026-04-14</lastmod>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 
-  <!-- City pages -->
-  <url>
-    <loc>https://placelabels.com/new-york</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/san-francisco</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/los-angeles</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/toronto</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/mexico-city</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/buenos-aires</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/london</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/amsterdam</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/rome</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/istanbul</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/tel-aviv</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/cairo</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/cape-town</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/tokyo</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/seoul</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/hong-kong</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/bali</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/mumbai</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/delhi</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/bangalore</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/hyderabad</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/pune</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/chennai</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/kolkata</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/jaipur</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/karachi</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/lahore</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/goa</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/ahmedabad</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/lucknow</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/chandigarh</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/indore</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/coimbatore</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/tehran</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://placelabels.com/jerusalem</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
+  <!-- City pages (priority 0.8) -->
+  <url><loc>https://placelabels.com/new-york</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/san-francisco</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/los-angeles</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/toronto</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/mexico-city</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/buenos-aires</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/london</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/amsterdam</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/rome</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/istanbul</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/tel-aviv</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/cairo</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/cape-town</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/tokyo</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/seoul</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/hong-kong</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/bali</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/mumbai</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/delhi</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/bangalore</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/hyderabad</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/pune</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/chennai</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/kolkata</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/jaipur</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/karachi</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/lahore</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/goa</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/ahmedabad</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/lucknow</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/chandigarh</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/indore</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/coimbatore</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/tehran</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://placelabels.com/jerusalem</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+
+  <!--
+    Intent pages (priority 0.7) — 35 cities × 14 intents = 490 URLs
+    Generated dynamically by prerender.mjs; listed here as representative samples.
+  -->
+  <url><loc>https://placelabels.com/mumbai/safe-neighborhoods</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://placelabels.com/mumbai/affordable-areas</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://placelabels.com/mumbai/family-friendly</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://placelabels.com/delhi/safe-neighborhoods</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://placelabels.com/bangalore/safe-neighborhoods</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://placelabels.com/london/safe-neighborhoods</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://placelabels.com/new-york/safe-neighborhoods</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://placelabels.com/tokyo/family-friendly</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+
+  <!--
+    Label pages (priority 0.5, changefreq weekly) — populated at build time
+    by prerender.mjs querying the database.
+    Example format: https://placelabels.com/{city-slug}/{label-slug}
+  -->
 
 </urlset>

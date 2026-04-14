@@ -425,6 +425,9 @@ importers:
       leaflet.markercluster:
         specifier: ^1.5.3
         version: 1.5.3(leaflet@1.9.4)
+      pg:
+        specifier: ^8.13.3
+        version: 8.20.0
       react-helmet-async:
         specifier: ^3.0.0
         version: 3.0.0(react@19.1.0)
