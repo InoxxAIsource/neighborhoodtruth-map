@@ -56,14 +56,42 @@ app.use(
 );
 app.use(compression());
 app.use(cors());
+
+// HSTS — tell browsers to always use HTTPS for this domain (1 year).
+// Only meaningful once a valid TLS certificate is in place.
+app.use((_req, res, next) => {
+  res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+  next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ── 1. Static assets ─────────────────────────────────────────────────────────
 // Must be BEFORE all app.get() routes and the catch-all wildcard.
-// { index: false } prevents index.html from being served for directory
-// requests — the SSR/SPA route handlers below take care of those.
-app.use(express.static(STATIC_DIR, { index: false, redirect: false }));
+// { index: false } — don't auto-serve index.html for directories (SSR handles those).
+// { redirect: false } — don't 301 /foo to /foo/ for directory entries.
+// Cache headers: hashed assets (JS/CSS/images) get 1-year immutable; HTML no-cache.
+app.use(
+  express.static(STATIC_DIR, {
+    index: false,
+    redirect: false,
+    etag: true,
+    setHeaders(res, filePath) {
+      if (filePath.endsWith(".html")) {
+        // HTML must never be cached — a new deploy should be seen immediately.
+        res.setHeader("Cache-Control", "no-cache");
+      } else if (/\.(js|css|woff2?|ttf|eot|png|jpg|jpeg|webp|avif|gif|ico|svg)$/.test(filePath)) {
+        // Vite emits content-hashed filenames for all JS/CSS/images, so
+        // 1-year immutable is safe — the hash changes on every deploy.
+        res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      } else if (filePath.endsWith(".xml") || filePath.endsWith(".json") || filePath.endsWith(".txt")) {
+        // Sitemaps, manifests, and text files: 1-hour cache with revalidation.
+        res.setHeader("Cache-Control", "public, max-age=3600");
+      }
+    },
+  }),
+);
 
 // ── 2. Specific route handlers ────────────────────────────────────────────────
 app.get("/sitemap.xml", async (_req: Request, res: Response) => {
@@ -100,14 +128,18 @@ app.get("/llms.txt", (_req: Request, res: Response) => {
       "## Explore",
       "",
       "- [Interactive Map](https://placelabels.com/) - Browse all crowd-sourced neighborhood labels worldwide",
-      "- [New York City](https://placelabels.com/city/new-york) - Neighborhood insights across NYC",
-      "- [Safe Neighborhoods in New York](https://placelabels.com/city/new-york/safe-neighborhoods)",
-      "- [Affordable Areas in New York](https://placelabels.com/city/new-york/affordable-areas)",
-      "- [San Francisco](https://placelabels.com/city/san-francisco)",
-      "- [Los Angeles](https://placelabels.com/city/los-angeles)",
-      "- [London](https://placelabels.com/city/london)",
-      "- [Tokyo](https://placelabels.com/city/tokyo)",
-      "- [Berlin](https://placelabels.com/city/berlin)",
+      "- [New York City](https://placelabels.com/new-york) - Neighborhood insights across NYC",
+      "- [Safe Neighborhoods in New York](https://placelabels.com/new-york/safe-neighborhoods)",
+      "- [Affordable Areas in New York](https://placelabels.com/new-york/affordable-areas)",
+      "- [San Francisco](https://placelabels.com/san-francisco)",
+      "- [Los Angeles](https://placelabels.com/los-angeles)",
+      "- [London](https://placelabels.com/london)",
+      "- [Tokyo](https://placelabels.com/tokyo)",
+      "- [Mumbai](https://placelabels.com/mumbai)",
+      "- [Bangalore](https://placelabels.com/bangalore)",
+      "- [Delhi](https://placelabels.com/delhi)",
+      "- [Mumbai Safe Neighborhoods](https://placelabels.com/mumbai/safe-neighborhoods)",
+      "- [Bangalore Affordable Areas](https://placelabels.com/bangalore/affordable-areas)",
       "",
       "## Sitemap",
       "",

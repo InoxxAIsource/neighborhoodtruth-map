@@ -1,0 +1,59 @@
+Fix Today — Before PH Launch
+1. SSL Certificate Mismatch (HTTPS 18%)
+This is your most urgent issue. A certificate name mismatch means some browsers show a security warning to users — kills trust and conversions on your PH launch day.
+Likely cause: Certificate is issued for a Replit subdomain (.replit.app) not placelabels.com.
+Fix in Replit:
+
+Go to your Replit project → Settings → Custom Domains
+Remove and re-add placelabels.com
+Replit auto-provisions an SSL cert via Let's Encrypt — this forces a reissue for the correct domain
+Wait 5–10 minutes and retest at: https://www.ssllabs.com/ssltest/analyze.html?d=placelabels.com
+
+
+2. Find the Broken 4XX Page
+SEMrush crawled 5 pages and found 1 broken. Almost certainly a label page or intent page with a bad internal link.
+Paste in Replit:
+Check all internal links in the app for any hardcoded URLs 
+that might return 404. Specifically check:
+
+1. The CityFooter component — are all 36 city links valid routes?
+2. The navigation/header links
+3. Any "related neighborhoods" or "explore more" links on city pages
+4. Check server logs for the most recent 404 URLs
+
+List any internal links pointing to non-existent routes.
+
+🟠 Fix This Week — Replit Prompt
+Add Gzip/Brotli compression and cache headers to the Express server.
+
+STEP 1 — Install compression:
+npm install compression
+npm install --save-dev @types/compression
+
+STEP 2 — Add to Express server (BEFORE static middleware):
+import compression from 'compression';
+app.use(compression());
+
+STEP 3 — Add cache headers for static assets:
+app.use(express.static(path.join(__dirname, 'dist'), {
+  maxAge: '1y',
+  etag: true,
+  setHeaders: (res, path) => {
+    if (path.endsWith('.html')) {
+      // Don't cache HTML — always fresh
+      res.setHeader('Cache-Control', 'no-cache');
+    }
+  }
+}));
+
+STEP 4 — Add HSTS header:
+app.use((req, res, next) => {
+  res.setHeader('Strict-Transport-Security', 
+    'max-age=31536000; includeSubDomains');
+  next();
+});
+
+After deploying, verify:
+curl -I https://placelabels.com/assets/index.js
+Should show: Content-Encoding: gzip
+             Cache-Control: max-age=31536000
