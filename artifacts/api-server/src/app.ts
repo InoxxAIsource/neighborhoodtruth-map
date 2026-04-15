@@ -35,6 +35,10 @@ function serveSpaCatchAll(res: Response): void {
 
 const app: Express = express();
 
+// Trust Cloudflare's forwarded headers so Express sees the real
+// visitor IP and protocol (X-Forwarded-For, X-Forwarded-Proto).
+app.set("trust proxy", 1);
+
 app.use(
   pinoHttp({
     logger,
@@ -56,15 +60,8 @@ app.use(
 );
 app.use(compression());
 
-// www → non-www canonical redirect.
-// SEMrush / crawlers hitting www.placelabels.com get the Replit subdomain
-// cert instead of the placelabels.com cert — redirect before anything else.
-app.use((req: Request, res: Response, next) => {
-  if (req.headers.host?.startsWith("www.")) {
-    return res.redirect(301, `https://placelabels.com${req.url}`);
-  }
-  next();
-});
+// www redirect is handled by Cloudflare redirect rules — no Express redirect
+// needed (and having one would cause a redirect loop with Cloudflare Flexible SSL).
 
 app.use(cors());
 
