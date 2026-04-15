@@ -55,6 +55,17 @@ app.use(
   }),
 );
 app.use(compression());
+
+// www → non-www canonical redirect.
+// SEMrush / crawlers hitting www.placelabels.com get the Replit subdomain
+// cert instead of the placelabels.com cert — redirect before anything else.
+app.use((req: Request, res: Response, next) => {
+  if (req.headers.host?.startsWith("www.")) {
+    return res.redirect(301, `https://placelabels.com${req.url}`);
+  }
+  next();
+});
+
 app.use(cors());
 
 // HSTS — tell browsers to always use HTTPS for this domain (1 year).
