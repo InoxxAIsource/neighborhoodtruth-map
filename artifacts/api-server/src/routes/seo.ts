@@ -226,6 +226,12 @@ router.get("/cities", async (_req, res) => {
   res.json(result);
 });
 
+// Guard: /city/sitemap.xml was generating 404s because Express treated
+// "sitemap.xml" as a city slug. Redirect to the canonical sitemap instead.
+router.get("/city/sitemap.xml", (_req, res) => {
+  res.redirect(301, "/sitemap.xml");
+});
+
 router.get("/city/:city", async (req, res) => {
   const cityDef = CITIES.find((c) => c.slug === req.params.city);
   if (!cityDef) { res.status(404).json({ error: "City not found" }); return; }
@@ -449,15 +455,11 @@ router.get("/compare", async (req, res) => {
   });
 });
 
-router.get("/sitemap", async (_req, res) => {
-  try {
-    const xml = await generateSitemapXml();
-    res.setHeader("Content-Type", "application/xml; charset=utf-8");
-    res.setHeader("Cache-Control", "public, max-age=3600");
-    res.send(xml);
-  } catch (err) {
-    res.status(500).send("Sitemap generation failed");
-  }
+// Redirect the old /api/seo/sitemap endpoint to the canonical sitemap.
+// The prerendered static sitemap.xml (served by express.static) is authoritative
+// — it includes all label pages generated at build time from the DB.
+router.get("/sitemap", (_req, res) => {
+  res.redirect(301, "/sitemap.xml");
 });
 
 export default router;

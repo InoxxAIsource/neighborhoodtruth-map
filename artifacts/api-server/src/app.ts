@@ -63,7 +63,7 @@ app.use(express.urlencoded({ extended: true }));
 // Must be BEFORE all app.get() routes and the catch-all wildcard.
 // { index: false } prevents index.html from being served for directory
 // requests — the SSR/SPA route handlers below take care of those.
-app.use(express.static(STATIC_DIR, { index: false }));
+app.use(express.static(STATIC_DIR, { index: false, redirect: false }));
 
 // ── 2. Specific route handlers ────────────────────────────────────────────────
 app.get("/sitemap.xml", async (_req: Request, res: Response) => {

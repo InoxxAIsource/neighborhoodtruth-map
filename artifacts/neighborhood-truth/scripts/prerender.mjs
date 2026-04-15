@@ -329,41 +329,16 @@ function patchBody(html, bodyShell) {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function run() {
-  if (!existsSync(TEMPLATE_PATH)) {
-    console.error(`✗ Template not found at ${TEMPLATE_PATH}`);
-    console.error("  Run `pnpm build` (Vite step) before prerendering.");
-    process.exit(1);
-  }
-
-  // ── Step 1: prerender city HTML pages ──
-  console.log("\n📄 Prerendering city pages…");
-  const template = readFileSync(TEMPLATE_PATH, "utf-8");
-  let ok = 0;
-
-  for (const { slug, name } of CITIES) {
-    const title       = cityTitle(name);
-    const description = cityDescription(name);
-    const canonical   = `https://placelabels.com/${slug}`;
-    const schema      = cityBreadcrumbSchema(slug, name);
-
-    let html = patchHead(template, { title, description, canonical, breadcrumbSchema: schema });
-    html = patchBody(html, cityBodyShell(slug, name));
-
-    const dir = resolve(DIST, slug);
-    mkdirSync(dir, { recursive: true });
-    writeFileSync(resolve(dir, "index.html"), html, "utf-8");
-
-    console.log(`  ✓ /${slug}  (${name} Neighborhoods)`);
-    ok++;
-  }
-
-  console.log(`\n🎉 Prerender complete — ${ok}/${CITIES.length} city pages written to dist/public/`);
-
-  // ── Step 2: generate sitemap.xml with all label URLs ──
+  // ── Step 1: generate sitemap.xml with all label URLs ──
+  // NOTE: City pages are intentionally NOT prerendered to static files.
+  // Writing dist/public/{city}/index.html creates directory entries that cause
+  // Replit's CDN to issue a 301 redirect (/mumbai → /mumbai/) before the
+  // Express SSR handler ever runs. The /:citySlug Express SSR handler serves
+  // all city pages directly with a 200 + correct SSR HTML — no files needed.
   console.log("\n🗺️  Generating sitemap.xml…");
   const totalUrls = await generateSitemap();
 
-  // ── Step 3: ping Google ──
+  // ── Step 2: ping Google ──
   console.log("\n📡 Pinging Google Search Console…");
   await pingGoogle();
 
