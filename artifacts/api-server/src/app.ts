@@ -60,8 +60,17 @@ app.use(
 );
 app.use(compression());
 
-// www redirect is handled by Cloudflare redirect rules — no Express redirect
-// needed (and having one would cause a redirect loop with Cloudflare Flexible SSL).
+// www → non-www permanent redirect.
+// Runs before everything else so www.placelabels.com always lands on the
+// canonical root domain. Safe with Cloudflare Full SSL — no loop risk because
+// the redirect target (placelabels.com) never redirects back to www.
+app.use((req: Request, res: Response, next) => {
+  if (req.hostname?.startsWith("www.")) {
+    const target = `https://placelabels.com${req.url}`;
+    return res.redirect(301, target);
+  }
+  next();
+});
 
 app.use(cors());
 
