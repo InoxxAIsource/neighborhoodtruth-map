@@ -1,31 +1,39 @@
 kind = "web"
-previewPath = "/"
-title = "NeighborhoodTruth"
-version = "1.0.0"
-id = "artifacts/neighborhood-truth"
-router = "path"
+  previewPath = "/"
+  title = "NeighborhoodTruth"
+  version = "1.0.0"
+  id = "artifacts/neighborhood-truth"
+  router = "path"
 
-[[integratedSkills]]
-name = "react-vite"
-version = "1.0.0"
+  [[integratedSkills]]
+  name = "react-vite"
+  version = "1.0.0"
 
-[[services]]
-name = "web"
-paths = [ "/" ]
-localPort = 23830
+  [[services]]
+  name = "web"
+  paths = [ "/" ]
+  localPort = 23830
 
-[services.development]
-run = "pnpm --filter @workspace/neighborhood-truth run dev"
+  [services.development]
+  run = "pnpm --filter @workspace/neighborhood-truth run dev"
 
-[services.production]
-build = [ "pnpm", "--filter", "@workspace/neighborhood-truth", "run", "build" ]
-publicDir = "artifacts/neighborhood-truth/dist/public"
-serve = "static"
+  [services.production]
+  publicDir = "artifacts/neighborhood-truth/dist/public"
+  serve = "static"
 
-[[services.production.rewrites]]
-from = "/*"
-to = "/index.html"
+  [services.production.build]
+  args = [ "pnpm", "--filter", "@workspace/neighborhood-truth", "run", "build" ]
 
-[services.env]
-PORT = "23830"
-BASE_PATH = "/"
+  [services.production.build.env]
+  PORT = "3000"
+  BASE_PATH = "/"
+  NODE_ENV = "production"
+
+  [[services.production.rewrites]]
+  from = "/*"
+  to = "/index.html"
+
+  [services.env]
+  PORT = "23830"
+  BASE_PATH = "/"
+  
