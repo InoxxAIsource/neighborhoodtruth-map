@@ -3,6 +3,7 @@ import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Router, Route, Switch } from "wouter";
 import Index from "@/pages/Index";
+import LandingPage from "@/pages/LandingPage";
 import CityPage from "@/pages/seo/CityPage";
 import AreaPage from "@/pages/seo/AreaPage";
 import IntentPage from "@/pages/seo/IntentPage";
@@ -70,10 +71,15 @@ function App() {
               <Route path="/:city/quiet-neighborhoods" component={IntentPage} />
               <Route path="/:city/expensive-neighborhoods" component={IntentPage} />
 
+              {/* Full-screen map */}
+              <Route path="/map" component={Index} />
+
               {/* Area and city pages */}
               <Route path="/:city/:area" component={AreaPage} />
               <Route path="/:city" component={CityPage} />
-              <Route path="/" component={Index} />
+
+              {/* Landing page — must be last */}
+              <Route path="/" component={LandingPage} />
             </Switch>
           </Router>
           <Toaster richColors position="top-center" />
