@@ -300,22 +300,15 @@ export default function Index() {
       {showHero && <HeroOverlay onDismiss={dismissHero} />}
       {!showHero && <MicroHints hasInteracted={hasInteracted} />}
 
-      {/* Home button — top-left, above Leaflet zoom controls */}
+      {/* Home button — positioned below Leaflet zoom controls to avoid overlap */}
       <Link
         href="/"
-        className="absolute top-4 left-4 z-[1200] flex items-center gap-2 bg-white border-2 border-black px-3 py-2 shadow-lg hover:bg-black hover:text-white transition-colors group"
-        style={{ textDecoration: "none" }}
+        className="absolute left-[10px] z-[1200] flex items-center gap-2 bg-white border-2 border-black px-3 py-2 shadow-lg hover:bg-black hover:text-white transition-colors group"
+        style={{ top: "84px", textDecoration: "none" }}
       >
         <Home className="h-4 w-4 group-hover:text-white" />
         <span className="text-xs font-bold uppercase tracking-widest hidden sm:inline">Home</span>
       </Link>
-
-      <div className="absolute top-4 right-4 z-[1000] hidden sm:block">
-        <div className="bg-card/95 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border">
-          <h1 className="text-lg font-bold text-foreground leading-none">Honest Neighborhood Reviews from Real Locals — PlaceLabels</h1>
-          <p className="text-[10px] text-muted-foreground">{labels.length} insights worldwide</p>
-        </div>
-      </div>
 
       <div className="fixed right-4 sm:right-6 z-[1000]" style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 20px)' }}>
         {isPlacingPin ? (

@@ -132,6 +132,153 @@ function NeighborhoodCard({ label, citySlug, cityName }: { label: LabelDTO; city
   );
 }
 
+const COMPARE_CITIES = [
+  { slug: "delhi", name: "Delhi" },
+  { slug: "mumbai", name: "Mumbai" },
+  { slug: "bangalore", name: "Bangalore" },
+  { slug: "hyderabad", name: "Hyderabad" },
+  { slug: "pune", name: "Pune" },
+  { slug: "chennai", name: "Chennai" },
+  { slug: "kolkata", name: "Kolkata" },
+  { slug: "gurgaon", name: "Gurgaon" },
+  { slug: "noida", name: "Noida" },
+  { slug: "jaipur", name: "Jaipur" },
+  { slug: "ahmedabad", name: "Ahmedabad" },
+  { slug: "surat", name: "Surat" },
+  { slug: "lucknow", name: "Lucknow" },
+  { slug: "indore", name: "Indore" },
+  { slug: "chandigarh", name: "Chandigarh" },
+  { slug: "goa", name: "Goa" },
+];
+
+const POPULAR_COMPARES = [
+  { slug: "delhi-vs-gurgaon", cityA: "Delhi", cityB: "Gurgaon", desc: "NCR showdown — jobs, rent & commute" },
+  { slug: "mumbai-vs-pune", cityA: "Mumbai", cityB: "Pune", desc: "Finance hub vs growing IT city" },
+  { slug: "bangalore-vs-hyderabad", cityA: "Bangalore", cityB: "Hyderabad", desc: "South India's top tech cities" },
+  { slug: "delhi-vs-mumbai", cityA: "Delhi", cityB: "Mumbai", desc: "India's two biggest metros" },
+  { slug: "bangalore-vs-pune", cityA: "Bangalore", cityB: "Pune", desc: "Best city for IT professionals" },
+  { slug: "chennai-vs-bangalore", cityA: "Chennai", cityB: "Bangalore", desc: "South India living compared" },
+  { slug: "hyderabad-vs-pune", cityA: "Hyderabad", cityB: "Pune", desc: "Affordable metros for young pros" },
+  { slug: "kolkata-vs-mumbai", cityA: "Kolkata", cityB: "Mumbai", desc: "Old metro vs financial capital" },
+  { slug: "delhi-vs-noida", cityA: "Delhi", cityB: "Noida", desc: "Capital vs NCR suburb" },
+  { slug: "gurgaon-vs-noida", cityA: "Gurgaon", cityB: "Noida", desc: "NCR's two corporate hubs" },
+  { slug: "jaipur-vs-delhi", cityA: "Jaipur", cityB: "Delhi", desc: "Tier-2 heritage city vs capital" },
+  { slug: "ahmedabad-vs-surat", cityA: "Ahmedabad", cityB: "Surat", desc: "Gujarat's fastest-growing cities" },
+];
+
+function CompareSection() {
+  const [cityA, setCityA] = useState("");
+  const [cityB, setCityB] = useState("");
+  const [, navigate] = useLocation();
+
+  const canCompare = !!(cityA && cityB && cityA !== cityB);
+
+  const handleCompare = () => {
+    if (canCompare) navigate(`/compare/${cityA}-vs-${cityB}`);
+  };
+
+  return (
+    <section className="border-t border-black px-5 md:px-10 py-14 bg-black text-white">
+      <div className="max-w-[1200px] mx-auto">
+        <div className="mb-10">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-[#FA76FF] mb-2">Compare Tool</p>
+          <h2 className="text-xl md:text-3xl font-black uppercase leading-tight mb-3">
+            Compare Any Two Cities
+          </h2>
+          <p className="text-sm text-gray-400 max-w-xl">
+            Pick any two cities and get a detailed side-by-side breakdown — rent, safety, commute,
+            vibe, and neighbourhood data from real locals.
+          </p>
+        </div>
+
+        {/* ── Search UI ─────────────────────────────────────────── */}
+        <div className="border border-white/20 bg-white/5 p-6 mb-10">
+          <div className="flex flex-col sm:flex-row items-stretch gap-4">
+            <div className="flex-1 flex flex-col gap-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">City A</label>
+              <select
+                value={cityA}
+                onChange={(e) => setCityA(e.target.value)}
+                className="w-full bg-black border border-white/30 text-white px-4 py-3 text-sm font-medium focus:outline-none focus:border-[#FA76FF] transition-colors cursor-pointer appearance-none"
+              >
+                <option value="">Choose a city…</option>
+                {COMPARE_CITIES.map((c) => (
+                  <option key={c.slug} value={c.slug} disabled={c.slug === cityB}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex sm:flex-col items-center justify-center gap-0 pt-0 sm:pt-5 flex-shrink-0">
+              <span className="text-2xl font-black text-[#FA76FF]">VS</span>
+            </div>
+
+            <div className="flex-1 flex flex-col gap-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">City B</label>
+              <select
+                value={cityB}
+                onChange={(e) => setCityB(e.target.value)}
+                className="w-full bg-black border border-white/30 text-white px-4 py-3 text-sm font-medium focus:outline-none focus:border-[#FA76FF] transition-colors cursor-pointer appearance-none"
+              >
+                <option value="">Choose a city…</option>
+                {COMPARE_CITIES.map((c) => (
+                  <option key={c.slug} value={c.slug} disabled={c.slug === cityA}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex sm:flex-col items-end justify-end sm:pt-5 flex-shrink-0">
+              <button
+                onClick={handleCompare}
+                disabled={!canCompare}
+                className={`w-full sm:w-auto px-8 py-3 font-black uppercase text-sm transition-colors ${
+                  canCompare
+                    ? "bg-[#FA76FF] text-black hover:bg-white cursor-pointer"
+                    : "bg-white/10 text-white/30 cursor-not-allowed"
+                }`}
+              >
+                Compare →
+              </button>
+            </div>
+          </div>
+
+          {cityA && cityB && cityA === cityB && (
+            <p className="text-[11px] text-red-400 mt-3 uppercase tracking-wide">
+              Please select two different cities.
+            </p>
+          )}
+
+          {!cityA && !cityB && (
+            <p className="text-[11px] text-gray-500 mt-3 uppercase tracking-wide">
+              16 Indian cities available to compare
+            </p>
+          )}
+        </div>
+
+        {/* ── Popular comparisons ───────────────────────────────── */}
+        <h3 className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-4">
+          Popular Comparisons
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-white/10">
+          {POPULAR_COMPARES.map((c) => (
+            <Link key={c.slug} href={`/compare/${c.slug}`}>
+              <div className="bg-black px-5 py-4 cursor-pointer group border border-transparent hover:border-[#FA76FF] transition-all h-full">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-base font-black leading-tight">{c.cityA}</span>
+                  <span className="text-[#FA76FF] text-[10px] font-black bg-[#FA76FF]/10 px-1.5 py-0.5 rounded">VS</span>
+                  <span className="text-base font-black leading-tight">{c.cityB}</span>
+                </div>
+                <p className="text-[12px] text-gray-400 group-hover:text-gray-200 transition-colors leading-snug">
+                  {c.desc}
+                </p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function LandingPage() {
   const [search, setSearch] = useState("");
   const [activeVibe, setActiveVibe] = useState("");
@@ -309,33 +456,8 @@ export default function LandingPage() {
         )}
       </section>
 
-      {/* ── Featured Comparisons ──────────────────────────────────── */}
-      <section className="border-t border-black px-5 md:px-10 py-14 bg-black text-white">
-        <h2 className="text-xl md:text-2xl font-black uppercase mb-6 text-[#FA76FF]">
-          City Comparisons
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-px bg-white/10">
-          {[
-            { slug: "delhi-vs-gurgaon", label: "Delhi vs Gurgaon" },
-            { slug: "mumbai-vs-pune", label: "Mumbai vs Pune" },
-            { slug: "bangalore-vs-hyderabad", label: "Bangalore vs Hyderabad" },
-            { slug: "bangalore-vs-pune", label: "Bangalore vs Pune" },
-            { slug: "chennai-vs-bangalore", label: "Chennai vs Bangalore" },
-            { slug: "delhi-vs-mumbai", label: "Delhi vs Mumbai" },
-            { slug: "hyderabad-vs-pune", label: "Hyderabad vs Pune" },
-            { slug: "kolkata-vs-mumbai", label: "Kolkata vs Mumbai" },
-          ].map((c) => (
-            <Link key={c.slug} href={`/compare/${c.slug}`}>
-              <div className="bg-black px-4 py-5 cursor-pointer group border border-white/10 hover:border-[#FA76FF] transition-colors">
-                <div className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-1 group-hover:text-[#FA76FF] transition-colors">
-                  Compare
-                </div>
-                <div className="text-base font-bold leading-tight">{c.label}</div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+      {/* ── City Compare Tool ──────────────────────────────────────── */}
+      <CompareSection />
 
       {/* ── How It Works ─────────────────────────────────────────── */}
       <section className="border-t border-black px-5 md:px-10 py-14 max-w-[1200px] mx-auto">
