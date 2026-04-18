@@ -904,7 +904,7 @@ export default function CityComparePage() {
     );
   }
 
-  const canonicalUrl = `https://placelabels.com/compare/${slug}`;
+  const canonicalUrl = `https://placelabels.com/compare/${rawSlug}`;
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
