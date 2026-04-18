@@ -784,11 +784,14 @@ export function MapView({
     }).addTo(map);
 
     tileLayer.once("tileload", () => setMapReady(true));
+    // Fallback: reveal map after 2 s even if tiles are blocked (e.g. in dev sandbox)
+    const mapReadyTimer = setTimeout(() => setMapReady(true), 2000);
 
     mapRef.current = map;
     markersRef.current = L.layerGroup().addTo(map);
 
     return () => {
+      clearTimeout(mapReadyTimer);
       map.remove();
       mapRef.current = null;
     };

@@ -271,6 +271,7 @@ export default function VibeFilterPage() {
   }
 
   const canonicalUrl = `https://placelabels.com/${key}`;
+  const area = key.includes("/") ? key.split("/")[1] : key;
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
