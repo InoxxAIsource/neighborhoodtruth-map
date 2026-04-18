@@ -84,8 +84,22 @@ app.use((_req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ── 1. Static assets ─────────────────────────────────────────────────────────
-// Must be BEFORE all app.get() routes and the catch-all wildcard.
+// ── 1. Dynamic sitemap — must come BEFORE express.static so it takes priority
+//    over the prebuilt dist/public/sitemap.xml (which may be stale after deploys).
+app.get("/sitemap.xml", async (_req: Request, res: Response) => {
+  try {
+    const xml = await generateSitemapXml();
+    res.setHeader("Content-Type", "application/xml; charset=utf-8");
+    res.setHeader("Cache-Control", "public, max-age=3600");
+    res.send(xml);
+  } catch (err) {
+    logger.error({ err }, "Failed to generate sitemap");
+    res.status(500).send("Sitemap generation failed");
+  }
+});
+
+// ── 2. Static assets ─────────────────────────────────────────────────────────
+// Must be BEFORE all other app.get() routes and the catch-all wildcard.
 // { index: false } — don't auto-serve index.html for directories (SSR handles those).
 // { redirect: false } — don't 301 /foo to /foo/ for directory entries.
 // Cache headers: hashed assets (JS/CSS/images) get 1-year immutable; HTML no-cache.
@@ -110,18 +124,7 @@ app.use(
   }),
 );
 
-// ── 2. Specific route handlers ────────────────────────────────────────────────
-app.get("/sitemap.xml", async (_req: Request, res: Response) => {
-  try {
-    const xml = await generateSitemapXml();
-    res.setHeader("Content-Type", "application/xml; charset=utf-8");
-    res.setHeader("Cache-Control", "public, max-age=3600");
-    res.send(xml);
-  } catch (err) {
-    logger.error({ err }, "Failed to generate sitemap");
-    res.status(500).send("Sitemap generation failed");
-  }
-});
+// ── 3. Specific route handlers ────────────────────────────────────────────────
 
 app.get("/llms.txt", (_req: Request, res: Response) => {
   res.setHeader("Content-Type", "text/plain; charset=utf-8");

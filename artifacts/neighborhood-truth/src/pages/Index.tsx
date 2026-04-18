@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, lazy, Suspense } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "wouter";
 import type { AreaSummary, LabelData, Filters } from "@/components/MapView";
 import { FilterSidebar, DEFAULT_FILTERS } from "@/components/FilterSidebar";
 import { TopToolbar } from "@/components/TopToolbar";
@@ -301,7 +302,7 @@ export default function Index() {
 
       <div className="absolute top-4 right-4 z-[1000] hidden sm:block">
         <div className="bg-card/95 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border">
-          <h1 className="text-lg font-bold text-foreground leading-none">PlaceLabels</h1>
+          <h1 className="text-lg font-bold text-foreground leading-none">Honest Neighborhood Reviews from Real Locals — PlaceLabels</h1>
           <p className="text-[10px] text-muted-foreground">{labels.length} insights worldwide</p>
         </div>
       </div>
@@ -441,6 +442,41 @@ export default function Index() {
           />
         );
       })()}
+
+      {/* SEO: Explore India's Cities — real anchor links for Google crawling */}
+      <nav
+        aria-label="Explore Indian Cities"
+        className="absolute bottom-0 left-0 right-0 z-[900] bg-white/90 backdrop-blur-sm border-t border-gray-200 py-2 px-3"
+      >
+        <div className="max-w-5xl mx-auto flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span className="text-[11px] font-semibold text-gray-500 flex-shrink-0">Explore India:</span>
+          {[
+            { slug: "mumbai", label: "Mumbai" },
+            { slug: "delhi", label: "Delhi" },
+            { slug: "bangalore", label: "Bangalore" },
+            { slug: "pune", label: "Pune" },
+            { slug: "hyderabad", label: "Hyderabad" },
+            { slug: "chennai", label: "Chennai" },
+            { slug: "kolkata", label: "Kolkata" },
+            { slug: "jaipur", label: "Jaipur" },
+          ].map((city) => (
+            <a
+              key={city.slug}
+              href={`/${city.slug}`}
+              className="text-[11px] text-teal-700 hover:text-teal-900 hover:underline font-medium whitespace-nowrap"
+            >
+              {city.label}
+            </a>
+          ))}
+          <span className="text-gray-300 hidden sm:inline">·</span>
+          <a href="/compare/mumbai-vs-pune" className="text-[11px] text-gray-500 hover:text-teal-700 hover:underline hidden sm:inline whitespace-nowrap">Mumbai vs Pune</a>
+          <a href="/compare/bangalore-vs-hyderabad" className="text-[11px] text-gray-500 hover:text-teal-700 hover:underline hidden sm:inline whitespace-nowrap">Bangalore vs Hyderabad</a>
+          <a href="/compare/delhi-vs-gurgaon" className="text-[11px] text-gray-500 hover:text-teal-700 hover:underline hidden lg:inline whitespace-nowrap">Delhi vs Gurgaon</a>
+          <a href="/mumbai/cheap-areas-to-live" className="text-[11px] text-gray-500 hover:text-teal-700 hover:underline hidden lg:inline whitespace-nowrap">Cheap Areas Mumbai</a>
+          <a href="/about" className="text-[11px] text-gray-400 hover:text-teal-700 hover:underline hidden xl:inline whitespace-nowrap">About</a>
+          <a href="/how-it-works" className="text-[11px] text-gray-400 hover:text-teal-700 hover:underline hidden xl:inline whitespace-nowrap">How It Works</a>
+        </div>
+      </nav>
     </div>
   );
 }

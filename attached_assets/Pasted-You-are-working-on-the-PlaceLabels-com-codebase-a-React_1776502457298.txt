@@ -1,0 +1,513 @@
+You are working on the PlaceLabels.com codebase — a React/Next.js (or Vite React) neighborhood review web app. Perform ALL of the following tasks completely. Do not skip any step. Each task is required for SEO and Google Search Console performance.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 1: CRITICAL BUG FIXES (Breaking GSC Right Now)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+── FIX 1: Serve a real sitemap.xml ──
+Create a proper XML sitemap at /public/sitemap.xml (or generate it dynamically at /sitemap.xml if using Next.js). It must NOT be routed through React Router. Include all these URLs with <lastmod> set to today's date and <changefreq>weekly</changefreq>:
+
+https://placelabels.com/
+https://placelabels.com/mumbai
+https://placelabels.com/delhi
+https://placelabels.com/bangalore
+https://placelabels.com/pune
+https://placelabels.com/chennai
+https://placelabels.com/kolkata
+https://placelabels.com/hyderabad
+https://placelabels.com/jaipur
+https://placelabels.com/mumbai/cheap-areas-to-live
+https://placelabels.com/delhi/cheap-areas-to-live
+https://placelabels.com/hyderabad/cheap-areas-to-live
+https://placelabels.com/bangalore/cheap-areas-to-live
+https://placelabels.com/pune/cheap-areas-to-live
+https://placelabels.com/compare/delhi-vs-gurgaon
+https://placelabels.com/compare/mumbai-vs-pune
+https://placelabels.com/compare/bangalore-vs-hyderabad
+https://placelabels.com/compare/delhi-vs-noida
+https://placelabels.com/compare/gurgaon-vs-noida
+https://placelabels.com/bangalore/it-hub-areas
+https://placelabels.com/pune/student-friendly-areas
+https://placelabels.com/delhi/family-friendly-areas
+https://placelabels.com/mumbai/safe-areas-for-women
+https://placelabels.com/about
+https://placelabels.com/how-it-works
+
+── FIX 2: Serve a real robots.txt ──
+Create /public/robots.txt with this content:
+User-agent: *
+Allow: /
+Disallow: /api/
+Sitemap: https://placelabels.com/sitemap.xml
+
+── FIX 3: Fix all city pages returning "City Not Found" ──
+The routes /mumbai, /delhi, /bangalore, /pune, /chennai, /kolkata, /hyderabad, /jaipur currently return "City Not Found" because the app's router is not matching these slugs to city pages. Fix the router so these routes render proper city landing pages (see PART 2 for city page content). Do NOT show "City Not Found" for any of these 8 Indian cities.
+
+── FIX 4: Fix canonical tags on all city/sub-pages ──
+Currently every page including /pune, /chennai, /bangalore etc. has canonical pointing to https://placelabels.com/ (the homepage). This tells Google not to index city pages. Fix it so every page's canonical tag points to its OWN URL. Example:
+- /pune → <link rel="canonical" href="https://placelabels.com/pune" />
+- /mumbai/cheap-areas-to-live → <link rel="canonical" href="https://placelabels.com/mumbai/cheap-areas-to-live" />
+This must be dynamic — use the current route path to set the canonical.
+
+── FIX 5: Fix duplicate meta descriptions ──
+Every page currently shares the same generic meta description. Make meta descriptions dynamic and unique per page. Each city page and sub-page must have its own description (see PART 2 for each page's meta description).
+
+── FIX 6: Add internal navigation links to homepage ──
+The homepage currently has ZERO internal <a href> links to city pages. Add a "Explore Cities" section to the homepage with clickable links to all 8 Indian city pages:
+/mumbai, /delhi, /bangalore, /pune, /chennai, /kolkata, /hyderabad, /jaipur
+Also add links to the comparison pages and the cheap areas guides. These must be real HTML anchor tags, not JavaScript onClick handlers, so Googlebot can crawl them.
+
+── FIX 7: Add alt text to all images ──
+Every img tag on the site currently has no alt attribute. Add descriptive alt text to all images. For map screenshots use alt="Neighborhood map of [city] with local labels". For icons use descriptive text like alt="Safety rating icon".
+
+── FIX 8: Strengthen Homepage H1 ──
+Current H1 is just "PlaceLabels" — too weak for SEO. Change it to:
+<h1>Honest Neighborhood Reviews from Real Locals — PlaceLabels</h1>
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 2: BUILD ALL NEW PAGES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For EVERY page below, implement:
+1. A unique <title> tag
+2. A unique <meta name="description"> 
+3. A <link rel="canonical"> pointing to the page's own URL
+4. A proper H1 tag
+5. Multiple H2 sections with real content (minimum 400 words of readable text per page)
+6. JSON-LD schema markup (BreadcrumbList + relevant type)
+7. Internal links back to the city's main page and to the homepage
+8. The page must be fully crawlable — no content hidden behind JS state or map interactions
+9. An embedded PlaceLabels map widget filtered to that city (if applicable)
+10. A CTA section: "Know this area? Drop a label on the map →" linking to the map
+
+━━━ SECTION A: CITY MAIN PAGES ━━━
+
+Build these 8 city landing pages. Each page must have real content — not just a map embed. Include neighborhood lists, a brief area overview, and quick stats.
+
+── PAGE: /mumbai ──
+Title: Best Neighborhoods in Mumbai (2026) | PlaceLabels
+H1: Explore Mumbai's Neighborhoods — Rated by Real Locals
+Meta: Discover the best areas to live in Mumbai. Locals rate Bandra, Andheri, Powai, Malad & more for safety, cost, and daily life. Real neighborhood insights, not ads.
+H2 sections:
+- Popular Neighborhoods in Mumbai (list Bandra, Andheri West, Powai, Juhu, Malad, Goregaon, Borivali, Navi Mumbai with 2-line description each)
+- Safest Areas in Mumbai According to Locals
+- Most Affordable Areas in Mumbai (link to /mumbai/cheap-areas-to-live)
+- Best Areas for Families in Mumbai
+- Best Areas for Young Professionals in Mumbai
+Schema: BreadcrumbList (Home > Mumbai Neighborhoods) + Place schema for Mumbai
+
+── PAGE: /delhi ──
+Title: Best Neighborhoods in Delhi (2026) | PlaceLabels
+H1: Explore Delhi's Neighborhoods — Honest Local Ratings
+Meta: Find the best areas to live in Delhi. Locals rate South Delhi, Dwarka, Rohini, Laxmi Nagar & more for rent, safety, and connectivity. Real data from residents.
+H2 sections:
+- Popular Neighborhoods in Delhi (South Delhi, North Delhi, East Delhi, West Delhi zones)
+- Safest Areas in Delhi for Families
+- Most Affordable Areas in Delhi (link to /delhi/cheap-areas-to-live)
+- Delhi vs Gurgaon — Which Is Better? (link to /compare/delhi-vs-gurgaon)
+- Best Metro-Connected Areas in Delhi (link to /delhi/areas-with-metro-access)
+
+── PAGE: /bangalore ──
+Title: Best Neighborhoods in Bangalore (2026) | PlaceLabels
+H1: Explore Bangalore's Neighborhoods — Local Insights & Ratings
+Meta: Best areas to live in Bangalore for IT professionals and families. Locals rate Indiranagar, Koramangala, HSR Layout, Whitefield & more. Updated 2026.
+H2 sections:
+- Top IT Hub Neighborhoods in Bangalore (link to /bangalore/it-hub-areas)
+- Best Areas Near Electronic City
+- Best Areas Near Whitefield & Sarjapur
+- Most Affordable Areas in Bangalore (link to /bangalore/cheap-areas-to-live)
+- Bangalore vs Hyderabad for IT Professionals (link to /compare/bangalore-vs-hyderabad)
+
+── PAGE: /pune ──
+Title: Best Neighborhoods in Pune (2026) | PlaceLabels
+H1: Explore Pune's Neighborhoods — Rated by Real Locals
+Meta: Find the best areas to live in Pune. Locals rate Koregaon Park, Baner, Viman Nagar, Kothrud & more for safety, rent, and daily commute. Real local data.
+H2 sections:
+- Most Popular Areas in Pune
+- Best Student-Friendly Areas (link to /pune/student-friendly-areas)
+- Most Affordable Neighborhoods in Pune (link to /pune/cheap-areas-to-live)
+- Pune vs Mumbai Cost of Living (link to /compare/mumbai-vs-pune)
+- Best Areas Near Hinjewadi IT Park
+
+── PAGE: /chennai ──
+Title: Best Neighborhoods in Chennai (2026) | PlaceLabels
+H1: Explore Chennai's Neighborhoods — Honest Local Reviews
+Meta: Best areas to live in Chennai. Locals rate Anna Nagar, T. Nagar, OMR, Adyar & Velachery for safety, rent costs, and lifestyle. Real neighborhood data.
+H2 sections:
+- Top Neighborhoods in Chennai
+- Best Areas Along OMR (IT Corridor)
+- Family-Friendly Areas in Chennai
+- Most Affordable Areas in Chennai
+- Chennai Neighborhoods by Safety Score
+
+── PAGE: /kolkata ──
+Title: Best Neighborhoods in Kolkata (2026) | PlaceLabels
+H1: Explore Kolkata's Neighborhoods — Real Local Insights
+Meta: Find the best areas to live in Kolkata. Locals rate Salt Lake, New Town, Park Street, Ballygunge & more for safety, rent, and local vibes. Updated 2026.
+H2 sections:
+- Top Neighborhoods in Kolkata
+- Salt Lake vs New Town — What Locals Say
+- Most Affordable Areas in Kolkata
+- Best Family Areas in Kolkata
+- Kolkata Neighborhood Safety Ratings
+
+── PAGE: /hyderabad ──
+Title: Best Neighborhoods in Hyderabad (2026) | PlaceLabels
+H1: Explore Hyderabad's Neighborhoods — Local Ratings & Insights
+Meta: Best areas in Hyderabad for IT professionals and families. Locals rate Gachibowli, HITEC City, Banjara Hills, Jubilee Hills & more. Real 2026 data.
+H2 sections:
+- Top IT Hub Areas Near HITEC City
+- Most Affordable Areas in Hyderabad (link to /hyderabad/cheap-areas-to-live)
+- Old City vs New City — Cost & Safety Comparison
+- Hyderabad vs Bangalore for IT Jobs (link to /compare/bangalore-vs-hyderabad)
+- Best Family Neighborhoods in Hyderabad
+
+── PAGE: /jaipur ──
+Title: Best Neighborhoods in Jaipur (2026) | PlaceLabels
+H1: Explore Jaipur's Neighborhoods — Local Reviews & Ratings
+Meta: Best areas to live in Jaipur. Locals rate Vaishali Nagar, Mansarovar, C-Scheme & Malviya Nagar for rent, safety, and daily commute. Updated 2026.
+H2 sections:
+- Top Neighborhoods in Jaipur
+- Most Affordable Areas in Jaipur
+- Best Areas for Families in Jaipur
+- Up-and-Coming Areas in Jaipur
+
+━━━ SECTION B: CHEAP AREAS GUIDE PAGES ━━━
+
+── PAGE: /mumbai/cheap-areas-to-live ──
+Title: Cheapest Areas to Live in Mumbai (2026) | PlaceLabels
+H1: 10 Most Affordable Neighborhoods in Mumbai — Verified by Locals
+Meta: Looking for cheap areas in Mumbai? Locals rate Virar, Mira Road, Nalasopara, Kandivali & Vasai for rent cost, safety & commute. Real 2026 data.
+H2 sections:
+- Why Mumbai Rent Varies So Wildly (intro, 80 words)
+- Top 10 Cheapest Areas in Mumbai to Live (with area name, avg rent range ₹8k–₹18k, safety label from PlaceLabels, commute time to city center, 3 lines of local context each):
+  1. Virar — avg ₹6,000–₹10,000/month
+  2. Nalasopara — avg ₹7,000–₹12,000/month
+  3. Vasai — avg ₹8,000–₹13,000/month
+  4. Mira Road — avg ₹10,000–₹16,000/month
+  5. Kandivali East — avg ₹12,000–₹18,000/month
+  6. Borivali East — avg ₹13,000–₹20,000/month
+  7. Malad East — avg ₹14,000–₹22,000/month
+  8. Goregaon East — avg ₹15,000–₹24,000/month
+  9. Thane — avg ₹12,000–₹20,000/month
+  10. Navi Mumbai (Kharghar) — avg ₹10,000–₹18,000/month
+- Cheap Areas Near Western Railway Line
+- Cheap Areas Near Harbour Line
+- Cost vs Commute Trade-Off Table (area, avg rent, commute to CST, safety score)
+- What Locals Say About Living Cheap in Mumbai (2–3 short quote-style insights)
+- FAQ section (H3 each):
+  Q: What is the cheapest area to live in Mumbai?
+  A: Virar and Nalasopara are among the most affordable...
+  Q: Is it safe to live in cheap areas of Mumbai?
+  A: Safety varies. PlaceLabels locals rate Mira Road and Kandivali as relatively safe...
+  Q: What is the average rent in Mumbai suburbs?
+  A: Suburban Mumbai rents range from ₹6,000 to ₹20,000...
+Schema: BreadcrumbList (Home > Mumbai > Cheap Areas) + FAQPage schema with the 3 FAQ questions above
+
+── PAGE: /delhi/cheap-areas-to-live ──
+Title: Cheapest Areas to Live in Delhi (2026) | PlaceLabels
+H1: 10 Most Affordable Neighborhoods in Delhi — Rated by Locals
+Meta: Find cheap areas in Delhi. Locals rate Dwarka, Uttam Nagar, Shahdara, Laxmi Nagar & Rohini for rent, safety, and metro access. Real 2026 data.
+H2 sections:
+- Top 10 Cheapest Areas in Delhi:
+  1. Uttam Nagar — avg ₹7,000–₹12,000/month
+  2. Dwarka (Sectors 23–25) — avg ₹8,000–₹14,000/month
+  3. Shahdara — avg ₹7,000–₹11,000/month
+  4. Laxmi Nagar — avg ₹9,000–₹15,000/month
+  5. Rohini (outer sectors) — avg ₹8,000–₹13,000/month
+  6. Vikaspuri — avg ₹9,000–₹14,000/month
+  7. Janakpuri — avg ₹10,000–₹16,000/month
+  8. Burari — avg ₹6,000–₹10,000/month
+  9. Kondli — avg ₹6,500–₹11,000/month
+  10. Mustafabad — avg ₹5,000–₹9,000/month
+- Cheap Areas in West Delhi
+- Cheap Areas in East Delhi
+- Budget Areas with Good Metro Access in Delhi
+- Delhi vs Gurgaon — Is Gurgaon Actually Cheaper? (link to /compare/delhi-vs-gurgaon)
+- FAQ:
+  Q: What is the cheapest area to live in Delhi?
+  Q: Which cheap areas in Delhi have metro access?
+  Q: Is it safe to live in budget areas of Delhi?
+Schema: BreadcrumbList + FAQPage
+
+── PAGE: /hyderabad/cheap-areas-to-live ──
+Title: Cheapest Areas to Live in Hyderabad (2026) | PlaceLabels
+H1: 10 Most Affordable Neighborhoods in Hyderabad — Local Guide
+Meta: Cheap areas in Hyderabad near HITEC City? Locals rate LB Nagar, Uppal, Dilsukhnagar, Miyapur & more for rent, safety & IT hub distance. Real 2026 data.
+H2 sections:
+- Top 10 Cheapest Areas in Hyderabad:
+  1. LB Nagar — avg ₹7,000–₹12,000/month
+  2. Uppal — avg ₹8,000–₹13,000/month
+  3. Dilsukhnagar — avg ₹7,500–₹12,000/month
+  4. Miyapur — avg ₹9,000–₹15,000/month
+  5. Kompally — avg ₹8,000–₹13,000/month
+  6. Nacharam — avg ₹9,000–₹14,000/month
+  7. Malkajgiri — avg ₹8,000–₹13,000/month
+  8. Kothapet — avg ₹7,000–₹12,000/month
+  9. Vanasthalipuram — avg ₹6,500–₹11,000/month
+  10. Tarnaka — avg ₹8,500–₹14,000/month
+- Budget Areas Near HITEC City
+- Old City Affordable Neighborhoods
+- Cost vs IT Commute Time Table
+- FAQ (3 questions as above pattern)
+Schema: BreadcrumbList + FAQPage
+
+── PAGE: /bangalore/cheap-areas-to-live ──
+Title: Cheapest Areas to Live in Bangalore (2026) | PlaceLabels
+H1: 10 Most Affordable Neighborhoods in Bangalore for 2026
+Meta: Cheap areas in Bangalore near IT parks? Locals rate Electronic City, Hennur, Sarjapur, Yelahanka & Marathahalli for rent cost and commute. Real data.
+H2 sections:
+- Top 10 Cheapest Areas:
+  1. Electronic City Phase 2 — avg ₹8,000–₹14,000/month
+  2. Hennur — avg ₹9,000–₹15,000/month
+  3. Yelahanka — avg ₹9,000–₹15,000/month
+  4. Sarjapur Road (outer) — avg ₹10,000–₹16,000/month
+  5. Bommanahalli — avg ₹9,500–₹15,000/month
+  6. Hoskote — avg ₹6,000–₹10,000/month
+  7. Jalahalli — avg ₹8,500–₹14,000/month
+  8. Thanisandra — avg ₹9,000–₹15,000/month
+  9. Begur Road — avg ₹8,000–₹13,000/month
+  10. Attibele — avg ₹6,000–₹10,000/month
+- Cheap Areas Near Outer Ring Road
+- Budget Zones Near Whitefield
+- Bangalore vs Hyderabad Rent (link to /compare/bangalore-vs-hyderabad)
+- FAQ (3 questions)
+Schema: BreadcrumbList + FAQPage
+
+── PAGE: /pune/cheap-areas-to-live ──
+Title: Cheapest Areas to Live in Pune (2026) | PlaceLabels
+H1: 10 Most Affordable Neighborhoods in Pune — Ranked by Locals
+Meta: Cheap areas in Pune? Locals rate Hadapsar, Kondhwa, Bibwewadi, Wadgaon Sheri & Ambegaon for rent, safety & commute to Hinjewadi. Real 2026 data.
+H2 sections:
+- Top 10 Cheapest Areas:
+  1. Hadapsar — avg ₹8,000–₹13,000/month
+  2. Kondhwa — avg ₹8,500–₹14,000/month
+  3. Bibwewadi — avg ₹8,000–₹13,000/month
+  4. Ambegaon — avg ₹7,000–₹11,000/month
+  5. Fursungi — avg ₹6,500–₹10,000/month
+  6. Undri — avg ₹7,500–₹12,000/month
+  7. Wadgaon Sheri — avg ₹9,000–₹14,000/month
+  8. Dhanori — avg ₹8,500–₹13,500/month
+  9. Vishrantwadi — avg ₹8,000–₹13,000/month
+  10. Katraj — avg ₹7,500–₹12,000/month
+- Budget Areas Near Hinjewadi IT Park
+- Cheap Student Areas in Pune (link to /pune/student-friendly-areas)
+- Pune vs Mumbai Cost (link to /compare/mumbai-vs-pune)
+- FAQ (3 questions)
+Schema: BreadcrumbList + FAQPage
+
+━━━ SECTION C: CITY COMPARISON PAGES ━━━
+
+Each comparison page must have a REAL data-driven layout — not just text. Use a comparison table component showing: Avg Rent (1BHK), Safety Score (from PlaceLabels), Cost of Food (approx), Public Transport Quality, IT Job Density, and an Overall Score. Make it visually clear with a winner highlighted per category.
+
+── PAGE: /compare/delhi-vs-gurgaon ──
+Title: Delhi vs Gurgaon — Cost of Living Comparison 2026 | PlaceLabels
+H1: Delhi vs Gurgaon: Which City Is Cheaper & Better to Live In?
+Meta: Comparing Delhi vs Gurgaon for rent, safety, commute & lifestyle? Real locals break down both cities neighborhood by neighborhood. Updated April 2026.
+H2 sections:
+- Quick Comparison Table (see above — 6 categories, winner per row)
+- Average Rent Comparison: Delhi vs Gurgaon (by area tier — budget/mid/premium)
+  Delhi budget areas: ₹7k–₹12k | Gurgaon budget areas: ₹12k–₹18k
+  Delhi mid: ₹15k–₹25k | Gurgaon mid: ₹20k–₹35k
+  Delhi premium: ₹35k+ | Gurgaon premium: ₹40k+
+- Commute & Connectivity Comparison
+  - Delhi: Metro covers most of the city, average commute 35 mins
+  - Gurgaon: Rapid Metro limited, HUDA Metro partial, heavy traffic, avg commute 45–55 mins
+- Safety: Delhi vs Gurgaon by Neighborhood (link to PlaceLabels labels for each)
+- Best Cheap Areas in Delhi (link to /delhi/cheap-areas-to-live)
+- Best Cheap Areas in Gurgaon (Sector 9, 10, 14, Palam Vihar — list with rent)
+- Which is Better For:
+  - IT Professionals → Gurgaon (MNC hub in Cyber City, DLF)
+  - Students → Delhi (universities, PG culture, cheaper rent)
+  - Families → Delhi (better schools, parks, infrastructure)
+  - Singles/Young Professionals → Delhi (metro access, nightlife, affordability)
+- What Locals Say (3 short opinion blurbs pulled from PlaceLabels label comments)
+- FAQ:
+  Q: Is Gurgaon more expensive than Delhi?
+  A: Yes. Average 1BHK rent in Gurgaon is 40–60% higher than comparable areas in Delhi...
+  Q: Is it better to live in Delhi or Gurgaon for IT jobs?
+  A: If you work in Cyber City or DLF, Gurgaon is closer. But Delhi's metro connectivity...
+  Q: Which has better public transport — Delhi or Gurgaon?
+  A: Delhi has a vastly superior metro network covering most neighborhoods...
+Schema: BreadcrumbList (Home > Compare > Delhi vs Gurgaon) + FAQPage schema
+
+── PAGE: /compare/mumbai-vs-pune ──
+Title: Mumbai vs Pune — Cost of Living Comparison 2026 | PlaceLabels
+H1: Mumbai vs Pune: Is Pune Really Cheaper? Real Local Data
+Meta: Mumbai vs Pune cost of living 2026. Locals compare rent, food, commute & safety across both cities. See which is better for IT, families & students.
+H2 sections:
+- Quick Comparison Table
+- Rent Comparison: Mumbai vs Pune
+  Mumbai budget: ₹12k–₹20k | Pune budget: ₹7k–₹13k
+  Mumbai mid: ₹25k–₹50k | Pune mid: ₹14k–₹25k
+  Mumbai premium: ₹60k+ | Pune premium: ₹30k+
+- Food & Daily Expenses Comparison
+- Commute Culture: Mumbai Local Trains vs Pune Two-Wheeler City
+- Safety Ratings Comparison (based on PlaceLabels local labels)
+- Best Cheap Areas in Mumbai (link) vs Best Cheap Areas in Pune (link)
+- Which is Better For: IT / Students / Families / Singles
+- What Locals Say
+- FAQ:
+  Q: Is Pune cheaper than Mumbai?
+  Q: Should I move from Mumbai to Pune for a better lifestyle?
+  Q: What is the cost of living difference between Mumbai and Pune?
+Schema: BreadcrumbList + FAQPage
+
+── PAGE: /compare/bangalore-vs-hyderabad ──
+Title: Bangalore vs Hyderabad — Cost of Living Comparison 2026 | PlaceLabels
+H1: Bangalore vs Hyderabad: Which City Wins for IT Professionals?
+Meta: Bangalore vs Hyderabad cost of living, rent, safety & job market 2026. Real local data from PlaceLabels. Find out which city suits you better.
+H2 sections:
+- Quick Comparison Table
+- Rent Comparison: Bangalore vs Hyderabad
+  Bangalore budget: ₹10k–₹16k | Hyderabad budget: ₹7k–₹13k
+  Bangalore mid: ₹18k–₹35k | Hyderabad mid: ₹14k–₹25k
+- IT Hub Proximity: Bangalore (Outer Ring Road, Whitefield, Electronic City) vs Hyderabad (HITEC City, Gachibowli)
+- Traffic & Commute Reality Check
+- Safety & Lifestyle Comparison
+- Cheap Areas in Bangalore (link) vs Cheap Areas in Hyderabad (link)
+- Which City Wins For: IT Jobs / Families / Students / Affordability
+- FAQ:
+  Q: Is Hyderabad cheaper than Bangalore?
+  Q: Which is better for IT professionals — Bangalore or Hyderabad?
+  Q: Which city has better infrastructure — Bangalore or Hyderabad?
+Schema: BreadcrumbList + FAQPage
+
+── PAGE: /compare/delhi-vs-noida ──
+Title: Delhi vs Noida — Cost of Living Comparison 2026 | PlaceLabels
+H1: Delhi vs Noida: Where Should You Live in NCR?
+Meta: Delhi vs Noida cost of living, rent, commute & safety 2026. Real local comparison from PlaceLabels. Decide where to live in NCR with actual data.
+H2 sections:
+- Quick Comparison Table
+- Rent Comparison (Delhi West/South vs Noida sectors)
+- Metro Connectivity: Both cities are well-connected via Blue Line
+- Noida sectors that offer best value: 62, 63, 71, 72, 120, 137
+- Delhi areas comparable to Noida in price: Dwarka, Rohini, Uttam Nagar
+- Which is Better For: IT / Families / Students / Budget renters
+- FAQ (3 questions)
+Schema: BreadcrumbList + FAQPage
+
+── PAGE: /compare/gurgaon-vs-noida ──
+Title: Gurgaon vs Noida — Which NCR City Is Better to Live In? | PlaceLabels
+H1: Gurgaon vs Noida: Rent, Safety & Commute — 2026 Comparison
+Meta: Gurgaon vs Noida 2026 — locals compare rent, IT hubs, safety & lifestyle. Decide which NCR city works for you. Real data from PlaceLabels.
+H2 sections:
+- Quick Comparison Table
+- Rent: Gurgaon vs Noida (Gurgaon is ~30% more expensive on average)
+  Noida budget: ₹8k–₹14k (sectors 62, 71, 120) | Gurgaon budget: ₹12k–₹20k (sectors 9, 10, 14)
+- IT Hub Breakdown: Gurgaon (Cyber City, MG Road) vs Noida (Sector 62, 63, 132)
+- Infrastructure & Metro Access
+- Which Is Better For: IT Professionals / Families / First-time renters
+- FAQ (3 questions)
+Schema: BreadcrumbList + FAQPage
+
+━━━ SECTION D: VIBE FILTER PAGES ━━━
+
+── PAGE: /bangalore/it-hub-areas ──
+Title: Best IT Hub Areas in Bangalore (2026) | PlaceLabels
+H1: Top IT Hub Neighborhoods in Bangalore — Rated by Tech Workers
+Meta: Best areas in Bangalore near IT parks. Locals rate Koramangala, HSR Layout, Whitefield, Electronic City & Outer Ring Road for proximity, rent & lifestyle.
+H2 sections:
+- Neighborhoods Near Electronic City (Phase 1 & 2)
+- Neighborhoods Near Outer Ring Road (Marathahalli, Bellandur, Sarjapur)
+- Neighborhoods Near Whitefield
+- Neighborhoods Near Manyata Tech Park (Hebbal, Thanisandra)
+- IT Hub Areas by Budget (Under ₹15k, Under ₹25k, Premium)
+- Drop Your Label: Tell others what your IT neighborhood is really like (CTA to map)
+Schema: BreadcrumbList + FAQPage
+
+── PAGE: /pune/student-friendly-areas ──
+Title: Best Student-Friendly Areas in Pune (2026) | PlaceLabels
+H1: Top Student Areas in Pune — Budget, Safe & Well-Connected
+Meta: Best areas in Pune for students. Locals rate Kothrud, Shivajinagar, Deccan, Pimpri & Wakad for PG costs, safety, college proximity & lifestyle. 2026 guide.
+H2 sections:
+- Areas Near Pune University
+- Areas Near SB Road & FC Road (student culture hub)
+- Budget PG-friendly zones (₹5k–₹10k/month)
+- Safe Areas for Female Students in Pune
+- Areas with Best Cafes, Libraries & Co-working Spaces
+Schema: BreadcrumbList + FAQPage
+
+── PAGE: /delhi/family-friendly-areas ──
+Title: Best Family-Friendly Areas in Delhi (2026) | PlaceLabels
+H1: Top Family Neighborhoods in Delhi — Safe, Green & Well-Connected
+Meta: Best areas in Delhi for families. Locals rate Dwarka, Rohini, Vasant Kunj, Saket & Greater Kailash for safety, schools, parks & daily living. Real 2026 data.
+H2 sections:
+- Safest Family Areas in South Delhi
+- Best Family Zones in West Delhi
+- Top Schools & Their Catchment Areas
+- Green Areas with Parks & Open Spaces
+- Family Areas by Budget
+Schema: BreadcrumbList + FAQPage
+
+── PAGE: /mumbai/safe-areas-for-women ──
+Title: Safest Areas in Mumbai for Women (2026) | PlaceLabels
+H1: Safest Neighborhoods for Women in Mumbai — Locals Know Best
+Meta: Looking for safe areas in Mumbai for women? Locals rate Powai, Bandra, Andheri West & Goregaon for safety, street lighting, transport & community. 2026.
+H2 sections:
+- What Makes an Area Safe for Women (PlaceLabels "Women Safe" label explained)
+- Top Neighborhoods Labeled "Women Safe" by Locals in Mumbai
+- Areas with Best Late-Night Transport Access
+- Areas Near Women's Colleges & Co-working Spaces
+- What Women Residents Say (3 quote-style blurbs)
+- Safety vs Affordability Trade-off in Mumbai
+Schema: BreadcrumbList + FAQPage
+
+━━━ SECTION E: UTILITY PAGES ━━━
+
+── PAGE: /about ──
+Title: About PlaceLabels — Honest Neighborhood Reviews from Locals
+H1: About PlaceLabels
+Meta: PlaceLabels is a crowd-sourced neighborhood map where real locals label areas by safety, cost, and vibe. No ads. No agents. Just honest local insights.
+Content: What PlaceLabels is, why it was built, how it works, who it's for, mission statement, call to drop a label.
+
+── PAGE: /how-it-works ──
+Title: How PlaceLabels Works — Drop Labels, Vote, Discover
+H1: How PlaceLabels Works
+Meta: Learn how to use PlaceLabels — drop a neighborhood label, vote on existing ones, filter by safety/cost/vibe, and find your perfect area. 3-step guide.
+Content: Step-by-step guide (Drop a Label, Vote on Labels, Filter by Your Needs), FAQ about label moderation, types of labels, coverage.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 3: GLOBAL TECHNICAL SEO RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Apply these globally across ALL pages:
+
+1. Every page must have a unique <title> tag (max 60 characters)
+2. Every page must have a unique <meta name="description"> (max 155 characters)
+3. Every page must have a self-referencing <link rel="canonical">
+4. Every page must have exactly ONE <h1> tag
+5. All H2s must follow a logical hierarchy under the H1
+6. All <img> tags must have non-empty alt attributes
+7. All internal navigation links must be proper <a href> anchor tags (NOT onClick JS handlers)
+8. Add <meta name="robots" content="index, follow"> on all public pages
+9. Add Open Graph tags on all pages: og:title, og:description, og:url, og:image (use /og-image.png as default or city-specific image)
+10. Add Twitter card tags: twitter:card="summary_large_image", twitter:title, twitter:description
+11. JSON-LD BreadcrumbList schema on every page deeper than homepage
+12. City pages and sub-pages should include a LocalBusiness or Place schema with address set to the city name, India
+13. Comparison pages should include FAQPage schema with the FAQ questions/answers
+14. All pages with FAQs must also include FAQPage JSON-LD schema
+15. Add a <link rel="sitemap" type="application/xml" href="/sitemap.xml"> in the <head> of every page
+16. Ensure all routes return HTTP 200 for their own content and HTTP 404 only for truly non-existent pages — not for valid city slugs
+17. The "City Not Found" fallback should only appear for cities NOT in the supported list, and should itself have a proper <meta name="robots" content="noindex"> to prevent Google from indexing error states
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 4: FINAL CHECKLIST BEFORE DONE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before marking this complete, verify:
+□ /sitemap.xml returns valid XML (not "City Not Found")
+□ /robots.txt returns plain text (not "City Not Found")
+□ /mumbai, /delhi, /bangalore, /pune, /chennai, /kolkata, /hyderabad, /jaipur all return HTTP 200 with real content
+□ All city pages have unique titles, meta descriptions, and canonical tags pointing to themselves
+□ Homepage has internal links to all 8 city pages
+□ All 5 cheap-areas pages exist with full content
+□ All 5 comparison pages exist with full content including comparison tables
+□ All 4 vibe-filter pages exist
+□ /about and /how-it-works pages exist
+□ No <img> tag missing alt text
+□ All JSON-LD schemas are valid (no syntax errors)
+□ sitemap.xml includes all 25+ URLs listed in Fix 1
+
+Total new pages to build: 26
+Total critical bugs to fix: 8

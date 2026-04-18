@@ -97,6 +97,39 @@ export async function generateSitemapXml(baseUrl = "https://placelabels.com"): P
 
   entries.push({ loc: `${baseUrl}/`, lastmod: today, changefreq: "daily", priority: "1.0" });
 
+  // Static utility pages
+  entries.push({ loc: `${baseUrl}/about`, lastmod: today, changefreq: "monthly", priority: "0.7" });
+  entries.push({ loc: `${baseUrl}/how-it-works`, lastmod: today, changefreq: "monthly", priority: "0.7" });
+
+  // City comparison pages (static city-vs-city)
+  const CITY_COMPARISONS = [
+    "delhi-vs-gurgaon",
+    "mumbai-vs-pune",
+    "bangalore-vs-hyderabad",
+    "delhi-vs-noida",
+    "gurgaon-vs-noida",
+  ];
+  for (const slug of CITY_COMPARISONS) {
+    entries.push({ loc: `${baseUrl}/compare/${slug}`, lastmod: today, changefreq: "monthly", priority: "0.8" });
+  }
+
+  // Cheap areas guides
+  const CHEAP_AREAS_CITIES = ["mumbai", "delhi", "hyderabad", "bangalore", "pune"];
+  for (const city of CHEAP_AREAS_CITIES) {
+    entries.push({ loc: `${baseUrl}/${city}/cheap-areas-to-live`, lastmod: today, changefreq: "monthly", priority: "0.85" });
+  }
+
+  // Vibe filter pages
+  const VIBE_PAGES = [
+    "bangalore/it-hub-areas",
+    "pune/student-friendly-areas",
+    "delhi/family-friendly-areas",
+    "mumbai/safe-areas-for-women",
+  ];
+  for (const page of VIBE_PAGES) {
+    entries.push({ loc: `${baseUrl}/${page}`, lastmod: today, changefreq: "monthly", priority: "0.85" });
+  }
+
   const citiesWithLabels = new Map<string, { labels: typeof allLabels; maxDate: Date }>();
 
   for (const label of allLabels) {
