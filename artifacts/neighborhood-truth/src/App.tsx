@@ -11,7 +11,7 @@ import IntentPage from "@/pages/seo/IntentPage";
 import ComparePage from "@/pages/seo/ComparePage";
 import CheapAreasPage from "@/pages/seo/CheapAreasPage";
 import VibeFilterPage from "@/pages/seo/VibeFilterPage";
-import CityComparePage from "@/pages/seo/CityComparePage";
+import CityComparePage, { ALL_CITY_SLUGS } from "@/pages/seo/CityComparePage";
 import AboutPage from "@/pages/seo/AboutPage";
 import HowItWorksPage from "@/pages/seo/HowItWorksPage";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -22,6 +22,16 @@ function ScrollToTop() {
     window.scrollTo(0, 0);
   }, [location]);
   return null;
+}
+
+function CompareRouter({ params }: { params: { slug: string } }) {
+  const { slug } = params;
+  const parts = slug.split("-vs-");
+  const slugA = parts[0] ?? "";
+  const slugB = parts.slice(1).join("-vs-") ?? "";
+  const bothCities = ALL_CITY_SLUGS.has(slugA) && ALL_CITY_SLUGS.has(slugB);
+  if (bothCities) return <CityComparePage />;
+  return <ComparePage />;
 }
 
 const queryClient = new QueryClient({
@@ -44,23 +54,8 @@ function App() {
               <Route path="/about" component={AboutPage} />
               <Route path="/how-it-works" component={HowItWorksPage} />
 
-              {/* City comparison pages — static city-vs-city (must come before generic compare) */}
-              <Route path="/compare/delhi-vs-gurgaon" component={CityComparePage} />
-              <Route path="/compare/mumbai-vs-pune" component={CityComparePage} />
-              <Route path="/compare/bangalore-vs-hyderabad" component={CityComparePage} />
-              <Route path="/compare/delhi-vs-noida" component={CityComparePage} />
-              <Route path="/compare/gurgaon-vs-noida" component={CityComparePage} />
-              <Route path="/compare/chennai-vs-bangalore" component={CityComparePage} />
-              <Route path="/compare/hyderabad-vs-pune" component={CityComparePage} />
-              <Route path="/compare/ahmedabad-vs-surat" component={CityComparePage} />
-              <Route path="/compare/kolkata-vs-mumbai" component={CityComparePage} />
-              <Route path="/compare/delhi-vs-mumbai" component={CityComparePage} />
-              <Route path="/compare/bangalore-vs-pune" component={CityComparePage} />
-              <Route path="/compare/chennai-vs-hyderabad" component={CityComparePage} />
-              <Route path="/compare/jaipur-vs-delhi" component={CityComparePage} />
-
-              {/* Generic area comparison page */}
-              <Route path="/compare/:slug" component={ComparePage} />
+              {/* City vs city → CityComparePage (dynamic), neighborhood vs neighborhood → ComparePage */}
+              <Route path="/compare/:slug" component={CompareRouter} />
 
               {/* Cheap areas guides */}
               <Route path="/:city/cheap-areas-to-live" component={CheapAreasPage} />

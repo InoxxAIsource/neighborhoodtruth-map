@@ -511,6 +511,361 @@ const DATA: Record<string, CityCompareData> = {
   },
 };
 
+interface CityProfile {
+  name: string;
+  slug: string;
+  state: string;
+  rentBudget: string;
+  rentMid: string;
+  rentPremium: string;
+  safetyScore: string;
+  safetyNum: number;
+  traffic: string;
+  trafficLevel: number;
+  metro: string;
+  metroLevel: number;
+  jobMarket: string;
+  jobLevel: number;
+  costIndex: number;
+  monthlyBudget: string;
+  knownFor: string;
+  budgetAreas: string[];
+  midAreas: string[];
+  pros: string[];
+  cons: string[];
+  intro: string;
+}
+
+export const CITY_PROFILES: Record<string, CityProfile> = {
+  delhi: {
+    name: "Delhi", slug: "delhi", state: "Delhi (NCR)",
+    rentBudget: "₹7,000–₹12,000", rentMid: "₹15,000–₹28,000", rentPremium: "₹35,000+",
+    safetyScore: "3.6/5", safetyNum: 3.6,
+    traffic: "Very High", trafficLevel: 5,
+    metro: "Excellent (350+ stations)", metroLevel: 5,
+    jobMarket: "Government, Banking, IT (NCR), Media", jobLevel: 5,
+    costIndex: 5, monthlyBudget: "₹25,000–₹45,000",
+    knownFor: "India's capital, best metro network, diverse job market",
+    budgetAreas: ["Uttam Nagar", "Rohini", "Shahdara", "Burari"],
+    midAreas: ["Dwarka", "Janakpuri", "Pitampura", "Saket"],
+    pros: ["Best metro connectivity in India", "Huge job variety (government, IT, banking)", "Cheapest rents among all major metros", "World-class museums, monuments, universities"],
+    cons: ["Air quality (AQI 200–500 in winter)", "Very high traffic", "Extreme summers (42–46°C)", "Safety concerns in some areas"],
+    intro: "India's capital is the country's political, cultural, and educational hub — home to the world's largest metro network by ridership and the most diverse job ecosystem of any Indian city.",
+  },
+  mumbai: {
+    name: "Mumbai", slug: "mumbai", state: "Maharashtra",
+    rentBudget: "₹12,000–₹20,000", rentMid: "₹25,000–₹50,000", rentPremium: "₹60,000+",
+    safetyScore: "3.7/5", safetyNum: 3.7,
+    traffic: "High (local trains offset it)", trafficLevel: 4,
+    metro: "Excellent (Local Trains + Metro)", metroLevel: 5,
+    jobMarket: "Finance, Media, Bollywood, IT, Banking HQs", jobLevel: 5,
+    costIndex: 9, monthlyBudget: "₹40,000–₹70,000",
+    knownFor: "India's financial capital, Bollywood, local trains",
+    budgetAreas: ["Mira Road", "Virar", "Nallasopara", "Kandivali"],
+    midAreas: ["Andheri", "Malad", "Thane", "Ghatkopar"],
+    pros: ["India's #1 financial & media job market", "Iconic local train network", "Coastal lifestyle, sea breeze", "24-hour city with vibrant nightlife"],
+    cons: ["Most expensive rents in India", "Extreme space constraints", "Monsoon flooding risk", "High cost of living across all categories"],
+    intro: "India's financial and entertainment capital — the city where fortunes are made and dreams are chased, at a premium cost that comes with unmatched career and cultural opportunities.",
+  },
+  bangalore: {
+    name: "Bangalore", slug: "bangalore", state: "Karnataka",
+    rentBudget: "₹10,000–₹16,000", rentMid: "₹18,000–₹35,000", rentPremium: "₹35,000+",
+    safetyScore: "3.5/5", safetyNum: 3.5,
+    traffic: "Very High (worst in India)", trafficLevel: 5,
+    metro: "Moderate (expanding)", metroLevel: 3,
+    jobMarket: "IT, Startups, MNCs — India's #1", jobLevel: 5,
+    costIndex: 7, monthlyBudget: "₹35,000–₹60,000",
+    knownFor: "India's startup capital, pleasant weather, IT hub",
+    budgetAreas: ["Electronic City", "Bommanahalli", "Hennur", "Yelahanka"],
+    midAreas: ["HSR Layout", "Bellandur", "Whitefield", "Koramangala"],
+    pros: ["India's largest IT & startup ecosystem", "Best weather among Indian metros (18–28°C year-round)", "Vibrant social and café culture", "Strong salary levels for tech roles"],
+    cons: ["India's worst traffic congestion", "Rising rents due to IT boom", "Water shortage issues in parts", "Metro network still limited outside IT corridors"],
+    intro: "India's Silicon Valley — Bangalore is the undisputed capital of the country's technology and startup ecosystem, offering unmatched career opportunities in tech at the cost of legendary traffic.",
+  },
+  hyderabad: {
+    name: "Hyderabad", slug: "hyderabad", state: "Telangana",
+    rentBudget: "₹7,000–₹13,000", rentMid: "₹14,000–₹25,000", rentPremium: "₹28,000+",
+    safetyScore: "3.8/5", safetyNum: 3.8,
+    traffic: "High (improving)", trafficLevel: 4,
+    metro: "Good (Phase 1 + 2 operational)", metroLevel: 4,
+    jobMarket: "IT MNCs (Google, Amazon, Microsoft), BFSI", jobLevel: 5,
+    costIndex: 5, monthlyBudget: "₹28,000–₹50,000",
+    knownFor: "HITEC City MNCs, Biriyani, Nizami heritage",
+    budgetAreas: ["LB Nagar", "Dilsukhnagar", "Uppal", "Vanasthalipuram"],
+    midAreas: ["Kondapur", "Miyapur", "Manikonda", "Madhapur"],
+    pros: ["Google, Amazon, Microsoft, Apple campuses", "20–30% cheaper than Bangalore", "Good metro network covering IT corridor", "Strong Nizami heritage & food culture"],
+    cons: ["Brutal summers (up to 42°C in April–May)", "Heavy monsoon flooding risk in some areas", "Traffic on HITEC City–Gachibowli stretch", "Fewer startup opportunities vs Bangalore"],
+    intro: "India's fastest-growing tech hub — Hyderabad has emerged as the home of the world's biggest tech MNCs in India, offering Bangalore-level opportunities at significantly lower costs.",
+  },
+  pune: {
+    name: "Pune", slug: "pune", state: "Maharashtra",
+    rentBudget: "₹7,000–₹13,000", rentMid: "₹14,000–₹25,000", rentPremium: "₹30,000+",
+    safetyScore: "3.9/5", safetyNum: 3.9,
+    traffic: "Moderate (two-wheeler city)", trafficLevel: 3,
+    metro: "Moderate (Phase 1 active)", metroLevel: 3,
+    jobMarket: "IT Services, Manufacturing, Defence, BFSI", jobLevel: 4,
+    costIndex: 5, monthlyBudget: "₹25,000–₹45,000",
+    knownFor: "Oxford of the East, Hinjewadi IT, quality of life",
+    budgetAreas: ["Hadapsar", "Katraj", "Ambegaon", "Kondhwa"],
+    midAreas: ["Kothrud", "Baner", "Aundh", "Wakad"],
+    pros: ["Best safety ratings among major IT cities (3.9/5)", "Pleasant weather (15–32°C, low humidity)", "Excellent weekend getaways (Lonavala, Mahabaleshwar)", "Strong student culture with dozens of universities"],
+    cons: ["Smaller job market than Bangalore or Mumbai", "Two-wheeler dependent city (less pedestrian-friendly)", "Metro network still limited", "Hinjewadi traffic can be severe"],
+    intro: "Maharashtra's most liveable city — Pune combines a strong IT ecosystem with genuinely pleasant weather, lower costs than Mumbai, and one of the best quality-of-life ratings in India.",
+  },
+  chennai: {
+    name: "Chennai", slug: "chennai", state: "Tamil Nadu",
+    rentBudget: "₹7,000–₹13,000", rentMid: "₹14,000–₹25,000", rentPremium: "₹28,000+",
+    safetyScore: "4.0/5", safetyNum: 4.0,
+    traffic: "High", trafficLevel: 4,
+    metro: "Moderate (Phase 2 expanding)", metroLevel: 3,
+    jobMarket: "IT Services (OMR), Automotive, Manufacturing", jobLevel: 4,
+    costIndex: 5, monthlyBudget: "₹25,000–₹42,000",
+    knownFor: "India's safest major metro, OMR IT corridor, Tamil culture",
+    budgetAreas: ["Tambaram", "Chromepet", "Ambattur", "Avadi"],
+    midAreas: ["Velachery", "Adyar", "Perungudi", "Medavakkam"],
+    pros: ["Consistently India's safest major city (4.0/5)", "Lower cost than Bangalore by 20–30%", "Strong IT services corridor on OMR", "Rich Tamil cultural heritage, cuisine"],
+    cons: ["Hot and humid (38–42°C with high humidity in summer)", "Strong regional language (Tamil required in many situations)", "Metro network still limited vs Delhi", "Cyclone risk during monsoon season"],
+    intro: "India's safest major metro — Chennai combines a strong IT services ecosystem with the country's best safety ratings, a rich cultural identity, and a lower cost of living than Bangalore.",
+  },
+  kolkata: {
+    name: "Kolkata", slug: "kolkata", state: "West Bengal",
+    rentBudget: "₹5,000–₹9,000", rentMid: "₹10,000–₹18,000", rentPremium: "₹22,000+",
+    safetyScore: "3.7/5", safetyNum: 3.7,
+    traffic: "High", trafficLevel: 4,
+    metro: "Good (one of India's oldest metro networks)", metroLevel: 4,
+    jobMarket: "Finance, BFSI, IT (growing), Government", jobLevel: 3,
+    costIndex: 3, monthlyBudget: "₹18,000–₹32,000",
+    knownFor: "India's cultural capital, most affordable metro, Bengali cuisine",
+    budgetAreas: ["Behala", "Dunlop", "Dum Dum", "Barasat"],
+    midAreas: ["Tollygunge", "Salt Lake", "Garia", "Ballygunge"],
+    pros: ["India's most affordable major city (50–60% cheaper than Mumbai)", "Exceptional cultural life (Durga Puja, art, literature, cinema)", "Outstanding street food & Bengali cuisine", "IIT Kharagpur nearby, strong academic ecosystem"],
+    cons: ["Smaller corporate job market vs mega-metros", "Ageing infrastructure in much of the city", "High humidity and heat in summer", "Political instability has historically slowed economic growth"],
+    intro: "India's cultural capital and most affordable metro — Kolkata offers a rich intellectual and artistic life, legendary food, and dramatically lower costs than other major cities.",
+  },
+  gurgaon: {
+    name: "Gurgaon", slug: "gurgaon", state: "Haryana (NCR)",
+    rentBudget: "₹12,000–₹20,000", rentMid: "₹22,000–₹40,000", rentPremium: "₹45,000+",
+    safetyScore: "3.8/5", safetyNum: 3.8,
+    traffic: "Very High", trafficLevel: 5,
+    metro: "Limited (Rapid Metro + Yellow Line extension)", metroLevel: 2,
+    jobMarket: "MNCs, Consulting, Finance, Startups — India's #1 corporate density", jobLevel: 5,
+    costIndex: 8, monthlyBudget: "₹35,000–₹65,000",
+    knownFor: "Cyber City MNCs, India's highest corporate density, premium malls",
+    budgetAreas: ["Sector 9", "Palam Vihar", "Sector 10", "Sector 14"],
+    midAreas: ["DLF Phase 1–3", "Sushant Lok", "South City", "Sector 56"],
+    pros: ["India's highest density of Fortune 500 MNCs", "Cyber City and Golf Course Road ecosystem", "Premium malls and social infrastructure", "Strong expat community"],
+    cons: ["Significantly more expensive than Delhi or Noida", "Very limited metro/public transport", "Car-dependent city with notorious traffic", "No independent metro rail system"],
+    intro: "NCR's corporate capital — Gurgaon hosts India's highest concentration of MNCs and Fortune 500 companies in Cyber City, at a premium cost and with the NCR's most car-dependent lifestyle.",
+  },
+  noida: {
+    name: "Noida", slug: "noida", state: "Uttar Pradesh (NCR)",
+    rentBudget: "₹8,000–₹14,000", rentMid: "₹14,000–₹25,000", rentPremium: "₹30,000+",
+    safetyScore: "3.7/5", safetyNum: 3.7,
+    traffic: "Moderate–High", trafficLevel: 3,
+    metro: "Good (Blue Line connects to Delhi)", metroLevel: 4,
+    jobMarket: "IT, Media, E-commerce, BPO", jobLevel: 4,
+    costIndex: 5, monthlyBudget: "₹28,000–₹48,000",
+    knownFor: "Planned city, Blue Line metro, affordable vs Gurgaon",
+    budgetAreas: ["Sector 62", "Sector 71", "Sector 72", "Greater Noida West"],
+    midAreas: ["Sector 50", "Sector 137", "Sector 150", "Sector 100"],
+    pros: ["Planned city with wider roads vs Delhi", "Good Blue Line metro connectivity to Delhi", "30–40% cheaper than Gurgaon", "Newer housing stock with better amenities"],
+    cons: ["Limited nightlife vs Gurgaon", "Far from Delhi's cultural attractions for residents in outer sectors", "Noida Extension commute can be long", "Government offices require Delhi visits"],
+    intro: "NCR's affordable alternative — Noida offers a planned city environment, good metro connectivity to Delhi, and competitive rents that are significantly lower than Gurgaon.",
+  },
+  jaipur: {
+    name: "Jaipur", slug: "jaipur", state: "Rajasthan",
+    rentBudget: "₹4,000–₹8,000", rentMid: "₹8,000–₹15,000", rentPremium: "₹18,000+",
+    safetyScore: "3.8/5", safetyNum: 3.8,
+    traffic: "Moderate", trafficLevel: 3,
+    metro: "Limited (Jaipur Metro, small network)", metroLevel: 2,
+    jobMarket: "Government, Tourism, Growing IT, Gems & Jewellery", jobLevel: 3,
+    costIndex: 2, monthlyBudget: "₹18,000–₹30,000",
+    knownFor: "Pink City, ~50% cheaper than Delhi, heritage lifestyle",
+    budgetAreas: ["Vidhyadhar Nagar", "Murlipura", "Mansarovar outer", "Sanganer"],
+    midAreas: ["Vaishali Nagar", "Bani Park", "Raja Park", "C-Scheme"],
+    pros: ["~50% cheaper than Delhi across all tiers", "Exceptional heritage lifestyle (Amber Fort, Hawa Mahal)", "Much better air quality than Delhi", "Strong safety ratings, slower pace"],
+    cons: ["Limited corporate IT job market", "Smaller city — fewer urban amenities vs metros", "Summer heat (40–46°C in May–June)", "Metro network too small for meaningful commute impact"],
+    intro: "Rajasthan's Pink City — Jaipur offers a stunning heritage lifestyle at dramatically lower costs than Delhi, making it increasingly attractive for remote workers, families, and those seeking a calmer pace.",
+  },
+  ahmedabad: {
+    name: "Ahmedabad", slug: "ahmedabad", state: "Gujarat",
+    rentBudget: "₹4,000–₹8,000", rentMid: "₹8,000–₹15,000", rentPremium: "₹18,000+",
+    safetyScore: "3.9/5", safetyNum: 3.9,
+    traffic: "Moderate", trafficLevel: 3,
+    metro: "Moderate (Phase 1 operational)", metroLevel: 3,
+    jobMarket: "Manufacturing, Pharma, GIFT City Finance, Growing IT", jobLevel: 3,
+    costIndex: 3, monthlyBudget: "₹18,000–₹32,000",
+    knownFor: "GIFT City, Sabarmati Riverfront, Gujarat's largest city",
+    budgetAreas: ["Naroda", "Odhav", "Vatva", "Chandkheda"],
+    midAreas: ["Bopal", "Prahlad Nagar", "Satellite", "Thaltej"],
+    pros: ["GIFT City — India's first international financial services hub", "Business-friendly Gujarat environment", "Good safety (3.9/5) and clean city initiatives", "Metro Phase 1 improves urban connectivity"],
+    cons: ["Dry state (alcohol prohibition) — affects social life for some", "Limited big-city entertainment vs metros", "Hot summers (up to 44°C)", "IT job market smaller than Bangalore or Hyderabad"],
+    intro: "Gujarat's largest city and business hub — Ahmedabad combines affordable living with a growing corporate sector anchored by GIFT City, in a business-friendly environment with strong safety ratings.",
+  },
+  surat: {
+    name: "Surat", slug: "surat", state: "Gujarat",
+    rentBudget: "₹4,000–₹7,000", rentMid: "₹7,000–₹13,000", rentPremium: "₹15,000+",
+    safetyScore: "4.0/5", safetyNum: 4.0,
+    traffic: "Low–Moderate", trafficLevel: 2,
+    metro: "Under construction", metroLevel: 1,
+    jobMarket: "Diamond processing, Textile, Chemical manufacturing", jobLevel: 3,
+    costIndex: 2, monthlyBudget: "₹15,000–₹28,000",
+    knownFor: "World's diamond capital, textile industry, India's fastest-growing city",
+    budgetAreas: ["Udhna", "Katargam", "Limbayat", "Varachha"],
+    midAreas: ["Adajan", "Citylight", "Vesu", "Althan"],
+    pros: ["India's most affordable major city for rent", "High safety ratings (4.0/5)", "India's fastest-growing GDP city", "Clean, well-maintained roads"],
+    cons: ["Very limited IT job market", "No metro (under construction)", "Dry state (alcohol prohibition)", "Less cosmopolitan than Ahmedabad or metros"],
+    intro: "India's diamond capital and fastest-growing city by GDP — Surat offers the country's lowest rents among significant cities, high safety ratings, and a booming business-driven economy.",
+  },
+  lucknow: {
+    name: "Lucknow", slug: "lucknow", state: "Uttar Pradesh",
+    rentBudget: "₹4,000–₹8,000", rentMid: "₹8,000–₹14,000", rentPremium: "₹16,000+",
+    safetyScore: "3.6/5", safetyNum: 3.6,
+    traffic: "Moderate–High", trafficLevel: 3,
+    metro: "Good (Lucknow Metro, 2 lines)", metroLevel: 3,
+    jobMarket: "Government, Growing IT (Gomti Nagar), Education, Healthcare", jobLevel: 3,
+    costIndex: 2, monthlyBudget: "₹16,000–₹28,000",
+    knownFor: "City of Nawabs, Tehzeeb culture, growing IT hub",
+    budgetAreas: ["Chinhat", "Mahanagar outer", "Faizabad Road", "Indira Nagar outer"],
+    midAreas: ["Gomti Nagar", "Indira Nagar", "Hazratganj", "Alambagh"],
+    pros: ["Excellent heritage culture (Nawabi architecture, Lucknawi cuisine)", "Affordable rents — UP's most developed city", "Growing IT presence in Gomti Nagar", "Good metro connectivity within main corridors"],
+    cons: ["Smaller corporate job market", "Safety varies significantly by area", "Slower economic growth vs South Indian IT cities", "Extreme heat in summers"],
+    intro: "Uttar Pradesh's graceful capital — Lucknow combines affordable living with rich Nawabi heritage, and a growing IT and government services sector, in a city renowned for its politeness and culture.",
+  },
+  indore: {
+    name: "Indore", slug: "indore", state: "Madhya Pradesh",
+    rentBudget: "₹3,500–₹7,000", rentMid: "₹7,000–₹13,000", rentPremium: "₹15,000+",
+    safetyScore: "3.7/5", safetyNum: 3.7,
+    traffic: "Moderate", trafficLevel: 3,
+    metro: "Planned (under development)", metroLevel: 1,
+    jobMarket: "Manufacturing, Education, Growing IT, Agriculture", jobLevel: 2,
+    costIndex: 2, monthlyBudget: "₹14,000–₹26,000",
+    knownFor: "India's cleanest city (7 years Swachh Bharat), street food",
+    budgetAreas: ["Sanwer Road", "Rajendra Nagar", "Lasudia", "Mhow"],
+    midAreas: ["Vijay Nagar", "Scheme 54", "Bhawarkuan", "Palasia"],
+    pros: ["India's cleanest city (Swachh Bharat winner 7 consecutive years)", "Most affordable city in this list", "India's best street food scene (Sarafa Bazaar, Chappan Dukan)", "Central location — well-connected to major metros"],
+    cons: ["Limited corporate job market", "No metro (planned)", "Smaller city amenities vs metros", "Few top-tier higher education institutes within city"],
+    intro: "India's cleanest city — Indore consistently wins the Swachh Survekshan (cleanest city survey) while offering the country's most affordable urban living, legendary street food, and a growing industrial economy.",
+  },
+  chandigarh: {
+    name: "Chandigarh", slug: "chandigarh", state: "Punjab/Haryana UT",
+    rentBudget: "₹6,000–₹10,000", rentMid: "₹10,000–₹18,000", rentPremium: "₹22,000+",
+    safetyScore: "4.1/5", safetyNum: 4.1,
+    traffic: "Low–Moderate", trafficLevel: 2,
+    metro: "None (planned)", metroLevel: 1,
+    jobMarket: "Government, IT (IT Park), Education, PSUs", jobLevel: 3,
+    costIndex: 3, monthlyBudget: "₹20,000–₹35,000",
+    knownFor: "India's best-planned city, highest safety ratings, greenest city",
+    budgetAreas: ["Sector 38 outer", "Manimajra", "Dhanas", "Industrial Area Phase 2"],
+    midAreas: ["Sector 22", "Sector 35", "Mohali Phases", "Panchkula"],
+    pros: ["India's highest safety rating (4.1/5)", "Best planned urban layout of any Indian city", "Excellent greenery (Chandigarh has highest per-capita green cover)", "High quality of life, clean environment"],
+    cons: ["Limited private sector job market (government-heavy)", "No metro — car/two-wheeler dependent", "Smaller city — social scene limited vs metros", "High per-capita income but limited for new migrants without government jobs"],
+    intro: "India's best-planned city — Chandigarh, designed by Le Corbusier, offers the country's highest safety ratings, exceptional greenery, and an enviable quality of life in a meticulously organized urban environment.",
+  },
+  goa: {
+    name: "Goa", slug: "goa", state: "Goa",
+    rentBudget: "₹8,000–₹15,000", rentMid: "₹15,000–₹28,000", rentPremium: "₹35,000+",
+    safetyScore: "3.8/5", safetyNum: 3.8,
+    traffic: "Low–Moderate", trafficLevel: 2,
+    metro: "None", metroLevel: 1,
+    jobMarket: "Tourism, Hospitality, Remote work, Fishing industry", jobLevel: 2,
+    costIndex: 6, monthlyBudget: "₹25,000–₹45,000",
+    knownFor: "Beaches, relaxed lifestyle, digital nomad hub",
+    budgetAreas: ["Ponda", "Mapusa", "Margao inner", "Old Goa"],
+    midAreas: ["Panaji", "Porvorim", "Calangute", "Candolim"],
+    pros: ["Unique beach lifestyle unmatched in India", "Low traffic, relaxed pace of life", "Growing digital nomad and remote work community", "International community, excellent food and nightlife"],
+    cons: ["More expensive than comparable tier-2 cities", "Very limited corporate job market", "No metro or urban public transport", "Highly seasonal — lifestyle fluctuates dramatically in monsoon"],
+    intro: "India's beach paradise and digital nomad capital — Goa offers a lifestyle like no other Indian city, attracting remote workers and those seeking a relaxed coastal existence, at a price premium over other tier-2 cities.",
+  },
+};
+
+export const ALL_CITY_SLUGS = new Set(Object.keys(CITY_PROFILES));
+
+function generateDynamicData(slugA: string, slugB: string): CityCompareData {
+  const a = CITY_PROFILES[slugA];
+  const b = CITY_PROFILES[slugB];
+
+  const aCheaper = a.costIndex < b.costIndex;
+  const bCheaper = b.costIndex < a.costIndex;
+  const aSafer = a.safetyNum > b.safetyNum;
+  const bSafer = b.safetyNum > a.safetyNum;
+  const aBetterMetro = a.metroLevel > b.metroLevel;
+  const bBetterMetro = b.metroLevel > a.metroLevel;
+  const aBetterJobs = a.jobLevel > b.jobLevel;
+  const bBetterJobs = b.jobLevel > a.jobLevel;
+
+  const rentWinner: "a" | "b" | "tie" = aCheaper ? "a" : bCheaper ? "b" : "tie";
+  const safetyWinner: "a" | "b" | "tie" = aSafer ? "a" : bSafer ? "b" : "tie";
+  const metroWinner: "a" | "b" | "tie" = aBetterMetro ? "a" : bBetterMetro ? "b" : "tie";
+  const jobsWinner: "a" | "b" | "tie" = aBetterJobs ? "a" : bBetterJobs ? "b" : "tie";
+  const trafficWinner: "a" | "b" | "tie" = a.trafficLevel < b.trafficLevel ? "a" : b.trafficLevel < a.trafficLevel ? "b" : "tie";
+
+  const cheaperCity = aCheaper ? a : bCheaper ? b : null;
+  const saferCity = aSafer ? a : bSafer ? b : null;
+  const betterJobsCity = aBetterJobs ? a : bBetterJobs ? b : null;
+
+  const title = `${a.name} vs ${b.name} — Cost of Living Comparison 2026 | PlaceLabels`;
+  const h1 = `${a.name} vs ${b.name}: Which City Is Better to Live In? (2026)`;
+  const description = `${a.name} vs ${b.name} cost of living 2026. Compare rent, safety, jobs & lifestyle. ${cheaperCity ? `${cheaperCity.name} is cheaper` : "Similar overall cost"}. ${saferCity ? `${saferCity.name} rates higher for safety` : "Similar safety"}. Real data from PlaceLabels.`;
+
+  const intro = `${a.name} vs ${b.name} is a genuine lifestyle choice for people relocating across India. ${a.name} is known for ${a.knownFor}. ${b.name} is known for ${b.knownFor}. Here's the honest, data-driven comparison based on real local insights from PlaceLabels users in both cities.`;
+
+  const table: CompareRow[] = [
+    { category: "Avg Rent (1BHK Budget)", cityA: a.rentBudget, cityB: b.rentBudget, winner: rentWinner },
+    { category: "Avg Rent (1BHK Mid-range)", cityA: a.rentMid, cityB: b.rentMid, winner: rentWinner },
+    { category: "Avg Rent (1BHK Premium)", cityA: a.rentPremium, cityB: b.rentPremium, winner: rentWinner },
+    { category: "Safety Score (PlaceLabels)", cityA: a.safetyScore, cityB: b.safetyScore, winner: safetyWinner },
+    { category: "Traffic Congestion", cityA: a.traffic, cityB: b.traffic, winner: trafficWinner },
+    { category: "Public Transport / Metro", cityA: a.metro, cityB: b.metro, winner: metroWinner },
+    { category: "Job Market", cityA: a.jobMarket, cityB: b.jobMarket, winner: jobsWinner },
+    { category: "Monthly Budget (comfortable)", cityA: a.monthlyBudget, cityB: b.monthlyBudget, winner: rentWinner },
+  ];
+
+  const sections = [
+    {
+      heading: `Rent Comparison: ${a.name} vs ${b.name}`,
+      content: `${cheaperCity ? `${cheaperCity.name} is the more affordable option` : `${a.name} and ${b.name} are similarly priced`} in the ${slugA}-vs-${slugB} comparison. Budget 1BHK: ${a.name} (${a.budgetAreas.slice(0, 2).join(", ")}) ${a.rentBudget} vs ${b.name} (${b.budgetAreas.slice(0, 2).join(", ")}) ${b.rentBudget}. Mid-range: ${a.name} (${a.midAreas.slice(0, 2).join(", ")}) ${a.rentMid} vs ${b.name} (${b.midAreas.slice(0, 2).join(", ")}) ${b.rentMid}. Monthly budget for a comfortable single-person lifestyle: ${a.monthlyBudget} in ${a.name} vs ${b.monthlyBudget} in ${b.name}.`,
+    },
+    {
+      heading: `Job Market: ${a.name} vs ${b.name}`,
+      content: `${a.name}'s job market is strongest in: ${a.jobMarket}. ${b.name}'s job market is strongest in: ${b.jobMarket}. ${betterJobsCity ? `Overall, ${betterJobsCity.name} has a larger and more diverse job ecosystem for corporate professionals.` : `Both cities offer comparable corporate job opportunities depending on your specific field.`} For remote workers, the lower-cost city (${cheaperCity ? cheaperCity.name : "either city"}) offers significantly better value — you bring your own job and pocket the cost difference.`,
+    },
+    {
+      heading: `Safety & Lifestyle: ${a.name} vs ${b.name}`,
+      content: `PlaceLabels users rate ${a.name} at ${a.safetyScore} for safety and ${b.name} at ${b.safetyScore}. ${saferCity ? `${saferCity.name} has a meaningfully better safety profile according to local ratings.` : `Both cities rate similarly for safety.`} ${a.name} pros: ${a.pros.slice(0, 2).join("; ")}. ${b.name} pros: ${b.pros.slice(0, 2).join("; ")}. Key trade-offs: ${a.name} cons include ${a.cons[0]}; ${b.name} cons include ${b.cons[0]}.`,
+    },
+    {
+      heading: `Who Should Choose ${a.name} vs ${b.name}?`,
+      content: `Choose ${a.name} if: you prioritize ${a.pros[0].toLowerCase()}, your job is in ${a.jobMarket.split(",")[0]}, or you prefer ${a.name}'s lifestyle. Choose ${b.name} if: you prioritize ${b.pros[0].toLowerCase()}, your job is in ${b.jobMarket.split(",")[0]}, or you prefer ${b.name}'s lifestyle. ${aCheaper ? `For remote workers with flexible location, ${a.name}'s lower costs (${a.monthlyBudget}/month vs ${b.monthlyBudget}/month) can mean saving ₹5,000–₹15,000 per month.` : bCheaper ? `For remote workers with flexible location, ${b.name}'s lower costs (${b.monthlyBudget}/month vs ${a.monthlyBudget}/month) can mean saving ₹5,000–₹15,000 per month.` : `Both cities offer similar cost levels, making the decision primarily about lifestyle, job market, and personal preferences.`}`,
+    },
+  ];
+
+  const cheaperAns = cheaperCity
+    ? `Yes, ${cheaperCity.name} is more affordable. Budget 1BHK rents in ${cheaperCity.name} start at ${cheaperCity.rentBudget} vs ${cheaperCity === a ? b.rentBudget : a.rentBudget} in ${cheaperCity === a ? b.name : a.name}. Monthly living costs are approximately ${cheaperCity.monthlyBudget} in ${cheaperCity.name} vs ${cheaperCity === a ? b.monthlyBudget : a.monthlyBudget} in ${cheaperCity === a ? b.name : a.name}.`
+    : `${a.name} and ${b.name} are similarly priced overall. Budget rents: ${a.name} ${a.rentBudget} vs ${b.name} ${b.rentBudget}. Monthly budgets are comparable at ${a.monthlyBudget} vs ${b.monthlyBudget}.`;
+
+  const saferAns = saferCity
+    ? `${saferCity.name} rates higher for safety at ${saferCity.safetyScore} vs ${saferCity === a ? b.safetyScore : a.safetyScore} for ${saferCity === a ? b.name : a.name} on PlaceLabels. ${saferCity.pros.find((p) => p.toLowerCase().includes("safe")) || `${saferCity.name} consistently receives higher safety ratings from locals.`}`
+    : `${a.name} (${a.safetyScore}) and ${b.name} (${b.safetyScore}) rate similarly for safety on PlaceLabels. Both cities have areas that rate very well and some that rate lower — your specific neighbourhood matters more than the city overall.`;
+
+  const betterOverallAns = `The better city depends on your priorities. ${aCheaper ? `For cost savings, ${a.name} wins — rents are lower at ${a.rentBudget} vs ${b.rentBudget}.` : bCheaper ? `For cost savings, ${b.name} wins — rents are lower at ${b.rentBudget} vs ${a.rentBudget}.` : ""} ${aBetterJobs ? `For career growth, ${a.name} has a stronger job market in ${a.jobMarket.split(",")[0]}.` : bBetterJobs ? `For career growth, ${b.name} has a stronger job market in ${b.jobMarket.split(",")[0]}.` : ""} ${aSafer ? `For safety, ${a.name} rates higher at ${a.safetyScore}.` : bSafer ? `For safety, ${b.name} rates higher at ${b.safetyScore}.` : ""}`;
+
+  const faqs = [
+    { q: `Is ${a.name} cheaper than ${b.name}?`, a: cheaperAns },
+    { q: `Is ${a.name} safer than ${b.name}?`, a: saferAns },
+    { q: `Which is better — ${a.name} or ${b.name}?`, a: betterOverallAns },
+  ];
+
+  const relatedLinks = [
+    { href: `/${slugA}`, label: `${a.name} Neighborhoods` },
+    { href: `/${slugB}`, label: `${b.name} Neighborhoods` },
+    { href: `/${slugA}/cheap-areas-to-live`, label: `Cheapest Areas in ${a.name}` },
+    { href: `/${slugB}/cheap-areas-to-live`, label: `Cheapest Areas in ${b.name}` },
+  ];
+
+  return { title, h1, description, cityA: a.name, cityB: b.name, slugA, slugB, intro, table, sections, faqs, relatedLinks };
+}
+
 function WinBadge() {
   return (
     <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-100 rounded-full px-2 py-0.5 ml-2">
@@ -521,8 +876,21 @@ function WinBadge() {
 
 export default function CityComparePage() {
   const [location] = useLocation();
-  const slug = location.replace(/^\/compare\//, "");
-  const data = slug ? DATA[slug] : null;
+  const rawSlug = location.replace(/^\/compare\//, "").split("?")[0];
+
+  const parts = rawSlug.split("-vs-");
+  const slugA = parts[0] ?? "";
+  const slugB = parts.slice(1).join("-vs-") ?? "";
+
+  const dataKey = DATA[rawSlug] ? rawSlug : DATA[`${slugB}-vs-${slugA}`] ? `${slugB}-vs-${slugA}` : null;
+  const hardcoded = dataKey ? DATA[dataKey] : null;
+
+  const bothCities = ALL_CITY_SLUGS.has(slugA) && ALL_CITY_SLUGS.has(slugB);
+
+  let data: CityCompareData | null = hardcoded;
+  if (!data && bothCities && slugA && slugB && slugA !== slugB) {
+    data = generateDynamicData(slugA, slugB);
+  }
 
   if (!data) {
     return (
