@@ -7,7 +7,7 @@ import { TopToolbar } from "@/components/TopToolbar";
 import { HeroOverlay, MicroHints, useOnboarding } from "@/components/Onboarding";
 import { ZoneLegend } from "@/components/ZoneLegend";
 import { Button } from "@/components/ui/button";
-import { Plus, MapPin, Sparkles, X } from "lucide-react";
+import { Plus, MapPin, Sparkles, X, Home } from "lucide-react";
 import { useVoterId } from "@/hooks/useVoterId";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -300,6 +300,16 @@ export default function Index() {
       {showHero && <HeroOverlay onDismiss={dismissHero} />}
       {!showHero && <MicroHints hasInteracted={hasInteracted} />}
 
+      {/* Home button — top-left, above Leaflet zoom controls */}
+      <Link
+        href="/"
+        className="absolute top-4 left-4 z-[1200] flex items-center gap-2 bg-white border-2 border-black px-3 py-2 shadow-lg hover:bg-black hover:text-white transition-colors group"
+        style={{ textDecoration: "none" }}
+      >
+        <Home className="h-4 w-4 group-hover:text-white" />
+        <span className="text-xs font-bold uppercase tracking-widest hidden sm:inline">Home</span>
+      </Link>
+
       <div className="absolute top-4 right-4 z-[1000] hidden sm:block">
         <div className="bg-card/95 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border">
           <h1 className="text-lg font-bold text-foreground leading-none">Honest Neighborhood Reviews from Real Locals — PlaceLabels</h1>
@@ -460,21 +470,21 @@ export default function Index() {
             { slug: "kolkata", label: "Kolkata" },
             { slug: "jaipur", label: "Jaipur" },
           ].map((city) => (
-            <a
+            <Link
               key={city.slug}
               href={`/${city.slug}`}
               className="text-[11px] text-teal-700 hover:text-teal-900 hover:underline font-medium whitespace-nowrap"
             >
               {city.label}
-            </a>
+            </Link>
           ))}
           <span className="text-gray-300 hidden sm:inline">·</span>
-          <a href="/compare/mumbai-vs-pune" className="text-[11px] text-gray-500 hover:text-teal-700 hover:underline hidden sm:inline whitespace-nowrap">Mumbai vs Pune</a>
-          <a href="/compare/bangalore-vs-hyderabad" className="text-[11px] text-gray-500 hover:text-teal-700 hover:underline hidden sm:inline whitespace-nowrap">Bangalore vs Hyderabad</a>
-          <a href="/compare/delhi-vs-gurgaon" className="text-[11px] text-gray-500 hover:text-teal-700 hover:underline hidden lg:inline whitespace-nowrap">Delhi vs Gurgaon</a>
-          <a href="/mumbai/cheap-areas-to-live" className="text-[11px] text-gray-500 hover:text-teal-700 hover:underline hidden lg:inline whitespace-nowrap">Cheap Areas Mumbai</a>
-          <a href="/about" className="text-[11px] text-gray-400 hover:text-teal-700 hover:underline hidden xl:inline whitespace-nowrap">About</a>
-          <a href="/how-it-works" className="text-[11px] text-gray-400 hover:text-teal-700 hover:underline hidden xl:inline whitespace-nowrap">How It Works</a>
+          <Link href="/compare/mumbai-vs-pune" className="text-[11px] text-gray-500 hover:text-teal-700 hover:underline hidden sm:inline whitespace-nowrap">Mumbai vs Pune</Link>
+          <Link href="/compare/bangalore-vs-hyderabad" className="text-[11px] text-gray-500 hover:text-teal-700 hover:underline hidden sm:inline whitespace-nowrap">Bangalore vs Hyderabad</Link>
+          <Link href="/compare/delhi-vs-gurgaon" className="text-[11px] text-gray-500 hover:text-teal-700 hover:underline hidden lg:inline whitespace-nowrap">Delhi vs Gurgaon</Link>
+          <Link href="/mumbai/cheap-areas-to-live" className="text-[11px] text-gray-500 hover:text-teal-700 hover:underline hidden lg:inline whitespace-nowrap">Cheap Areas Mumbai</Link>
+          <Link href="/about" className="text-[11px] text-gray-400 hover:text-teal-700 hover:underline hidden xl:inline whitespace-nowrap">About</Link>
+          <Link href="/how-it-works" className="text-[11px] text-gray-400 hover:text-teal-700 hover:underline hidden xl:inline whitespace-nowrap">How It Works</Link>
         </div>
       </nav>
     </div>

@@ -1,7 +1,8 @@
+import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Router, Route, Switch } from "wouter";
+import { Router, Route, Switch, useLocation } from "wouter";
 import Index from "@/pages/Index";
 import LandingPage from "@/pages/LandingPage";
 import CityPage from "@/pages/seo/CityPage";
@@ -14,6 +15,14 @@ import CityComparePage from "@/pages/seo/CityComparePage";
 import AboutPage from "@/pages/seo/AboutPage";
 import HowItWorksPage from "@/pages/seo/HowItWorksPage";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+
+function ScrollToTop() {
+  const [location] = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
+  return null;
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,6 +38,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Router base={BASE}>
+            <ScrollToTop />
             <Switch>
               {/* Utility pages */}
               <Route path="/about" component={AboutPage} />
