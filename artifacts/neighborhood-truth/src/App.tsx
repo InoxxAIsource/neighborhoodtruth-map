@@ -39,6 +39,14 @@ function App() {
               <Route path="/compare/bangalore-vs-hyderabad" component={CityComparePage} />
               <Route path="/compare/delhi-vs-noida" component={CityComparePage} />
               <Route path="/compare/gurgaon-vs-noida" component={CityComparePage} />
+              <Route path="/compare/chennai-vs-bangalore" component={CityComparePage} />
+              <Route path="/compare/hyderabad-vs-pune" component={CityComparePage} />
+              <Route path="/compare/ahmedabad-vs-surat" component={CityComparePage} />
+              <Route path="/compare/kolkata-vs-mumbai" component={CityComparePage} />
+              <Route path="/compare/delhi-vs-mumbai" component={CityComparePage} />
+              <Route path="/compare/bangalore-vs-pune" component={CityComparePage} />
+              <Route path="/compare/chennai-vs-hyderabad" component={CityComparePage} />
+              <Route path="/compare/jaipur-vs-delhi" component={CityComparePage} />
 
               {/* Generic area comparison page */}
               <Route path="/compare/:slug" component={ComparePage} />

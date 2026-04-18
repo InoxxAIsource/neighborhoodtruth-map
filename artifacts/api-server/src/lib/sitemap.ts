@@ -108,6 +108,14 @@ export async function generateSitemapXml(baseUrl = "https://placelabels.com"): P
     "bangalore-vs-hyderabad",
     "delhi-vs-noida",
     "gurgaon-vs-noida",
+    "chennai-vs-bangalore",
+    "hyderabad-vs-pune",
+    "ahmedabad-vs-surat",
+    "kolkata-vs-mumbai",
+    "delhi-vs-mumbai",
+    "bangalore-vs-pune",
+    "chennai-vs-hyderabad",
+    "jaipur-vs-delhi",
   ];
   for (const slug of CITY_COMPARISONS) {
     entries.push({ loc: `${baseUrl}/compare/${slug}`, lastmod: today, changefreq: "monthly", priority: "0.8" });
