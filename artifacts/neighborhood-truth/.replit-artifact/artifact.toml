@@ -18,8 +18,6 @@ kind = "web"
   run = "pnpm --filter @workspace/neighborhood-truth run dev"
 
   [services.production]
-  publicDir = "artifacts/neighborhood-truth/dist/public"
-  serve = "static"
 
   [services.production.build]
   args = [ "pnpm", "--filter", "@workspace/neighborhood-truth", "run", "build" ]
@@ -29,11 +27,6 @@ kind = "web"
   BASE_PATH = "/"
   NODE_ENV = "production"
 
-  [[services.production.rewrites]]
-  from = "/*"
-  to = "/index.html"
-
   [services.env]
   PORT = "23830"
   BASE_PATH = "/"
-  
