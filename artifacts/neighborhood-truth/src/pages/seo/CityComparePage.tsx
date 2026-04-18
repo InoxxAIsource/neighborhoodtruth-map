@@ -1,4 +1,4 @@
-import { useParams, Link } from "wouter";
+import { useLocation, Link } from "wouter";
 import { Helmet } from "react-helmet-async";
 import { SEOLayout } from "./SEOLayout";
 import { Trophy, ChevronRight, MapPin } from "lucide-react";
@@ -520,7 +520,8 @@ function WinBadge() {
 }
 
 export default function CityComparePage() {
-  const { slug } = useParams<{ slug: string }>();
+  const [location] = useLocation();
+  const slug = location.replace(/^\/compare\//, "");
   const data = slug ? DATA[slug] : null;
 
   if (!data) {

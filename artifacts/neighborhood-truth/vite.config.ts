@@ -126,12 +126,25 @@ export default defineConfig({
         changeOrigin: true,
         // Only proxy if it looks like a city or intent route (not static assets)
         bypass: (req) => {
-          const url = req.url;
-          // Don't proxy if it has a file extension (static assets)
+          const url = req.url ?? "";
+          // Don't proxy static assets
           if (/\.[a-z]{2,4}$/i.test(url)) return null;
+          // Don't proxy purely client-side routes — let Vite serve current source
+          const spaOnlyPrefixes = [
+            "/compare/",
+            "/map",
+            "/about",
+            "/how-it-works",
+            // Vibe filter pages (not handled by SSR)
+            "/bangalore/it-hub-areas",
+            "/pune/student-friendly-areas",
+            "/delhi/family-friendly-areas",
+            "/mumbai/safe-areas-for-women",
+          ];
+          if (spaOnlyPrefixes.some((p) => url === p || url.startsWith(p))) return null;
           // Don't proxy if it's not a city/intent pattern
           if (!url.match(/^\/[a-z-]+(?:\/[a-z-]+)?(?:\/)?$/)) return null;
-          // Allow proxy for city and intent pages
+          // Allow proxy for city and intent pages (SSR)
           return undefined;
         },
       },

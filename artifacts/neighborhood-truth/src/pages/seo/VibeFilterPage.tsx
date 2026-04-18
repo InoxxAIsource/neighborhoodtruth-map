@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useParams, Link } from "wouter";
+import { useLocation, Link } from "wouter";
 import { Helmet } from "react-helmet-async";
 import { SEOLayout } from "./SEOLayout";
 import { MapPin, ChevronRight, Briefcase, GraduationCap, Heart, Shield } from "lucide-react";
@@ -254,8 +254,8 @@ const DATA: Record<string, VibePageData> = {
 };
 
 export default function VibeFilterPage() {
-  const { city, area } = useParams<{ city: string; area: string }>();
-  const key = city && area ? `${city}/${area}` : "";
+  const [location] = useLocation();
+  const key = location.replace(/^\//, "");
   const data = DATA[key];
 
   if (!data) {
