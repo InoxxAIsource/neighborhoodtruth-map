@@ -376,7 +376,34 @@ export default function CheapAreasPage() {
               </Link>
             </li>
           ))}
+          <li>
+            <Link href={`/${data.citySlug}/affordable-areas`} className="flex items-center gap-2 text-teal-600 hover:text-teal-800 hover:underline text-sm">
+              <ChevronRight className="h-4 w-4" />Affordable areas in {data.cityName}
+            </Link>
+          </li>
+          <li>
+            <Link href={`/${data.citySlug}/safe-neighborhoods`} className="flex items-center gap-2 text-teal-600 hover:text-teal-800 hover:underline text-sm">
+              <ChevronRight className="h-4 w-4" />Safest neighborhoods in {data.cityName}
+            </Link>
+          </li>
+          <li>
+            <Link href={`/${data.citySlug}/best-areas-for-young-professionals`} className="flex items-center gap-2 text-teal-600 hover:text-teal-800 hover:underline text-sm">
+              <ChevronRight className="h-4 w-4" />Best areas for young professionals in {data.cityName}
+            </Link>
+          </li>
         </ul>
+      </div>
+
+      {/* Cheap areas in other cities */}
+      <div className="mb-6">
+        <h2 className="text-lg font-bold text-gray-800 mb-3">Cheap Areas in Other Indian Cities</h2>
+        <div className="flex flex-wrap gap-2">
+          {["mumbai", "delhi", "bangalore", "pune", "hyderabad"].filter((c) => c !== data.citySlug).map((c) => (
+            <Link key={c} href={`/${c}/cheap-areas-to-live`} className="inline-flex items-center bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 hover:border-teal-300 hover:text-teal-700 transition-colors capitalize">
+              💰 Cheap areas in {c}
+            </Link>
+          ))}
+        </div>
       </div>
     </SEOLayout>
   );

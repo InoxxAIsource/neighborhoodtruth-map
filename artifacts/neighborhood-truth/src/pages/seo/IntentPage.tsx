@@ -430,18 +430,67 @@ export default function IntentPage() {
 
       {/* Related Cities & Intents - Critical for SEO crawl depth */}
       <section className="mb-10 border-t pt-10">
-        <h2 className="text-lg font-bold text-gray-900 mb-4">Explore This Intent in Other Cities</h2>
+        <h2 className="text-lg font-bold text-gray-900 mb-4">{intent.label} in Other Cities</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          {["new-york", "san-francisco", "los-angeles", "london", "tokyo", "mumbai", "delhi", "bangalore"].filter((c) => c !== cityInfo.slug).slice(0, 6).map((citySlug) => (
+          {["mumbai", "delhi", "bangalore", "pune", "hyderabad", "chennai", "kolkata", "gurgaon", "new-york", "london"].filter((c) => c !== cityInfo.slug).slice(0, 8).map((citySlug) => (
             <Link key={citySlug} href={`/${citySlug}/${intent.slug}`}>
               <div className="bg-white border border-gray-200 rounded-lg p-4 text-center hover:border-teal-300 hover:shadow-md transition-all cursor-pointer">
-                <p className="font-semibold text-gray-900 capitalize">{citySlug.replace("-", " ")}</p>
+                <p className="font-semibold text-gray-900 capitalize">{citySlug.replace(/-/g, " ")}</p>
                 <p className="text-xs text-gray-400 mt-1">{intent.label}</p>
               </div>
             </Link>
           ))}
         </div>
       </section>
+
+      {/* Comparison cross-links */}
+      {["mumbai", "delhi", "bangalore", "pune", "hyderabad", "chennai", "kolkata"].includes(cityInfo.slug) && (
+        <section className="mb-10 bg-gray-50 rounded-2xl border border-gray-200 p-5">
+          <h2 className="text-base font-bold text-gray-900 mb-3">Compare {cityInfo.name} with Other Cities</h2>
+          <div className="flex flex-wrap gap-2">
+            {(
+              {
+                delhi: [
+                  { slug: "delhi-vs-gurgaon", label: "Delhi vs Gurgaon" },
+                  { slug: "delhi-vs-mumbai", label: "Delhi vs Mumbai" },
+                  { slug: "delhi-vs-noida", label: "Delhi vs Noida" },
+                ],
+                mumbai: [
+                  { slug: "mumbai-vs-pune", label: "Mumbai vs Pune" },
+                  { slug: "delhi-vs-mumbai", label: "Delhi vs Mumbai" },
+                  { slug: "kolkata-vs-mumbai", label: "Kolkata vs Mumbai" },
+                ],
+                bangalore: [
+                  { slug: "bangalore-vs-hyderabad", label: "Bangalore vs Hyderabad" },
+                  { slug: "bangalore-vs-pune", label: "Bangalore vs Pune" },
+                  { slug: "chennai-vs-bangalore", label: "Chennai vs Bangalore" },
+                ],
+                hyderabad: [
+                  { slug: "bangalore-vs-hyderabad", label: "Bangalore vs Hyderabad" },
+                  { slug: "hyderabad-vs-pune", label: "Hyderabad vs Pune" },
+                  { slug: "chennai-vs-hyderabad", label: "Chennai vs Hyderabad" },
+                ],
+                pune: [
+                  { slug: "mumbai-vs-pune", label: "Mumbai vs Pune" },
+                  { slug: "bangalore-vs-pune", label: "Bangalore vs Pune" },
+                  { slug: "hyderabad-vs-pune", label: "Hyderabad vs Pune" },
+                ],
+                chennai: [
+                  { slug: "chennai-vs-bangalore", label: "Chennai vs Bangalore" },
+                  { slug: "chennai-vs-hyderabad", label: "Chennai vs Hyderabad" },
+                ],
+                kolkata: [
+                  { slug: "kolkata-vs-mumbai", label: "Kolkata vs Mumbai" },
+                ],
+              } as Record<string, Array<{slug: string; label: string}>>
+            )[cityInfo.slug]?.map((c) => (
+              <Link key={c.slug} href={`/compare/${c.slug}`} className="inline-flex items-center gap-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 hover:border-teal-300 hover:text-teal-700 transition-colors">
+                ⚖️ {c.label}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Footer nav */}
       <div className="flex flex-wrap gap-3 items-center text-sm text-gray-500 justify-center border-t pt-6">

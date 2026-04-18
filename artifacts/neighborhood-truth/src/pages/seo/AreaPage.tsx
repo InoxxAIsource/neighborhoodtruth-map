@@ -520,14 +520,68 @@ export default function AreaPage() {
           <p>
             <strong>Cost of living in {areaInfo.text}:</strong> Rated <strong>{areaInfo.cost}</strong> ({COST_LABELS[areaInfo.cost] || areaInfo.cost}).
             {areaInfo.vibe.length > 0 && ` Locals describe the vibe as ${areaInfo.vibe.map((v) => `"${v}"`).join(", ")}.`}
+            {(areaInfo.cost === "$" || areaInfo.cost === "$$") && (
+              <>{" "}Looking for more budget options? See all{" "}
+                <Link href={`/${cityInfo.slug}/affordable-areas`} className="text-teal-700 hover:underline">affordable areas in {cityInfo.name}</Link>
+                {["mumbai", "delhi", "bangalore", "pune", "hyderabad"].includes(cityInfo.slug) && (
+                  <> or the full{" "}
+                    <Link href={`/${cityInfo.slug}/cheap-areas-to-live`} className="text-teal-700 hover:underline">cheap areas guide for {cityInfo.name}</Link>
+                  </>
+                )}.
+              </>
+            )}
           </p>
           <p>
             Explore more{" "}
             <Link href={`/${cityInfo.slug}`} className="text-teal-700 hover:underline">neighborhoods in {cityInfo.name}</Link>,
             or find the{" "}
-            <Link href={`/${cityInfo.slug}/safe-neighborhoods`} className="text-teal-700 hover:underline">safest neighborhoods in {cityInfo.name}</Link>{" "}
-            and <Link href={`/${cityInfo.slug}/affordable-areas`} className="text-teal-700 hover:underline">affordable areas in {cityInfo.name}</Link>.
+            <Link href={`/${cityInfo.slug}/safe-neighborhoods`} className="text-teal-700 hover:underline">safest neighborhoods in {cityInfo.name}</Link>,{" "}
+            <Link href={`/${cityInfo.slug}/affordable-areas`} className="text-teal-700 hover:underline">affordable areas in {cityInfo.name}</Link>,{" "}
+            and <Link href={`/${cityInfo.slug}/best-areas-for-young-professionals`} className="text-teal-700 hover:underline">best areas for professionals in {cityInfo.name}</Link>.
           </p>
+          {/* City-specific comparison links */}
+          {cityInfo.slug === "delhi" && (
+            <p>Considering a move? Compare:{" "}
+              <Link href="/compare/delhi-vs-gurgaon" className="text-teal-700 hover:underline">Delhi vs Gurgaon</Link>,{" "}
+              <Link href="/compare/delhi-vs-mumbai" className="text-teal-700 hover:underline">Delhi vs Mumbai</Link>,{" "}
+              <Link href="/compare/delhi-vs-noida" className="text-teal-700 hover:underline">Delhi vs Noida</Link>.
+            </p>
+          )}
+          {cityInfo.slug === "mumbai" && (
+            <p>Considering a move? Compare:{" "}
+              <Link href="/compare/mumbai-vs-pune" className="text-teal-700 hover:underline">Mumbai vs Pune</Link>,{" "}
+              <Link href="/compare/delhi-vs-mumbai" className="text-teal-700 hover:underline">Delhi vs Mumbai</Link>,{" "}
+              <Link href="/compare/kolkata-vs-mumbai" className="text-teal-700 hover:underline">Kolkata vs Mumbai</Link>.
+            </p>
+          )}
+          {cityInfo.slug === "bangalore" && (
+            <p>Considering a move? Compare:{" "}
+              <Link href="/compare/bangalore-vs-hyderabad" className="text-teal-700 hover:underline">Bangalore vs Hyderabad</Link>,{" "}
+              <Link href="/compare/bangalore-vs-pune" className="text-teal-700 hover:underline">Bangalore vs Pune</Link>,{" "}
+              <Link href="/compare/chennai-vs-bangalore" className="text-teal-700 hover:underline">Chennai vs Bangalore</Link>.{" "}
+              Also see <Link href="/bangalore/it-hub-areas" className="text-teal-700 hover:underline">IT hub areas in Bangalore</Link>.
+            </p>
+          )}
+          {cityInfo.slug === "pune" && (
+            <p>Considering a move? Compare:{" "}
+              <Link href="/compare/mumbai-vs-pune" className="text-teal-700 hover:underline">Mumbai vs Pune</Link>,{" "}
+              <Link href="/compare/bangalore-vs-pune" className="text-teal-700 hover:underline">Bangalore vs Pune</Link>.{" "}
+              Also see <Link href="/pune/student-friendly-areas" className="text-teal-700 hover:underline">student-friendly areas in Pune</Link>.
+            </p>
+          )}
+          {cityInfo.slug === "hyderabad" && (
+            <p>Considering a move? Compare:{" "}
+              <Link href="/compare/bangalore-vs-hyderabad" className="text-teal-700 hover:underline">Bangalore vs Hyderabad</Link>,{" "}
+              <Link href="/compare/hyderabad-vs-pune" className="text-teal-700 hover:underline">Hyderabad vs Pune</Link>,{" "}
+              <Link href="/compare/chennai-vs-hyderabad" className="text-teal-700 hover:underline">Chennai vs Hyderabad</Link>.
+            </p>
+          )}
+          {cityInfo.slug === "chennai" && (
+            <p>Considering a move? Compare:{" "}
+              <Link href="/compare/chennai-vs-bangalore" className="text-teal-700 hover:underline">Chennai vs Bangalore</Link>,{" "}
+              <Link href="/compare/chennai-vs-hyderabad" className="text-teal-700 hover:underline">Chennai vs Hyderabad</Link>.
+            </p>
+          )}
         </div>
       </section>
 

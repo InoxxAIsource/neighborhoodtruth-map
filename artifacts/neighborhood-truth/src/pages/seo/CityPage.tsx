@@ -534,6 +534,111 @@ export default function CityPage() {
         </div>
       </section>
 
+      {/* Comparison Pages — long-tail internal linking */}
+      {(() => {
+        const CITY_COMPARISONS: Record<string, Array<{ slug: string; label: string }>> = {
+          delhi: [
+            { slug: "delhi-vs-gurgaon", label: "Delhi vs Gurgaon" },
+            { slug: "delhi-vs-mumbai", label: "Delhi vs Mumbai" },
+            { slug: "delhi-vs-noida", label: "Delhi vs Noida" },
+            { slug: "jaipur-vs-delhi", label: "Jaipur vs Delhi" },
+          ],
+          mumbai: [
+            { slug: "mumbai-vs-pune", label: "Mumbai vs Pune" },
+            { slug: "delhi-vs-mumbai", label: "Delhi vs Mumbai" },
+            { slug: "kolkata-vs-mumbai", label: "Kolkata vs Mumbai" },
+          ],
+          bangalore: [
+            { slug: "bangalore-vs-hyderabad", label: "Bangalore vs Hyderabad" },
+            { slug: "bangalore-vs-pune", label: "Bangalore vs Pune" },
+            { slug: "chennai-vs-bangalore", label: "Chennai vs Bangalore" },
+          ],
+          hyderabad: [
+            { slug: "bangalore-vs-hyderabad", label: "Bangalore vs Hyderabad" },
+            { slug: "hyderabad-vs-pune", label: "Hyderabad vs Pune" },
+            { slug: "chennai-vs-hyderabad", label: "Chennai vs Hyderabad" },
+          ],
+          pune: [
+            { slug: "mumbai-vs-pune", label: "Mumbai vs Pune" },
+            { slug: "bangalore-vs-pune", label: "Bangalore vs Pune" },
+            { slug: "hyderabad-vs-pune", label: "Hyderabad vs Pune" },
+          ],
+          chennai: [
+            { slug: "chennai-vs-bangalore", label: "Chennai vs Bangalore" },
+            { slug: "chennai-vs-hyderabad", label: "Chennai vs Hyderabad" },
+          ],
+          kolkata: [
+            { slug: "kolkata-vs-mumbai", label: "Kolkata vs Mumbai" },
+          ],
+          gurgaon: [
+            { slug: "delhi-vs-gurgaon", label: "Delhi vs Gurgaon" },
+            { slug: "gurgaon-vs-noida", label: "Gurgaon vs Noida" },
+          ],
+          noida: [
+            { slug: "delhi-vs-noida", label: "Delhi vs Noida" },
+            { slug: "gurgaon-vs-noida", label: "Gurgaon vs Noida" },
+          ],
+          jaipur: [
+            { slug: "jaipur-vs-delhi", label: "Jaipur vs Delhi" },
+          ],
+          ahmedabad: [
+            { slug: "ahmedabad-vs-surat", label: "Ahmedabad vs Surat" },
+          ],
+          surat: [
+            { slug: "ahmedabad-vs-surat", label: "Ahmedabad vs Surat" },
+          ],
+        };
+        const CITY_CHEAP_AREAS: Record<string, boolean> = {
+          mumbai: true, delhi: true, bangalore: true, pune: true, hyderabad: true,
+        };
+        const CITY_VIBE_PAGES: Record<string, Array<{ href: string; label: string }>> = {
+          bangalore: [{ href: "/bangalore/it-hub-areas", label: "IT hub areas in Bangalore" }],
+          pune: [{ href: "/pune/student-friendly-areas", label: "Student-friendly areas in Pune" }],
+          delhi: [{ href: "/delhi/family-friendly-areas", label: "Family-friendly areas in Delhi" }],
+          mumbai: [{ href: "/mumbai/safe-areas-for-women", label: "Safe areas for women in Mumbai" }],
+        };
+
+        const comparisons = CITY_COMPARISONS[cityInfo.slug] ?? [];
+        const hasCheap = CITY_CHEAP_AREAS[cityInfo.slug] ?? false;
+        const vibePages = CITY_VIBE_PAGES[cityInfo.slug] ?? [];
+        const hasAnything = comparisons.length > 0 || hasCheap || vibePages.length > 0;
+        if (!hasAnything) return null;
+
+        return (
+          <section className="mb-10 bg-white rounded-2xl border border-gray-200 p-5">
+            <h2 className="text-base font-bold text-gray-900 mb-4">
+              Related Guides for {cityInfo.name}
+            </h2>
+            <div className="grid sm:grid-cols-2 gap-2">
+              {hasCheap && (
+                <Link href={`/${cityInfo.slug}/cheap-areas-to-live`}>
+                  <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-gray-50 border border-gray-100 hover:border-teal-200 transition-colors cursor-pointer">
+                    <span className="text-lg">💰</span>
+                    <span className="text-sm font-medium text-gray-800">Cheapest areas to live in {cityInfo.name}</span>
+                  </div>
+                </Link>
+              )}
+              {vibePages.map((v) => (
+                <Link key={v.href} href={v.href}>
+                  <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-gray-50 border border-gray-100 hover:border-teal-200 transition-colors cursor-pointer">
+                    <span className="text-lg">🎯</span>
+                    <span className="text-sm font-medium text-gray-800">{v.label}</span>
+                  </div>
+                </Link>
+              ))}
+              {comparisons.map((c) => (
+                <Link key={c.slug} href={`/compare/${c.slug}`}>
+                  <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-gray-50 border border-gray-100 hover:border-teal-200 transition-colors cursor-pointer">
+                    <span className="text-lg">⚖️</span>
+                    <span className="text-sm font-medium text-gray-800">{c.label} — which is better?</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        );
+      })()}
+
       {/* Related Cities - Critical for SEO crawl depth */}
       <section>
         <h2 className="text-lg font-bold text-gray-900 mb-4">Explore Other Cities</h2>

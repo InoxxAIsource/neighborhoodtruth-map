@@ -381,6 +381,137 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── Explore by Topic — Long-tail SEO hub ─────────────────── */}
+      <section className="border-t border-black px-5 md:px-10 py-14 bg-gray-50">
+        <div className="max-w-[1200px] mx-auto">
+          <h2 className="text-xl md:text-2xl font-black uppercase mb-2">Explore by Topic</h2>
+          <p className="text-sm text-gray-500 mb-10">All neighbourhood guides, curated by city, intent, and lifestyle.</p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            {/* Safe Neighbourhoods */}
+            <div>
+              <h3 className="text-[11px] font-bold uppercase tracking-widest text-gray-400 border-b border-gray-200 pb-2 mb-3">🛡️ Safe Neighbourhoods</h3>
+              <ul className="space-y-1.5">
+                {[
+                  { href: "/mumbai/safe-neighborhoods", label: "Safe areas in Mumbai" },
+                  { href: "/delhi/safe-neighborhoods", label: "Safe areas in Delhi" },
+                  { href: "/bangalore/safe-neighborhoods", label: "Safe areas in Bangalore" },
+                  { href: "/pune/safe-neighborhoods", label: "Safe areas in Pune" },
+                  { href: "/hyderabad/safe-neighborhoods", label: "Safe areas in Hyderabad" },
+                  { href: "/chennai/safe-neighborhoods", label: "Safe areas in Chennai" },
+                  { href: "/kolkata/safe-neighborhoods", label: "Safe areas in Kolkata" },
+                  { href: "/mumbai/safe-areas-for-women", label: "Safe areas for women in Mumbai" },
+                ].map((l) => (
+                  <li key={l.href}><a href={l.href} className="text-sm text-gray-700 hover:text-black hover:underline">{l.label}</a></li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Cheap & Affordable */}
+            <div>
+              <h3 className="text-[11px] font-bold uppercase tracking-widest text-gray-400 border-b border-gray-200 pb-2 mb-3">💰 Cheap & Affordable Areas</h3>
+              <ul className="space-y-1.5">
+                {[
+                  { href: "/mumbai/cheap-areas-to-live", label: "Cheapest areas to live in Mumbai" },
+                  { href: "/delhi/cheap-areas-to-live", label: "Cheapest areas to live in Delhi" },
+                  { href: "/bangalore/cheap-areas-to-live", label: "Cheapest areas to live in Bangalore" },
+                  { href: "/pune/cheap-areas-to-live", label: "Cheapest areas to live in Pune" },
+                  { href: "/hyderabad/cheap-areas-to-live", label: "Cheapest areas to live in Hyderabad" },
+                  { href: "/mumbai/affordable-areas", label: "Affordable areas in Mumbai" },
+                  { href: "/delhi/affordable-areas", label: "Affordable areas in Delhi" },
+                  { href: "/bangalore/affordable-areas", label: "Affordable areas in Bangalore" },
+                ].map((l) => (
+                  <li key={l.href}><a href={l.href} className="text-sm text-gray-700 hover:text-black hover:underline">{l.label}</a></li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Family & Students */}
+            <div>
+              <h3 className="text-[11px] font-bold uppercase tracking-widest text-gray-400 border-b border-gray-200 pb-2 mb-3">👨‍👩‍👧 Family & Student Areas</h3>
+              <ul className="space-y-1.5">
+                {[
+                  { href: "/delhi/family-friendly-areas", label: "Family-friendly areas in Delhi" },
+                  { href: "/mumbai/family-friendly", label: "Family-friendly areas in Mumbai" },
+                  { href: "/bangalore/family-friendly", label: "Family-friendly areas in Bangalore" },
+                  { href: "/pune/student-friendly-areas", label: "Student-friendly areas in Pune" },
+                  { href: "/mumbai/best-areas-for-students", label: "Best areas for students in Mumbai" },
+                  { href: "/delhi/best-areas-for-students", label: "Best areas for students in Delhi" },
+                  { href: "/bangalore/best-areas-for-students", label: "Best areas for students in Bangalore" },
+                  { href: "/hyderabad/family-friendly", label: "Family-friendly areas in Hyderabad" },
+                ].map((l) => (
+                  <li key={l.href}><a href={l.href} className="text-sm text-gray-700 hover:text-black hover:underline">{l.label}</a></li>
+                ))}
+              </ul>
+            </div>
+
+            {/* IT & Professionals */}
+            <div>
+              <h3 className="text-[11px] font-bold uppercase tracking-widest text-gray-400 border-b border-gray-200 pb-2 mb-3">💼 IT Hubs & Professionals</h3>
+              <ul className="space-y-1.5">
+                {[
+                  { href: "/bangalore/it-hub-areas", label: "IT hub areas in Bangalore" },
+                  { href: "/bangalore/best-areas-for-young-professionals", label: "Best areas for professionals in Bangalore" },
+                  { href: "/hyderabad/best-areas-for-young-professionals", label: "Best areas for professionals in Hyderabad" },
+                  { href: "/pune/best-areas-for-young-professionals", label: "Best areas for professionals in Pune" },
+                  { href: "/delhi/best-areas-for-young-professionals", label: "Best areas for professionals in Delhi" },
+                  { href: "/mumbai/best-areas-for-young-professionals", label: "Best areas for professionals in Mumbai" },
+                  { href: "/chennai/best-areas-for-young-professionals", label: "Best areas for professionals in Chennai" },
+                  { href: "/gurgaon/best-areas-for-young-professionals", label: "Best areas for professionals in Gurgaon" },
+                ].map((l) => (
+                  <li key={l.href}><a href={l.href} className="text-sm text-gray-700 hover:text-black hover:underline">{l.label}</a></li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Nightlife & Quiet */}
+            <div>
+              <h3 className="text-[11px] font-bold uppercase tracking-widest text-gray-400 border-b border-gray-200 pb-2 mb-3">🎉 Nightlife & Quiet Areas</h3>
+              <ul className="space-y-1.5">
+                {[
+                  { href: "/mumbai/nightlife-areas", label: "Best nightlife areas in Mumbai" },
+                  { href: "/delhi/nightlife-areas", label: "Best nightlife areas in Delhi" },
+                  { href: "/bangalore/nightlife-areas", label: "Best nightlife areas in Bangalore" },
+                  { href: "/pune/nightlife-areas", label: "Best nightlife areas in Pune" },
+                  { href: "/mumbai/quiet-neighborhoods", label: "Quiet neighbourhoods in Mumbai" },
+                  { href: "/delhi/quiet-neighborhoods", label: "Quiet neighbourhoods in Delhi" },
+                  { href: "/bangalore/quiet-neighborhoods", label: "Quiet neighbourhoods in Bangalore" },
+                  { href: "/goa/nightlife-areas", label: "Best nightlife areas in Goa" },
+                ].map((l) => (
+                  <li key={l.href}><a href={l.href} className="text-sm text-gray-700 hover:text-black hover:underline">{l.label}</a></li>
+                ))}
+              </ul>
+            </div>
+
+            {/* City Comparisons */}
+            <div>
+              <h3 className="text-[11px] font-bold uppercase tracking-widest text-gray-400 border-b border-gray-200 pb-2 mb-3">⚖️ City Comparisons</h3>
+              <ul className="space-y-1.5">
+                {[
+                  { href: "/compare/delhi-vs-gurgaon", label: "Delhi vs Gurgaon: which to live in?" },
+                  { href: "/compare/mumbai-vs-pune", label: "Mumbai vs Pune: cost & lifestyle" },
+                  { href: "/compare/bangalore-vs-hyderabad", label: "Bangalore vs Hyderabad: IT city showdown" },
+                  { href: "/compare/delhi-vs-mumbai", label: "Delhi vs Mumbai: India's two biggest cities" },
+                  { href: "/compare/bangalore-vs-pune", label: "Bangalore vs Pune: best for IT jobs?" },
+                  { href: "/compare/chennai-vs-bangalore", label: "Chennai vs Bangalore: South India living" },
+                  { href: "/compare/hyderabad-vs-pune", label: "Hyderabad vs Pune: affordability guide" },
+                  { href: "/compare/kolkata-vs-mumbai", label: "Kolkata vs Mumbai: old vs new metro" },
+                  { href: "/compare/delhi-vs-noida", label: "Delhi vs Noida: which is better?" },
+                  { href: "/compare/gurgaon-vs-noida", label: "Gurgaon vs Noida: NCR comparison" },
+                  { href: "/compare/chennai-vs-hyderabad", label: "Chennai vs Hyderabad: South IT hubs" },
+                  { href: "/compare/jaipur-vs-delhi", label: "Jaipur vs Delhi: tier-2 vs capital" },
+                  { href: "/compare/ahmedabad-vs-surat", label: "Ahmedabad vs Surat: Gujarat cities" },
+                ].map((l) => (
+                  <li key={l.href}><a href={l.href} className="text-sm text-gray-700 hover:text-black hover:underline">{l.label}</a></li>
+                ))}
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
       {/* ── SEO Footer Nav ────────────────────────────────────────── */}
       <footer className="border-t border-black px-5 md:px-10 py-8 bg-white">
         <nav aria-label="Explore Indian Cities">
