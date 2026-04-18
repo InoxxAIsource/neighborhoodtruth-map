@@ -1,4 +1,4 @@
-import { useLocation } from "wouter";
+import { Link } from "wouter";
 
 interface CityCard {
   city: string;
@@ -90,17 +90,15 @@ const CITIES: CityCard[] = [
 const doubled = [...CITIES, ...CITIES];
 
 export function CityCarousel() {
-  const [, navigate] = useLocation();
-
   return (
     <div className="w-full overflow-hidden py-8 bg-white">
       <div className="relative overflow-hidden">
         <div className="flex gap-px w-max animate-scroll-left-fast will-change-transform">
           {doubled.map((city, i) => (
-            <div
+            <Link
               key={`${city.slug}-${i}`}
-              onClick={() => navigate(`/${city.slug}`)}
-              className="relative flex-shrink-0 w-[65vw] md:w-[36vw] lg:w-[26vw] aspect-[4/5] cursor-pointer overflow-hidden group"
+              href={`/${city.slug}`}
+              className="relative flex-shrink-0 w-[65vw] md:w-[36vw] lg:w-[26vw] aspect-[4/5] cursor-pointer overflow-hidden group block"
               style={{ backgroundColor: CITY_COLORS[i % CITY_COLORS.length] }}
             >
               <img
@@ -130,7 +128,7 @@ export function CityCarousel() {
                 <h3 className="text-xl md:text-2xl font-bold leading-tight">{city.city}</h3>
                 <p className="text-sm text-white/80 mt-0.5">{city.caption}</p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

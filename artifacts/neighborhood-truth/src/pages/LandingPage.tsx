@@ -76,14 +76,13 @@ function getCityForLabel(lat: number, lng: number): string | null {
 }
 
 function NeighborhoodCard({ label, citySlug, cityName }: { label: LabelDTO; citySlug: string; cityName: string }) {
-  const [, navigate] = useLocation();
   const areaSlug = label.text.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
   const vibes = (label.vibe ?? []).slice(0, 3);
 
   return (
+    <Link href={`/${citySlug}/${areaSlug}`} className="block">
     <div
       className="relative cursor-pointer group border border-black"
-      onClick={() => navigate(`/${citySlug}/${areaSlug}`)}
     >
       <div className="aspect-square bg-gray-100 overflow-hidden relative">
         <div
@@ -129,6 +128,7 @@ function NeighborhoodCard({ label, citySlug, cityName }: { label: LabelDTO; city
         )}
       </div>
     </div>
+    </Link>
   );
 }
 
@@ -149,7 +149,7 @@ export default function LandingPage() {
   const featuredLabels = useMemo(() => {
     const withCity = labels
       .map((l) => ({ ...l, citySlug: getCityForLabel(l.lat, l.lng) }))
-      .filter((l) => l.citySlug !== null && l.upvotes >= 0)
+      .filter((l) => l.citySlug !== null && l.upvotes >= 0 && l.text && l.text.trim().length > 0)
       .filter((l) => {
         if (activeVibe) {
           return (l.vibe ?? []).some((v) => v.toLowerCase() === activeVibe);
@@ -403,7 +403,7 @@ export default function LandingPage() {
                   { href: "/kolkata/safe-neighborhoods", label: "Safe areas in Kolkata" },
                   { href: "/mumbai/safe-areas-for-women", label: "Safe areas for women in Mumbai" },
                 ].map((l) => (
-                  <li key={l.href}><a href={l.href} className="text-sm text-gray-700 hover:text-black hover:underline">{l.label}</a></li>
+                  <li key={l.href}><Link href={l.href} className="text-sm text-gray-700 hover:text-black hover:underline">{l.label}</Link></li>
                 ))}
               </ul>
             </div>
@@ -422,7 +422,7 @@ export default function LandingPage() {
                   { href: "/delhi/affordable-areas", label: "Affordable areas in Delhi" },
                   { href: "/bangalore/affordable-areas", label: "Affordable areas in Bangalore" },
                 ].map((l) => (
-                  <li key={l.href}><a href={l.href} className="text-sm text-gray-700 hover:text-black hover:underline">{l.label}</a></li>
+                  <li key={l.href}><Link href={l.href} className="text-sm text-gray-700 hover:text-black hover:underline">{l.label}</Link></li>
                 ))}
               </ul>
             </div>
@@ -441,7 +441,7 @@ export default function LandingPage() {
                   { href: "/bangalore/best-areas-for-students", label: "Best areas for students in Bangalore" },
                   { href: "/hyderabad/family-friendly", label: "Family-friendly areas in Hyderabad" },
                 ].map((l) => (
-                  <li key={l.href}><a href={l.href} className="text-sm text-gray-700 hover:text-black hover:underline">{l.label}</a></li>
+                  <li key={l.href}><Link href={l.href} className="text-sm text-gray-700 hover:text-black hover:underline">{l.label}</Link></li>
                 ))}
               </ul>
             </div>
@@ -460,7 +460,7 @@ export default function LandingPage() {
                   { href: "/chennai/best-areas-for-young-professionals", label: "Best areas for professionals in Chennai" },
                   { href: "/gurgaon/best-areas-for-young-professionals", label: "Best areas for professionals in Gurgaon" },
                 ].map((l) => (
-                  <li key={l.href}><a href={l.href} className="text-sm text-gray-700 hover:text-black hover:underline">{l.label}</a></li>
+                  <li key={l.href}><Link href={l.href} className="text-sm text-gray-700 hover:text-black hover:underline">{l.label}</Link></li>
                 ))}
               </ul>
             </div>
@@ -479,7 +479,7 @@ export default function LandingPage() {
                   { href: "/bangalore/quiet-neighborhoods", label: "Quiet neighbourhoods in Bangalore" },
                   { href: "/goa/nightlife-areas", label: "Best nightlife areas in Goa" },
                 ].map((l) => (
-                  <li key={l.href}><a href={l.href} className="text-sm text-gray-700 hover:text-black hover:underline">{l.label}</a></li>
+                  <li key={l.href}><Link href={l.href} className="text-sm text-gray-700 hover:text-black hover:underline">{l.label}</Link></li>
                 ))}
               </ul>
             </div>
@@ -503,7 +503,7 @@ export default function LandingPage() {
                   { href: "/compare/jaipur-vs-delhi", label: "Jaipur vs Delhi: tier-2 vs capital" },
                   { href: "/compare/ahmedabad-vs-surat", label: "Ahmedabad vs Surat: Gujarat cities" },
                 ].map((l) => (
-                  <li key={l.href}><a href={l.href} className="text-sm text-gray-700 hover:text-black hover:underline">{l.label}</a></li>
+                  <li key={l.href}><Link href={l.href} className="text-sm text-gray-700 hover:text-black hover:underline">{l.label}</Link></li>
                 ))}
               </ul>
             </div>
@@ -521,28 +521,28 @@ export default function LandingPage() {
               {FEATURED_CITIES.filter((c) =>
                 ["mumbai", "delhi", "bangalore", "pune", "hyderabad", "chennai", "kolkata", "jaipur"].includes(c.slug)
               ).map((city) => (
-                <a
+                <Link
                   key={city.slug}
                   href={`/${city.slug}`}
                   className="text-[12px] text-black hover:text-[#FA76FF] font-medium transition-colors"
                 >
                   {city.name}
-                </a>
+                </Link>
               ))}
             </div>
             <div className="flex flex-wrap gap-x-4 gap-y-2 mb-4">
-              <a href="/mumbai/cheap-areas-to-live" className="text-[12px] text-gray-500 hover:text-[#FA76FF] transition-colors">Cheap Areas in Mumbai</a>
-              <a href="/delhi/cheap-areas-to-live" className="text-[12px] text-gray-500 hover:text-[#FA76FF] transition-colors">Cheap Areas in Delhi</a>
-              <a href="/bangalore/it-hub-areas" className="text-[12px] text-gray-500 hover:text-[#FA76FF] transition-colors">IT Hub Areas Bangalore</a>
-              <a href="/compare/delhi-vs-gurgaon" className="text-[12px] text-gray-500 hover:text-[#FA76FF] transition-colors">Delhi vs Gurgaon</a>
-              <a href="/compare/mumbai-vs-pune" className="text-[12px] text-gray-500 hover:text-[#FA76FF] transition-colors">Mumbai vs Pune</a>
-              <a href="/compare/bangalore-vs-hyderabad" className="text-[12px] text-gray-500 hover:text-[#FA76FF] transition-colors">Bangalore vs Hyderabad</a>
+              <Link href="/mumbai/cheap-areas-to-live" className="text-[12px] text-gray-500 hover:text-[#FA76FF] transition-colors">Cheap Areas in Mumbai</Link>
+              <Link href="/delhi/cheap-areas-to-live" className="text-[12px] text-gray-500 hover:text-[#FA76FF] transition-colors">Cheap Areas in Delhi</Link>
+              <Link href="/bangalore/it-hub-areas" className="text-[12px] text-gray-500 hover:text-[#FA76FF] transition-colors">IT Hub Areas Bangalore</Link>
+              <Link href="/compare/delhi-vs-gurgaon" className="text-[12px] text-gray-500 hover:text-[#FA76FF] transition-colors">Delhi vs Gurgaon</Link>
+              <Link href="/compare/mumbai-vs-pune" className="text-[12px] text-gray-500 hover:text-[#FA76FF] transition-colors">Mumbai vs Pune</Link>
+              <Link href="/compare/bangalore-vs-hyderabad" className="text-[12px] text-gray-500 hover:text-[#FA76FF] transition-colors">Bangalore vs Hyderabad</Link>
             </div>
             <div className="flex items-center gap-4 pt-3 border-t border-gray-100">
               <span className="text-[11px] text-gray-400">© 2025 PlaceLabels</span>
-              <a href="/about" className="text-[11px] text-gray-400 hover:text-black transition-colors">About</a>
-              <a href="/how-it-works" className="text-[11px] text-gray-400 hover:text-black transition-colors">How It Works</a>
-              <a href="/map" className="text-[11px] text-gray-400 hover:text-black transition-colors">Open Map</a>
+              <Link href="/about" className="text-[11px] text-gray-400 hover:text-black transition-colors">About</Link>
+              <Link href="/how-it-works" className="text-[11px] text-gray-400 hover:text-black transition-colors">How It Works</Link>
+              <Link href="/map" className="text-[11px] text-gray-400 hover:text-black transition-colors">Open Map</Link>
             </div>
           </div>
         </nav>
