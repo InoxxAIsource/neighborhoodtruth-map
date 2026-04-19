@@ -24,6 +24,13 @@ function ScrollToTop() {
   return null;
 }
 
+function ApiPassthrough() {
+  useEffect(() => {
+    window.location.replace(window.location.pathname + window.location.search);
+  }, []);
+  return null;
+}
+
 function CompareRouter({ params }: { params: { slug: string } }) {
   const { slug } = params;
   const parts = slug.split("-vs-");
@@ -77,7 +84,11 @@ function App() {
               <Route path="/:city/expensive-neighborhoods" component={IntentPage} />
 
               {/* Full-screen map */}
+              <Route path="/labels" component={Index} />
               <Route path="/map" component={Index} />
+
+              {/* Guard: prevent /api/* from being caught by /:city/:area */}
+              <Route path="/api/:rest*" component={ApiPassthrough} />
 
               {/* Area and city pages */}
               <Route path="/:city/:area" component={AreaPage} />

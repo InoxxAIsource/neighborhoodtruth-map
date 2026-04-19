@@ -7,7 +7,7 @@ export function LandingNavbar() {
 
   const navLinks = [
     { href: "/", label: "DISCOVER" },
-    { href: "/map", label: "MAP" },
+    { href: "/labels", label: "MAP" },
     { href: "/compare/delhi-vs-gurgaon", label: "COMPARE" },
     { href: "/about", label: "ABOUT" },
   ];
@@ -32,7 +32,7 @@ export function LandingNavbar() {
               </div>
             </Link>
           ))}
-          <Link href="/map">
+          <Link href="/labels">
             <div className="relative overflow-hidden bg-black text-white h-[34px] px-4 flex items-center text-[11px] font-medium uppercase border border-black border-l-0 leading-none group cursor-pointer">
               <span className="relative z-10">ADD LABEL</span>
               <span className="absolute inset-0 bg-[#FA76FF] translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
@@ -61,7 +61,7 @@ export function LandingNavbar() {
               </div>
             </Link>
           ))}
-          <Link href="/map">
+          <Link href="/labels">
             <div
               className="mt-6 bg-black text-white text-center py-4 text-lg font-bold uppercase cursor-pointer"
               onClick={() => setMobileOpen(false)}

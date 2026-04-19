@@ -41,7 +41,7 @@ export function SEOLayout({ children, breadcrumbs = [] }: SEOLayoutProps) {
             )}
           </div>
           <Link
-            href="/"
+            href="/labels"
             className="flex items-center gap-1.5 text-sm text-teal-700 border border-teal-200 rounded-lg px-3 py-1.5 hover:bg-teal-50 transition-colors flex-shrink-0"
           >
             <Map className="h-4 w-4" />
@@ -128,7 +128,7 @@ export function ErrorState({ message }: { message: string }) {
   return (
     <div className="text-center py-16">
       <p className="text-gray-500 mb-4">{message}</p>
-      <Link href="/" className="text-teal-700 underline text-sm">← Back to map</Link>
+      <Link href="/labels" className="text-teal-700 underline text-sm">← Back to map</Link>
     </div>
   );
 }

@@ -334,7 +334,7 @@ export default function LandingPage() {
       </Helmet>
 
       <LandingNavbar />
-      <RotatingBadge onClick={() => navigate("/map")} />
+      <RotatingBadge onClick={() => navigate("/labels")} />
 
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <section className="pt-28 md:pt-32 pb-8 px-5 md:px-10 max-w-[1200px] mx-auto">
@@ -367,7 +367,7 @@ export default function LandingPage() {
           className="flex flex-wrap gap-0 animate-fade-in"
           style={{ animationDelay: "0.7s" }}
         >
-          <Link href="/map">
+          <Link href="/labels">
             <div className="relative overflow-hidden bg-black text-white h-[46px] px-6 flex items-center text-[13px] font-semibold uppercase border border-black cursor-pointer group">
               <span className="relative z-10 flex items-center gap-2">
                 EXPLORE MAP <ArrowRight className="w-4 h-4" />
@@ -375,7 +375,7 @@ export default function LandingPage() {
               <span className="absolute inset-0 bg-[#FA76FF] translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
             </div>
           </Link>
-          <Link href="/map">
+          <Link href="/labels">
             <div className="relative overflow-hidden bg-white text-black h-[46px] px-6 flex items-center text-[13px] font-semibold uppercase border border-black border-l-0 cursor-pointer group">
               <span className="relative z-10">ADD A LABEL</span>
               <span className="absolute inset-0 bg-[#FA76FF] translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
@@ -398,7 +398,7 @@ export default function LandingPage() {
           <h2 className="text-2xl md:text-3xl font-black uppercase">
             Discover Neighbourhoods
           </h2>
-          <Link href="/map">
+          <Link href="/labels">
             <div className="text-[12px] font-semibold uppercase border-b border-black cursor-pointer hover:text-[#FA76FF] hover:border-[#FA76FF] transition-colors">
               VIEW ALL ON MAP →
             </div>
@@ -664,7 +664,7 @@ export default function LandingPage() {
               <span className="text-[11px] text-gray-400">© 2025 PlaceLabels</span>
               <Link href="/about" className="text-[11px] text-gray-400 hover:text-black transition-colors">About</Link>
               <Link href="/how-it-works" className="text-[11px] text-gray-400 hover:text-black transition-colors">How It Works</Link>
-              <Link href="/map" className="text-[11px] text-gray-400 hover:text-black transition-colors">Open Map</Link>
+              <Link href="/labels" className="text-[11px] text-gray-400 hover:text-black transition-colors">Open Map</Link>
             </div>
           </div>
         </nav>
