@@ -24,7 +24,7 @@ function ScrollToTop() {
   return null;
 }
 
-function ApiPassthrough() {
+function HardNavigate() {
   useEffect(() => {
     window.location.replace(window.location.pathname + window.location.search);
   }, []);
@@ -87,8 +87,11 @@ function App() {
               <Route path="/labels" component={Index} />
               <Route path="/map" component={Index} />
 
-              {/* Guard: prevent /api/* from being caught by /:city/:area */}
-              <Route path="/api/:rest*" component={ApiPassthrough} />
+              {/* Guard: prevent server-only paths from being caught by /:city */}
+              <Route path="/api/:rest*" component={HardNavigate} />
+              <Route path="/robots.txt" component={HardNavigate} />
+              <Route path="/sitemap.xml" component={HardNavigate} />
+              <Route path="/llms.txt" component={HardNavigate} />
 
               {/* Area and city pages */}
               <Route path="/:city/:area" component={AreaPage} />

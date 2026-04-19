@@ -336,6 +336,8 @@ export default function LandingPage() {
       <LandingNavbar />
       <RotatingBadge onClick={() => navigate("/labels")} />
 
+      <main>
+
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <section className="pt-28 md:pt-32 pb-8 px-5 md:px-10 max-w-[1200px] mx-auto">
         <p
@@ -411,6 +413,7 @@ export default function LandingPage() {
             <input
               type="text"
               placeholder="Search neighbourhood..."
+              aria-label="Search neighbourhoods"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full h-[40px] pl-9 pr-4 border border-black text-sm focus:outline-none focus:border-[#FA76FF] bg-white"
@@ -500,6 +503,51 @@ export default function LandingPage() {
               <span className="absolute inset-0 bg-[#FA76FF] translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
             </div>
           </Link>
+        </div>
+      </section>
+
+      {/* ── What is PlaceLabels? — SEO content section ───────────── */}
+      <section className="border-t border-black px-5 md:px-10 py-14 bg-white">
+        <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div>
+            <h2 className="text-xl md:text-2xl font-black uppercase mb-5">What is PlaceLabels?</h2>
+            <p className="text-sm text-gray-600 leading-relaxed mb-4">
+              PlaceLabels is a crowd-sourced neighborhood review platform built on a simple idea: real locals know their areas better than any algorithm. Anyone can drop a label on the map — rating safety, cost of living, walkability, and local vibe — without creating an account or being paid to promote anything.
+            </p>
+            <p className="text-sm text-gray-600 leading-relaxed mb-4">
+              Unlike real-estate portals that hide uncomfortable truths, PlaceLabels surfaces raw, unfiltered local knowledge. Every label is community-verified through upvotes and downvotes, so the most accurate insights rise to the top. Browse by city, filter by what matters to you, and discover neighborhoods that match your lifestyle — not just your budget.
+            </p>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              We cover hundreds of cities worldwide with a strong focus on India: Mumbai, Delhi, Bangalore, Pune, Hyderabad, Chennai, Kolkata, and beyond. Whether you're relocating, traveling, or just curious about a new area, PlaceLabels gives you honest ground truth from people who actually live there.
+            </p>
+          </div>
+          <div>
+            <h2 className="text-xl md:text-2xl font-black uppercase mb-5">Popular Cities</h2>
+            <ul className="grid grid-cols-2 gap-2">
+              {[
+                { href: "/mumbai", label: "Mumbai" },
+                { href: "/delhi", label: "Delhi" },
+                { href: "/bangalore", label: "Bangalore" },
+                { href: "/pune", label: "Pune" },
+                { href: "/hyderabad", label: "Hyderabad" },
+                { href: "/chennai", label: "Chennai" },
+                { href: "/kolkata", label: "Kolkata" },
+                { href: "/jaipur", label: "Jaipur" },
+                { href: "/gurgaon", label: "Gurgaon" },
+                { href: "/noida", label: "Noida" },
+                { href: "/ahmedabad", label: "Ahmedabad" },
+                { href: "/london", label: "London" },
+                { href: "/new-york", label: "New York" },
+                { href: "/tokyo", label: "Tokyo" },
+              ].map((city) => (
+                <li key={city.href}>
+                  <Link href={city.href} className="text-sm font-medium text-gray-800 hover:text-[#FA76FF] transition-colors">
+                    → {city.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </section>
 
@@ -633,6 +681,8 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      </main>
 
       {/* ── SEO Footer Nav ────────────────────────────────────────── */}
       <footer className="border-t border-black px-5 md:px-10 py-8 bg-white">

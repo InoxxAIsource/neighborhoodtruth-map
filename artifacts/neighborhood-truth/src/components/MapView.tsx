@@ -779,13 +779,20 @@ export function MapView({
     });
 
     const tileLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" rel="noopener noreferrer">OpenStreetMap</a> contributors',
       maxZoom: 19,
     }).addTo(map);
 
     tileLayer.once("tileload", () => setMapReady(true));
     // Fallback: reveal map after 2 s even if tiles are blocked (e.g. in dev sandbox)
     const mapReadyTimer = setTimeout(() => setMapReady(true), 2000);
+
+    // Accessibility: add aria-labels to Leaflet's built-in zoom buttons
+    const container = map.getContainer();
+    const zoomIn = container.querySelector(".leaflet-control-zoom-in") as HTMLElement | null;
+    const zoomOut = container.querySelector(".leaflet-control-zoom-out") as HTMLElement | null;
+    if (zoomIn) { zoomIn.setAttribute("aria-label", "Zoom in"); zoomIn.removeAttribute("href"); zoomIn.setAttribute("role", "button"); }
+    if (zoomOut) { zoomOut.setAttribute("aria-label", "Zoom out"); zoomOut.removeAttribute("href"); zoomOut.setAttribute("role", "button"); }
 
     mapRef.current = map;
     markersRef.current = L.layerGroup().addTo(map);

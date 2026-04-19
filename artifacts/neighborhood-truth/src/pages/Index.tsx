@@ -242,7 +242,7 @@ export default function Index() {
   }, []);
 
   return (
-    <div className="h-screen w-screen relative overflow-hidden">
+    <main className="h-screen w-screen relative overflow-hidden">
       <Suspense fallback={
         <div className="absolute inset-0 bg-[#e8e0d8] flex flex-col items-center justify-center z-0">
           <div className="flex flex-col items-center gap-3 text-gray-500">
@@ -480,6 +480,6 @@ export default function Index() {
           <Link href="/how-it-works" className="text-[11px] text-gray-400 hover:text-teal-700 hover:underline hidden xl:inline whitespace-nowrap">How It Works</Link>
         </div>
       </nav>
-    </div>
+    </main>
   );
 }

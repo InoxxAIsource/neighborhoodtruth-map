@@ -1,0 +1,43 @@
+Fix the following SEO issues on placelabels.com:
+
+**1. Fix robots.txt and sitemap.xml routing (CRITICAL)**
+The app's SPA router is catching /robots.txt and /sitemap.xml and returning a "City Not Found" page. Fix this by:
+- Serving a static robots.txt file at the root with:
+  User-agent: *
+  Allow: /
+  Sitemap: https://placelabels.com/sitemap.xml
+- Creating a /sitemap.xml route or static file that lists https://placelabels.com/ and any other public pages
+- Make sure these paths are excluded from the SPA city-slug routing logic (add them as exceptions before the catch-all route)
+
+**2. Add a static SEO content section to the homepage**
+Below the map, add a hidden-from-view-but-crawlable (or visible) HTML section with:
+- An H2 heading like "What is PlaceLabels?"
+- 2–3 paragraphs of descriptive text explaining the product (neighborhood reviews, safety ratings, local vibes, cost of living, global map)
+- An H2 section "How It Works" with 3 short steps
+- An H2 section "Popular Cities" with links to a few city pages if they exist
+- Keep it styled nicely so it doesn't ruin the UI (can be a footer-style section below the map)
+
+**3. Fix the H1 tag**
+Change the current H1 (which just says "PlaceLabels") to something descriptive like:
+"PlaceLabels — Honest Neighborhood Reviews from Real Locals"
+
+**4. Fix link anchor text**
+The zoom +/− map buttons use <a href="#"> with no text. Replace them with proper <button> elements or add aria-label attributes like aria-label="Zoom in" and aria-label="Zoom out".
+
+**5. Add rel attributes to external links**
+The Leaflet and OpenStreetMap attribution links at the bottom of the map should have rel="noopener noreferrer" added.
+
+**6. Performance: Fix LCP (Largest Contentful Paint is 8.0s on mobile)**
+- Convert any hero/background images to WebP format
+- Add loading="lazy" to below-fold images
+- Defer or lazy-load non-critical JavaScript bundles
+- The biggest saving is image delivery (509 KiB) — compress and serve modern image formats
+
+**7. Fix accessibility issues**
+- Add <label> elements or aria-label to all <select> and input elements
+- Ensure heading order is sequential (H1 → H2 → H3, not jumping levels)
+- Wrap the main app content in a <main> landmark element
+- Fix color contrast issues on any text that fails WCAG AA ratio
+- Add aria-label or visible text to any icon-only links or buttons
+
+**Priority order: Fix #1 first (robots.txt + sitemap), then #2 (content section), then the rest.**
