@@ -331,6 +331,52 @@ export default function LandingPage() {
           content="Crowd-sourced neighborhood labels from real locals. Discover honest reviews for areas in Mumbai, Delhi, Bangalore and cities worldwide. Find safe, affordable, walkable neighbourhoods."
         />
         <link rel="canonical" href="https://placelabels.com/" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is PlaceLabels?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "PlaceLabels is a crowd-sourced global neighborhood map where locals drop honest labels about areas — covering safety, cost of living, vibe, and more. Anyone can vote on existing insights or add their own."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How do I add a neighborhood label?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Click the 'Drop Label' button, then tap anywhere on the map to place your pin. Fill in the neighborhood name, safety rating (1–5), cost level, and vibe tags, then submit. Your label appears instantly on the map for others to vote on."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How is neighborhood safety rated?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Safety is rated on a 1–5 scale by local contributors: 1 is unsafe, 5 is very safe. Each label's safety score is set by the person who drops it, and other community members can upvote or downvote to validate the insight."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is PlaceLabels free to use?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, PlaceLabels is completely free. You can browse the map, read neighborhood insights, vote on labels, and add your own labels without creating an account."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Which cities are covered?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "PlaceLabels has community-contributed labels for neighborhoods in major cities worldwide including New York, London, Paris, Tokyo, Dubai, Singapore, Sydney, Berlin, Barcelona, Bangkok, Seoul, Mumbai, Cairo, and many more. New labels can be added anywhere in the world."
+              }
+            }
+          ]
+        })}</script>
       </Helmet>
 
       <LandingNavbar />
