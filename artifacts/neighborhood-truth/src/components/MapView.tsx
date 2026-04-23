@@ -676,6 +676,7 @@ export function MapView({
 }: MapViewProps) {
   const { t } = useLanguage();
   const [mapReady, setMapReady] = useState(false);
+  const [posterDismissed, setPosterDismissed] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
@@ -803,6 +804,13 @@ export function MapView({
       mapRef.current = null;
     };
   }, []);
+
+  // Remove poster from DOM after crossfade completes (350ms > 300ms transition)
+  useEffect(() => {
+    if (!mapReady) return;
+    const t = setTimeout(() => setPosterDismissed(true), 350);
+    return () => clearTimeout(t);
+  }, [mapReady]);
 
   // Map view change — notify parent of center+zoom for city detection
   useEffect(() => {
@@ -1200,7 +1208,7 @@ export function MapView({
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
-      {!mapReady && (
+      {!posterDismissed && (
         <img
           src={posterSrc}
           alt="World neighborhood map"
@@ -1213,6 +1221,9 @@ export function MapView({
             height: "100%",
             objectFit: "cover",
             zIndex: 1,
+            opacity: mapReady ? 0 : 1,
+            transition: "opacity 0.3s ease",
+            pointerEvents: "none",
           }}
         />
       )}
