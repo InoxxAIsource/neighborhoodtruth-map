@@ -200,6 +200,48 @@ app.get("/api/healthz", (_req: Request, res: Response) => {
   res.json({ ok: true });
 });
 
+// SSR for homepage — injects H1 + key content for crawlers; React hydrates on load
+app.get("/", (_req: Request, res: Response) => {
+  const { ssrHtmlShell } = require("./lib/ssrShared");
+  const html = ssrHtmlShell({
+    title: "PlaceLabels | Honest Neighborhood Reviews from Real Locals",
+    description: "Crowd-sourced global neighborhood map. Real locals share honest insights on safety, cost, and vibe — drop a label, vote, and discover the truth about any neighborhood worldwide.",
+    canonical: "https://placelabels.com/",
+    ogImage: "https://placelabels.com/og-image.png",
+    bodyHtml: `
+      <div style="text-align:center;padding:3rem 1rem 2rem;">
+        <h1 style="font-size:2.5rem;font-weight:900;line-height:1;text-transform:uppercase;letter-spacing:-0.03em;margin-bottom:1rem;">
+          What's your neighbourhood <em style="color:#FA76FF;font-style:italic;">really</em> like?
+        </h1>
+        <p style="font-size:1.125rem;color:#4b5563;max-width:36rem;margin:0 auto 2rem;">
+          Crowd-sourced neighborhood insights from real locals. Drop a label, vote on vibes, and discover honest reviews on safety, cost of living, and character — for any neighborhood, anywhere in the world.
+        </p>
+        <a href="/labels" style="display:inline-block;background:#0d9488;color:#fff;font-weight:700;padding:0.875rem 2rem;border-radius:0.5rem;text-decoration:none;font-size:1rem;">
+          Explore the Map →
+        </a>
+      </div>
+      <section style="max-width:48rem;margin:3rem auto 0;">
+        <h2 style="font-size:1.25rem;font-weight:700;margin-bottom:1rem;">Explore neighborhoods by city</h2>
+        <ul style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0.5rem;list-style:none;padding:0;">
+          <li><a href="/mumbai">Mumbai</a></li>
+          <li><a href="/delhi">Delhi</a></li>
+          <li><a href="/bangalore">Bangalore</a></li>
+          <li><a href="/hyderabad">Hyderabad</a></li>
+          <li><a href="/pune">Pune</a></li>
+          <li><a href="/new-york">New York</a></li>
+          <li><a href="/london">London</a></li>
+          <li><a href="/tokyo">Tokyo</a></li>
+          <li><a href="/dubai">Dubai</a></li>
+          <li><a href="/singapore">Singapore</a></li>
+        </ul>
+      </section>
+    `,
+  });
+  res.setHeader("Content-Type", "text/html; charset=utf-8");
+  res.setHeader("Cache-Control", "public, max-age=3600");
+  res.send(html);
+});
+
 // API router must be registered BEFORE wildcard SSR routes to prevent
 // /:citySlug/:intentSlug from catching /api/labels, /api/chat, etc.
 app.use("/api", router);
