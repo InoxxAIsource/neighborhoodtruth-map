@@ -129,6 +129,10 @@
     </script>
   </head>
   <body>
+    <!-- sr-only H1 for crawlers — React landing page renders the visible H1 via JS -->
+    <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">
+      What's your neighbourhood really like? — Honest Neighborhood Reviews from Real Locals
+    </h1>
     <div id="root">
       <!-- Poster renders instantly before any JS — becomes the LCP element -->
       <img

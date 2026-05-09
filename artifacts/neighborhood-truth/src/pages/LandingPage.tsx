@@ -1,11 +1,124 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
-import { MapPin, ArrowRight, Search } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { RotatingBadge } from "@/components/landing/RotatingBadge";
 import { CityCarousel } from "@/components/landing/CityCarousel";
 import { Helmet } from "react-helmet-async";
+
+function hashStr(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+
+function MapCardIllustration({ color, seed }: { color: string; seed: string }) {
+  const h = hashStr(seed);
+  const c = color || "#14b8a6";
+
+  // Vary route shape based on hash
+  const routes = [
+    "M 20 80 L 20 50 L 60 50 L 60 30 L 100 30",
+    "M 20 90 L 20 60 L 50 60 L 50 40 L 80 40 L 80 20",
+    "M 30 90 L 30 55 L 70 55 L 70 25 L 110 25",
+    "M 15 85 L 15 45 L 55 45 L 55 25 L 95 25",
+    "M 25 90 L 25 65 L 65 65 L 65 35 L 105 35",
+  ];
+  const routePath = routes[h % routes.length];
+
+  // Pin position matches route end
+  const pins = [
+    { x: 100, y: 24 },
+    { x: 80, y: 14 },
+    { x: 110, y: 19 },
+    { x: 95, y: 19 },
+    { x: 105, y: 29 },
+  ];
+  const pin = pins[h % pins.length];
+
+  // Building block layouts — 3 variants
+  const blockSets = [
+    [
+      { x: 25, y: 58, w: 22, h: 14 },
+      { x: 65, y: 58, w: 28, h: 16 },
+      { x: 25, y: 28, w: 26, h: 14 },
+      { x: 70, y: 38, w: 18, h: 10 },
+      { x: 95, y: 55, w: 20, h: 20 },
+    ],
+    [
+      { x: 28, y: 68, w: 18, h: 12 },
+      { x: 60, y: 68, w: 24, h: 14 },
+      { x: 28, y: 32, w: 20, h: 10 },
+      { x: 58, y: 48, w: 14, h: 10 },
+      { x: 88, y: 48, w: 22, h: 22 },
+    ],
+    [
+      { x: 30, y: 62, w: 20, h: 16 },
+      { x: 72, y: 62, w: 26, h: 14 },
+      { x: 30, y: 30, w: 22, h: 12 },
+      { x: 72, y: 30, w: 20, h: 12 },
+      { x: 100, y: 42, w: 18, h: 18 },
+    ],
+  ];
+  const blocks = blockSets[h % blockSets.length];
+
+  // Road grid offsets
+  const gridOffset = (h % 3) * 4;
+
+  return (
+    <svg
+      viewBox="0 0 128 100"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ width: "100%", height: "100%", display: "block" }}
+      aria-hidden="true"
+    >
+      {/* Background */}
+      <rect width="128" height="100" fill={`${c}18`} />
+
+      {/* Road grid */}
+      {[20 + gridOffset, 52 + gridOffset, 84 + gridOffset].map((x) => (
+        <line key={`v${x}`} x1={x} y1="0" x2={x} y2="100" stroke="#00000018" strokeWidth="6" />
+      ))}
+      {[25 + gridOffset, 55 + gridOffset, 80 + gridOffset].map((y) => (
+        <line key={`h${y}`} x1="0" y1={y} x2="128" y2={y} stroke="#00000018" strokeWidth="5" />
+      ))}
+
+      {/* Road centre dashes */}
+      {[20 + gridOffset, 52 + gridOffset, 84 + gridOffset].map((x) => (
+        <line key={`vd${x}`} x1={x} y1="0" x2={x} y2="100" stroke="white" strokeWidth="1" strokeDasharray="4 5" />
+      ))}
+      {[25 + gridOffset, 55 + gridOffset, 80 + gridOffset].map((y) => (
+        <line key={`hd${y}`} x1="0" y1={y} x2="128" y2={y} stroke="white" strokeWidth="1" strokeDasharray="4 5" />
+      ))}
+
+      {/* Building blocks */}
+      {blocks.map((b, i) => (
+        <rect key={i} x={b.x} y={b.y} width={b.w} height={b.h} rx="1.5"
+          fill={`${c}28`} stroke={`${c}55`} strokeWidth="0.75" />
+      ))}
+
+      {/* Route — shadow */}
+      <path d={routePath} fill="none" stroke="white" strokeWidth="5"
+        strokeLinecap="round" strokeLinejoin="round" />
+      {/* Route — coloured */}
+      <path d={routePath} fill="none" stroke={c} strokeWidth="3"
+        strokeLinecap="round" strokeLinejoin="round" strokeDasharray="200"
+        strokeDashoffset="0" />
+
+      {/* Route start dot */}
+      <circle cx={Number(routePath.split(" ")[1])} cy={Number(routePath.split(" ")[2])}
+        r="3.5" fill="white" stroke={c} strokeWidth="2" />
+
+      {/* Destination pin */}
+      <g transform={`translate(${pin.x - 8}, ${pin.y - 18})`}>
+        <path d="M8 0 C3.6 0 0 3.6 0 8 C0 14 8 20 8 20 C8 20 16 14 16 8 C16 3.6 12.4 0 8 0Z"
+          fill={c} />
+        <circle cx="8" cy="8" r="3.5" fill="white" />
+      </g>
+    </svg>
+  );
+}
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 const API = `${BASE}/api`;
@@ -86,12 +199,9 @@ function NeighborhoodCard({ label, citySlug, cityName }: { label: LabelDTO; city
     >
       <div className="aspect-square bg-gray-100 overflow-hidden relative">
         <div
-          className="w-full h-full flex items-center justify-center transition-transform duration-500 ease-out group-hover:scale-105"
-          style={{
-            background: `linear-gradient(135deg, ${label.color ?? "#14b8a6"}22 0%, ${label.color ?? "#14b8a6"}44 100%)`,
-          }}
+          className="w-full h-full transition-transform duration-500 ease-out group-hover:scale-105"
         >
-          <MapPin className="w-10 h-10 opacity-30" style={{ color: label.color ?? "#14b8a6" }} />
+          <MapCardIllustration color={label.color ?? "#14b8a6"} seed={label.text + citySlug} />
         </div>
 
         <div className="absolute top-3 left-3 flex flex-col gap-0">
