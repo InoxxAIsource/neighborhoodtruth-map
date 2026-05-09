@@ -39,6 +39,17 @@ const app: Express = express();
 // visitor IP and protocol (X-Forwarded-For, X-Forwarded-Proto).
 app.set("trust proxy", 1);
 
+// www → non-www permanent redirect (handled at app level as a fallback
+// in case the Cloudflare redirect rule is not firing)
+app.use((req, res, next) => {
+  const host = req.headers.host || "";
+  if (host.startsWith("www.")) {
+    const nonWww = host.slice(4);
+    return res.redirect(301, `https://${nonWww}${req.originalUrl}`);
+  }
+  next();
+});
+
 app.use(
   pinoHttp({
     logger,
