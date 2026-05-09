@@ -50,6 +50,15 @@ app.use((req, res, next) => {
   next();
 });
 
+// Strip trailing slashes (except root) — prevents GSC "alternate page with proper canonical" noise
+app.use((req, res, next) => {
+  if (req.path !== "/" && req.path.endsWith("/")) {
+    const clean = req.path.slice(0, -1) + (req.url.slice(req.path.length) || "");
+    return res.redirect(301, clean);
+  }
+  next();
+});
+
 app.use(
   pinoHttp({
     logger,
